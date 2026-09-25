@@ -12,8 +12,11 @@ function cardFace(c, n, attack = BASE_DAMAGE) {
 // Each player secretly picks a loadout of LOADOUT_MIN–LOADOUT_MAX cards (pass the device).
 // Then they take turns: a spinner rolls through the attacker's loadout and lands on a card,
 // which deals base damage × its multiplier. First frog to 0 HP loses.
-async function battleEvent() {
-  const attacker = players[turn], defender = players[1 - turn];
+// Pass an enemy (from makeEnemy) to fight the computer instead of the other player.
+async function battleEvent(enemy = null) {
+  const attacker = players[turn], defender = enemy || players[1 - turn];
+  // Face whoever is acting; the computer never needs the screen, so keep facing the human then
+  const face = p => setFlip(p.enemy ? attacker : p);
   const el = document.getElementById('battle');
   const title = document.getElementById('battleTitle');
   const msg = document.getElementById('battleMsg');
@@ -23,10 +26,11 @@ async function battleEvent() {
   const waitGo = label => new Promise(r => { go.textContent = label; go.disabled = false; go.onclick = r; });
 
   async function chooseLoadout(p) {
+    if (p.enemy) return p.loadout; // the computer's loadout is fixed by its difficulty
     const other = p === attacker ? defender : attacker;
-    setFlip(p); // face the player who is picking
+    face(p); // face the player who is picking
     title.textContent = `${p.name}: build your loadout`;
-    msg.textContent = `${other.name}, look away!`;
+    msg.textContent = other.enemy ? 'Pick your cards for the fight.' : `${other.name}, look away!`;
     body.innerHTML = '';
     await waitGo(`I'm ${p.name} — show my cards`);
     // Not enough cards to choose: take them all and fill up to the minimum with Bare Hands
@@ -82,7 +86,9 @@ async function battleEvent() {
   }
 
   title.textContent = 'Battle!';
-  msg.textContent = `${attacker.name} (${attacker.maxHp} HP) challenges ${defender.name} (${defender.maxHp} HP)! Winner takes ${BATTLE_PRIZE} coins.`;
+  msg.textContent = enemy
+    ? `${attacker.name} (${attacker.maxHp} HP) vs ${defender.name} (${defender.maxHp} HP, ⚔️ ${defender.attack})! Win for ${enemy.tier.reward}+ coins, lose and pay ${enemy.tier.loss}.`
+    : `${attacker.name} (${attacker.maxHp} HP) challenges ${defender.name} (${defender.maxHp} HP)! Winner takes ${BATTLE_PRIZE} coins.`;
   body.innerHTML = '';
   await waitGo('Start');
   const fighters = [
@@ -256,7 +262,7 @@ async function battleEvent() {
   while (fighters[0].hp > 0 && fighters[1].hp > 0) {
     const f = fighters[cur], foe = fighters[1 - cur];
     title.textContent = `${f.p.name}'s turn`;
-    setFlip(f.p); // face whoever is spinning
+    face(f.p); // face whoever is spinning
     // Start-of-turn effects: poison ticks, stun skips the turn
     if (f.poison) {
       f.hp = Math.max(0, f.hp - f.poisonDmg);
@@ -277,9 +283,10 @@ async function battleEvent() {
       cur = 1 - cur;
       continue;
     }
-    msg.textContent = 'Spin to see which cards attack!';
+    msg.textContent = f.p.enemy ? `${f.p.name} is spinning...` : 'Spin to see which cards attack!';
     body.innerHTML = hpRow() + reel(f) + '<div class="dmg-counter"></div>';
-    await waitGo('Spin');
+    if (f.p.enemy) { go.disabled = true; go.textContent = 'Enemy turn'; await sleep(700); } // the computer spins by itself
+    else await waitGo('Spin');
     msg.textContent = '';
     go.disabled = true;
     spinsThisTurn = 0;
@@ -454,10 +461,48 @@ async function battleEvent() {
     cur = 1 - cur;
   }
 
+  // Enemy fight result: win → reward quiz (speed multiplies the coins); lose → pay the tier's penalty
+  async function enemyResult(won) {
+    const tier = enemy.tier, p = attacker;
+    await waitGo('See result');
+    if (!won) {
+      const lost = Math.min(p.coins, tier.loss);
+      p.coins -= lost;
+      title.textContent = `${enemy.name} wins...`;
+      sfx('fail');
+      msg.innerHTML = `${p.name} was defeated and drops <span class="lose-text">${lost} coins</span>.`;
+      body.innerHTML = hpRow();
+    } else {
+      // Reward question, as hard as the enemy was
+      el.hidden = true;
+      const mult = await quizPanel(coinIcon([0, tier.reward]), `Victory! ${tier.reward} coins`,
+        'Answer fast to multiply your reward! Wrong answer halves it.', async result => {
+          const { correct, timeLeft } = await askQuestion(makeQuestion(tier.quiz), 9000 + tier.quiz * 6000);
+          const m = correct ? +(1 + timeLeft).toFixed(2) : 0.5;
+          sfx(correct ? 'coin' : 'fail', correct ? 0.9 + timeLeft * 0.4 : 1);
+          result.innerHTML = `${correct ? (timeLeft > 0.6 ? 'Lightning fast!' : 'Correct!') : timeLeft <= 0 ? 'Too slow!' : 'Wrong!'} ` +
+            `Reward <span class="${m < 1 ? 'lose-text' : ''}">×${m}</span>`;
+          return m;
+        });
+      const got = gainCoins(p, Math.round(tier.reward * mult));
+      el.hidden = false;
+      title.textContent = `${p.name} defeats ${enemy.name}!`;
+      sfx('win');
+      flash('#ffd23f', 0.5);
+      burst(title, ['#ffd23f', '#fff', '#ff5d5d', '#6aa8ff', '#3cdc3c'], 60, 2);
+      msg.innerHTML = `Reward: ${tier.reward} × ${mult} = <b>${got} coins</b>` + (p.moneyMult !== 1 ? ' (with Money bonus)' : '');
+      body.innerHTML = hpRow();
+    }
+    render();
+    await waitGo('Done');
+    el.hidden = true;
+  }
+
   // Result
   // Growing cards keep their progress: they go back to their owner's hand instead of being used up
   fighters.forEach(fg => fg.p.hand.push(...new Set(fg.loadout.filter(c => c.gimmick === 'grow'))));
   const winF = fighters.find(f => f.hp > 0), loseF = fighters.find(f => f.hp <= 0);
+  if (enemy) return enemyResult(winF.p === attacker);
   const prize = Math.min(BATTLE_PRIZE, loseF.p.coins);
   loseF.p.coins -= prize;
   const won = gainCoins(winF.p, prize); // winner's Money stat boosts what they receive

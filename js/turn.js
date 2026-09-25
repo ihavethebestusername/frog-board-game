@@ -26,7 +26,7 @@ function pickNext(p) {
 }
 // Special tiles: anything that does something when you land on it
 const isSpecial = i => SHOP_SQUARES.includes(i) || COIN_SQUARES[i] || CARD_SQUARES.includes(i) ||
-                       BATTLE_SQUARES.includes(i) || FUSE_SQUARES.includes(i);
+                       BATTLE_SQUARES.includes(i) || FUSE_SQUARES.includes(i) || ENEMY_SQUARES.includes(i);
 // Tiles you could end up on after exactly `steps` hops (following every fork)
 function reachable(from, steps) {
   let now = new Set([from]);
@@ -100,6 +100,7 @@ async function rollDice() {
   if (CARD_SQUARES.includes(p.pos)) await cardEvent();
   if (BATTLE_SQUARES.includes(p.pos)) await battleEvent();
   if (FUSE_SQUARES.includes(p.pos)) await fuseEvent();
+  if (ENEMY_SQUARES.includes(p.pos)) await enemyEvent();
   await sleep(400);
   // Hand over to the other player; the camera pans to them
   turn = 1 - turn;

@@ -100,6 +100,30 @@ const BASE_DAMAGE = 2; // every player's starting base damage stat (p.attack)
 // Battle square: challenge the other frog; the winner takes coins from the loser
 const BATTLE_SQUARES = [at(0, 2), at(7, 6), at(4, 11)];
 
+// Enemy squares: fight a computer enemy of the difficulty you choose (same slot-machine battles)
+const ENEMY_SQUARES = [at(3, 0), at(8, 10), at(1, 12), at(4, 5), at(3, 9)];
+// Harder enemies hit harder and have more HP, but pay much more. After a win you answer a question
+// (harder for harder enemies); answering fast multiplies the reward (×1 slow ... ×2 instant, wrong ×0.5).
+// Loadouts are card names from CARD_TYPES.
+const ENEMY_TIERS = [
+  { key: 'easy', label: 'Easy', color: '#1e9e3a', name: 'Mosquito', art: '🦟', hp: 60, attack: 2, crit: 0.05,
+    loadout: ['Tadpole Tackle', 'Tadpole Tackle', 'Sticky Tongue', 'Tadpole Tackle'], reward: 6, loss: 2, quiz: 0.1 },
+  { key: 'medium', label: 'Medium', color: '#e0b000', name: 'Snapping Turtle', art: '🐢', hp: 100, attack: 3, crit: 0.1,
+    loadout: ['Sticky Tongue', 'Big Leap', 'Tadpole Tackle', 'Poison Dart'], reward: 14, loss: 4, quiz: 0.4 },
+  { key: 'hard', label: 'Hard', color: '#d46a20', name: 'Grey Heron', art: '🦩', hp: 150, attack: 4, crit: 0.12,
+    loadout: ['Big Leap', 'Croak Blast', 'Stun Slime', 'Double Croak', 'Sticky Tongue'], reward: 28, loss: 7, quiz: 0.7 },
+  { key: 'nightmare', label: 'Nightmare', color: '#8a1010', name: 'Swamp Serpent', art: '🐍', hp: 220, attack: 5, crit: 0.18,
+    loadout: ['Swamp King', 'Croak Blast', 'Big Leap', 'Poison Dart', 'Double Croak'], reward: 55, loss: 12, quiz: 1 },
+];
+// Build an enemy fighter from a tier (looks like a player to the battle code)
+function makeEnemy(tier) {
+  return {
+    enemy: true, tier, name: `${tier.art} ${tier.name}`, maxHp: tier.hp, attack: tier.attack,
+    critChance: tier.crit, critMult: 2, coins: 0, hand: [],
+    loadout: tier.loadout.map(n => CARD_TYPES.find(c => c.name === n)),
+  };
+}
+
 // Fusion squares: move one card's gimmick onto another card (each card can carry one extra gimmick)
 const FUSE_SQUARES = [at(0, 4), at(8, 8)];
 // How a fused (extra) gimmick is described on the card it was added to

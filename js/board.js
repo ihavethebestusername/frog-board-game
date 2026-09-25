@@ -33,6 +33,9 @@ cells.forEach(([x, y, w, h], i) => {
   if (SHOP_SQUARES.includes(i)) {
     sq.classList.add('shop');
     sq.innerHTML = COIN + 'SHOP';
+  } else if (ENEMY_SQUARES.includes(i)) {
+    sq.classList.add('enemy');
+    sq.innerHTML = '<div class="icon">👾</div>ENEMY';
   } else if (FUSE_SQUARES.includes(i)) {
     sq.classList.add('fuse');
     sq.innerHTML = '<div class="icon">⚗️</div>FUSE';
