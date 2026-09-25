@@ -1,6 +1,11 @@
 html, body { margin: 0; height: 100%; background: #1e3a28; overflow: hidden; touch-action: manipulation;
              -webkit-user-select: none; user-select: none; }
-#view { position: fixed; inset: 0; height: 100dvh; overflow: hidden; }
+#view { position: fixed; inset: 0; height: 100dvh; overflow: hidden; background: #0b1a0b; }
+/* Tiled pixel grass, darkened so the tiles and text stand out. It sits inside the board (.world) and
+   extends far past its edges, so it pans and zooms exactly with the camera. */
+.grass { position: absolute; left: -3000px; top: -3000px; right: -3000px; bottom: -3000px; pointer-events: none;
+         background: linear-gradient(#0000008c, #0000008c), url('../sprites/grass_bg.png') 0 0 / 72px repeat;
+         image-rendering: pixelated; }
 .label { position: absolute; top: calc(env(safe-area-inset-top, 0px) + 10px); left: 0; right: 0; text-align: center;
          color: #fff; font: bold 18px sans-serif; z-index: 2; text-shadow: 0 1px 3px #000; }
 .world { position: absolute; left: 0; top: 0; transform-origin: 0 0; transition: transform 0.5s ease; }
@@ -395,8 +400,8 @@ html, body { margin: 0; height: 100%; background: #1e3a28; overflow: hidden; tou
 .quiz-choice:disabled { cursor: default; }
 /* The answer, hidden in tiny text in the bottom-left corner of the screen.
    Only shown once cheats are toggled on by clicking a frog 10 times (body.cheats). */
-body:not(.cheats) .quiz-cheat { display: none; }
-.quiz-cheat { position: fixed; left: 6px; bottom: calc(env(safe-area-inset-bottom, 0px) + 4px); z-index: 2; font: bold 10px sans-serif; color: #fff3d6; opacity: 0.7; text-shadow: 0 1px 0 #000; pointer-events: none; }
+body:not(.cheats) .quiz-cheat, #check[hidden] ~ .quiz-cheat { display: none; }
+.quiz-cheat { position: fixed; left: 6px; bottom: calc(env(safe-area-inset-bottom, 0px) + 4px); z-index: 25; /* above the water balloon blur */ font: bold 10px sans-serif; color: #fff3d6; opacity: 0.7; text-shadow: 0 1px 0 #000; pointer-events: none; }
 
 /* Lost coins */
 .lose-text { color: #ff5d5d; }
@@ -405,3 +410,69 @@ body:not(.cheats) .quiz-cheat { display: none; }
 /* Player 2's turn: the whole screen turns upside down */
 html { transition: transform 0.6s ease; transform-origin: 50% 50%; }
 html.flipped { transform: rotate(180deg); }
+
+/* Critical hits */
+.fx-float.crit { color: #ffd23f; font-size: 34px; font-weight: 900; -webkit-text-stroke: 2px #8a1010; paint-order: stroke fill; }
+.dmg-counter.crit .dmg-num { color: #ffd23f; -webkit-text-stroke-color: #8a1010; }
+.dmg-counter.crit .dmg-formula { color: #ffd23f; }
+
+/* Shop upgrade level tag */
+.shop-item .lvl { font-size: 11px; font-weight: bold; color: #fff; background: #5a3e1b; border-radius: 4px; padding: 0 5px; margin-left: 4px; }
+.shop-item .desc b { color: #1e7a1e; }
+
+/* Ambient fireflies: tiny glowing dots that always stay visible and just float around.
+   .firefly-sway moves left/right, the .firefly inside bobs up/down (GPU-run CSS animations). */
+.firefly-sway { position: absolute; width: 0; height: 0; z-index: 4; pointer-events: none; will-change: transform;
+                animation: fireflySway 10s ease-in-out infinite alternate; }
+.firefly { position: absolute; left: -2px; top: -2px; width: 4px; height: 4px; border-radius: 50%;
+           background: #fffbb0; box-shadow: 0 0 6px 2px #e8ff6a, 0 0 14px 4px #c8ff3a66; opacity: 0.9; will-change: transform;
+           animation: fireflyBob 8s ease-in-out infinite alternate; }
+@keyframes fireflySway { from { transform: translateX(calc(var(--rx) * -1)); } to { transform: translateX(var(--rx)); } }
+@keyframes fireflyBob { from { transform: translateY(calc(var(--ry) * -1)); } to { transform: translateY(var(--ry)); } }
+
+/* Drizzle overlay: above the board, under the HUD buttons and labels */
+.rain { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1; }
+
+/* Water balloons */
+.balloons { position: fixed; right: 10px; top: calc(env(safe-area-inset-top, 0px) + 60px); z-index: 20; /* above pop-ups */
+            display: flex; flex-direction: column; gap: 6px; align-items: flex-end; }
+.balloon-btn { font: bold 20px sans-serif; padding: 12px 18px; min-width: 120px; border: 2px solid #000; border-radius: 4px; cursor: pointer;
+               background: #0d2a4acc; color: #cfe8ff; box-shadow: inset 0 0 0 2px #6aa8ff88; text-shadow: 0 2px 0 #000; }
+.balloon-btn:active { transform: translateY(2px); }
+/* Soaked screen (cheap, GPU-run): the quiz panel wobbles like it's seen through water and goes a bit blurry,
+   while two layers of water blobs stream down the screen at different speeds */
+body.soaked #check .check-panel, body.soaked .balloons { animation: waterWobble 0.45s ease-in-out infinite alternate; filter: blur(5px) saturate(1.3) hue-rotate(-15deg); }
+@keyframes waterWobble {
+  0%   { transform: skew(4deg, -2deg) scale(1.04, 0.96) translate(-6px, 3px); }
+  50%  { transform: skew(-3deg, 3deg) scale(0.97, 1.05) translate(5px, -4px); }
+  100% { transform: skew(2deg, -4deg) scale(1.05, 0.97) translate(-3px, 6px); }
+}
+.water-drips { position: fixed; inset: 0; z-index: 15; pointer-events: none; overflow: hidden;
+               background: linear-gradient(#3a8cd455, #1a5ca066); transition: opacity 0.7s;
+               /* Blur everything behind the water too (GPU-accelerated) */
+               -webkit-backdrop-filter: blur(3.5px); backdrop-filter: blur(3.5px); }
+.water-drips.fading { opacity: 0; }
+.water-layer { position: absolute; left: 0; right: 0; top: -100%; height: 200%; will-change: transform;
+  background:
+    radial-gradient(ellipse 40px 70px at 15% 20%, #bfe4ff77, transparent 70%),
+    radial-gradient(ellipse 60px 45px at 65% 12%, #bfe4ff66, transparent 70%),
+    radial-gradient(ellipse 35px 60px at 45% 40%, #bfe4ff77, transparent 70%),
+    radial-gradient(ellipse 70px 55px at 85% 35%, #bfe4ff55, transparent 70%),
+    radial-gradient(ellipse 45px 80px at 25% 65%, #bfe4ff66, transparent 70%),
+    radial-gradient(ellipse 55px 40px at 75% 80%, #bfe4ff77, transparent 70%);
+  background-size: 100% 50%; animation: waterStream 1.6s linear infinite; }
+.water-layer.two { animation-duration: 2.4s; opacity: 0.7; transform: scaleX(-1); background-position: 30% 0; }
+@keyframes waterStream { from { transform: translateY(0); } to { transform: translateY(50%); } }
+
+/* FPS counter (toggle from the Events menu) */
+.fps { position: fixed; left: 50%; transform: translateX(-50%); top: calc(env(safe-area-inset-top, 0px) + 64px); z-index: 30;
+       font: bold 12px monospace; color: #9dff7a; background: #000a; padding: 2px 6px; border-radius: 4px; pointer-events: none; }
+
+/* Colored answer buttons (overrides the sprite button look) and the secret colored-square hint */
+.check-panel .quiz-choice { border-image: none; border: 3px solid #000; border-radius: 6px; background: var(--c);
+  color: #fff; text-shadow: 0 2px 0 #000; box-shadow: inset 0 3px 0 #ffffff55, inset 0 -4px 0 #0005; filter: none; }
+.check-panel .quiz-choice:not(:disabled):hover { filter: brightness(1.15); }
+.check-panel .quiz-choice.right { outline: 4px solid #9dff7a; outline-offset: 2px; }
+.check-panel .quiz-choice.wrong { outline: 4px solid #fff; outline-offset: 2px; filter: grayscale(0.6) brightness(0.7); }
+.check-panel .quiz-choice:disabled:not(.right):not(.wrong) { filter: brightness(0.6); }
+.quiz-cheat { width: 10px; height: 10px; border: 1px solid #000; opacity: 0.85; }

@@ -10,6 +10,11 @@ const shopEl = document.getElementById('shop');
 world.style.width = width + 'px';
 world.style.height = height + 'px';
 
+// Grass ground: a big layer inside the board itself, so it moves with the camera exactly
+const grass = document.createElement('div');
+grass.className = 'grass';
+world.appendChild(grass);
+
 // Roads between connected tiles (drawn under the tiles) so paths and forks are easy to follow
 nextOf.forEach((outs, a) => outs.forEach(b => {
   const [ax, ay] = cellCenter(a), [bx, by] = cellCenter(b);

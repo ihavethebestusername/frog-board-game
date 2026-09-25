@@ -92,9 +92,9 @@ CARD_TYPES.forEach(c => c.text ||= a => `${a * c.mult} damage`);
 const NO_CARD = { name: 'Bare Hands', art: '✋', mult: 1, text: a => `${a} damage` }; // x1 so battles always end
 const MAX_BONUS_SPINS = 3; // max Saw Blade re-spins per turn, so a loadout of saws can't spin forever
 const LOADOUT_MIN = 3, LOADOUT_MAX = 5; // cards each player brings into a battle
-const BATTLE_HP = 100;
+const BATTLE_HP = 100; // starting max HP (upgradable per player)
+const CRIT_CHANCE = 0.1, CRIT_MULT = 2; // starting crit: 10% chance per strike to deal double damage
 const HP_SEGMENTS = 20; // health bar is split into this many sprite segments
-const HP_PER_SEGMENT = BATTLE_HP / HP_SEGMENTS;
 const BASE_DAMAGE = 2; // every player's starting base damage stat (p.attack)
 
 // Battle square: challenge the other frog; the winner takes coins from the loser
@@ -123,12 +123,36 @@ for (let i = deck.length - 1; i > 0; i--) {
 }
 
 const players = [
-  { name: 'Player 1', pos: 0, cls: 'p1', angle: 0, coins: 10, hand: [], attack: BASE_DAMAGE },
-  { name: 'Player 2', pos: at(8, 12), cls: 'p2', angle: 0, coins: 10, hand: [], attack: BASE_DAMAGE },
+  { name: 'Player 1', pos: 0, cls: 'p1', angle: 0, coins: 10, hand: [] },
+  { name: 'Player 2', pos: at(8, 12), cls: 'p2', angle: 0, coins: 10, hand: [] },
 ];
-// Placeholder items for now
-const SHOP_ITEMS = [
-  { name: 'Extra Roll', desc: 'Roll again this turn', price: 5 },
-  { name: 'Lily Pad Boost', desc: 'Move +2 on your next roll', price: 3 },
-  { name: 'Shield', desc: 'Block the next bad square', price: 8 },
+// Each player's stats (all upgradable in the shop)
+players.forEach(p => Object.assign(p, {
+  maxHp: BATTLE_HP,        // battle health
+  attack: BASE_DAMAGE,     // base damage (cards multiply this)
+  critChance: CRIT_CHANCE, // chance per strike to crit
+  critMult: CRIT_MULT,     // crit damage multiplier
+  luck: 0,                 // chance your die roll is nudged onto a special tile
+  moneyMult: 1,            // coins you gain are multiplied by this
+  levels: {},              // upgrade levels bought, per stat
+}));
+
+// Shop upgrades: each buy adds `step` to a stat. Price grows exponentially: base × growth^level.
+const UPGRADE_GROWTH = 1.8;
+const UPGRADES = [
+  { key: 'maxHp',      name: 'Health',      icon: '❤️', step: 10,   base: 4, int: true, show: v => `${v} HP` },
+  { key: 'attack',     name: 'Base Damage', icon: '⚔️', step: 1,    base: 5, int: true, show: v => `${v}` },
+  { key: 'critChance', name: 'Crit Chance', icon: '🎯', step: 0.05, base: 4, max: 1, show: v => `${Math.round(v * 100)}%` },
+  { key: 'critMult',   name: 'Crit Damage', icon: '💥', step: 0.5,  base: 4, show: v => `x${v}` },
+  { key: 'luck',       name: 'Luck',        icon: '🍀', step: 0.1,  base: 5, max: 1, show: v => `${Math.round(v * 100)}%`,
+    desc: 'Chance your roll lands you on a special tile' },
+  { key: 'moneyMult',  name: 'Money',       icon: '💰', step: 0.25, base: 6, show: v => `x${v}`,
+    desc: 'Multiplies every coin you gain, including selling cards' },
 ];
+const upgradePrice = (p, u) => Math.round(u.base * UPGRADE_GROWTH ** (p.levels[u.key] || 0));
+// Give a player coins, boosted by their Money stat. Returns how many they actually got.
+function gainCoins(p, n) {
+  const got = Math.round(n * p.moneyMult);
+  p.coins += got;
+  return got;
+}

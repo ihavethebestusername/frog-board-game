@@ -82,22 +82,22 @@ async function battleEvent() {
   }
 
   title.textContent = 'Battle!';
-  msg.textContent = `${attacker.name} challenges ${defender.name}! Each frog has ${BATTLE_HP} HP. Winner takes ${BATTLE_PRIZE} coins.`;
+  msg.textContent = `${attacker.name} (${attacker.maxHp} HP) challenges ${defender.name} (${defender.maxHp} HP)! Winner takes ${BATTLE_PRIZE} coins.`;
   body.innerHTML = '';
   await waitGo('Start');
   const fighters = [
-    { p: attacker, loadout: await chooseLoadout(attacker), hp: BATTLE_HP, poison: 0, poisonDmg: 0, shield: 0, stunned: 0, doubleNext: 0 },
-    { p: defender, loadout: await chooseLoadout(defender), hp: BATTLE_HP, poison: 0, poisonDmg: 0, shield: 0, stunned: 0, doubleNext: 0 },
+    { p: attacker, loadout: await chooseLoadout(attacker), hp: attacker.maxHp, maxHp: attacker.maxHp, poison: 0, poisonDmg: 0, shield: 0, stunned: 0, doubleNext: 0 },
+    { p: defender, loadout: await chooseLoadout(defender), hp: defender.maxHp, maxHp: defender.maxHp, poison: 0, poisonDmg: 0, shield: 0, stunned: 0, doubleNext: 0 },
   ];
 
   // Battle screen: HP bars + the current attacker's spinner reel
-  // Segmented health bar: each segment is HP_PER_SEGMENT HP; a segment stays lit while any of its HP is left
+  // Segmented health bar: each segment is maxHp / HP_SEGMENTS HP; a segment stays lit while any of its HP is left
   const hpBar = f => '<div class="hp-bar">' + Array.from({ length: HP_SEGMENTS }, (_, k) =>
-    `<div class="hp-seg${f.hp > k * HP_PER_SEGMENT ? ' full' : ''}"></div>`).join('') + '</div>';
+    `<div class="hp-seg${f.hp > k * f.maxHp / HP_SEGMENTS ? ' full' : ''}"></div>`).join('') + '</div>';
   const hpRow = () => `<div class="hp-row">${fighters.map(f => `
     <div class="hp"><div class="who">${f.p.name}</div>
       ${hpBar(f)}
-      <div class="hp-num">${f.hp} / ${BATTLE_HP} &nbsp; ⚔️ ${f.p.attack}</div>
+      <div class="hp-num">${f.hp} / ${f.maxHp} &nbsp; ⚔️ ${f.p.attack}</div>
       <div class="status">${f.poison ? `🧪 ${f.poisonDmg}/turn (${f.poison} left) ` : ''}${f.shield ? `🪷 x${f.shield} ` : ''}${f.stunned ? `🟢 Stunned x${f.stunned} ` : ''}${f.doubleNext ? `🎶 Next attack strikes x${1 + f.doubleNext}` : ''}</div></div>`).join('')}</div>`;
   // Update HP bars and statuses in place (so effects on them keep playing)
   function updateHp() {
@@ -299,11 +299,13 @@ async function battleEvent() {
       for (let h = 0; h < hits && foe.hp > 0; h++) {
         if (h > 0) await sleep(Math.max(180, 380 - h * 60)); // quick follow-up strikes
         blocked = 0;
-        const d = hit(foe, dmg);
+        const crit = Math.random() < f.p.critChance; // rolled separately for every strike
+        const d = hit(foe, crit ? Math.round(dmg * f.p.critMult) : dmg);
         total += d;
         turnTotal += d;
         const mods = [...parts];
         if (hits > 1) mods.push(`strike ${h + 1}/${hits}`);
+        if (crit) mods.push(`${f.p.critMult} CRIT!`);
         showDamage(d, mods.join(' × '), blocked ? '🪷 blocked' : '');
         if (d > 0) {
           const bigHit = d >= f.p.attack * 5;
@@ -322,6 +324,15 @@ async function battleEvent() {
           }
           burst(hpBox(foeI), ['#ff3b3b', '#fff', '#ff9a3b'], bigHit ? 30 : 14, bigHit ? 1.3 : 0.8);
           flash('#ff2020', bigHit ? 0.45 : 0.15);
+          if (crit) {
+            // Critical hit: gold flash, big CRIT! pop, heavy boom and an extra shake
+            floatFx(foeI, 'CRIT!', 'crit', 120);
+            flash('#ffd23f', 0.5);
+            burst(hpBox(foeI), ['#ffd23f', '#fff', '#ff5d5d'], 36, 1.5);
+            sfx('big_hit', 0.8, 1.3);
+            shake(true);
+            body.querySelector('.dmg-counter')?.classList.add('crit');
+          } else body.querySelector('.dmg-counter')?.classList.remove('crit');
         } else if (blocked) {
           floatFx(foeI, 'BLOCKED', 'shield');
           sfx('blocked');
@@ -340,7 +351,7 @@ async function battleEvent() {
           break;
         case 'heal': {
           const before = f.hp;
-          f.hp = Math.min(BATTLE_HP, f.hp + f.p.attack * 2);
+          f.hp = Math.min(f.maxHp, f.hp + f.p.attack * 2);
           healFx(fi, `+${f.hp - before}`);
           break;
         }
@@ -372,7 +383,7 @@ async function battleEvent() {
       if (dmg > 0) await attack(dmg, [`🌱 ${card.name} ${dmg}`]);
       else if (dmg < 0) {
         const before = foe.hp;
-        foe.hp = Math.min(BATTLE_HP, foe.hp - dmg);
+        foe.hp = Math.min(foe.maxHp, foe.hp - dmg);
         showDamage(before - foe.hp, `🌱 ${card.name} heals the foe`, '');
         healFx(foeI, `+${foe.hp - before}`);
         updateHp();
@@ -419,7 +430,7 @@ async function battleEvent() {
         if (dealt > 0) { hurtFx(foeI, `-${dealt}`); shake(); }
         else if (blocked) floatFx(foeI, 'BLOCKED', 'shield');
         const before = f.hp;
-        f.hp = Math.min(BATTLE_HP, f.hp + dealt);
+        f.hp = Math.min(f.maxHp, f.hp + dealt);
         if (dealt > 0) healFx(fi, `🩸 +${f.hp - before}`);
         updateHp();
       } else {
@@ -429,7 +440,7 @@ async function battleEvent() {
         const rolled = f.loadout[await spin(f, wi, c => c.mult > 0)];
         const d = await attack(dmgOf(rolled), [`${f.p.attack} ⚔️`, `${rolled.mult} ${rolled.name}`, 'Leech']);
         if (d > 0) {
-          f.hp = Math.min(BATTLE_HP, f.hp + d);
+          f.hp = Math.min(f.maxHp, f.hp + d);
           healFx(fi, `🩸 +${d}`);
           updateHp();
         } else if (!dmgOf(rolled)) {
@@ -448,14 +459,14 @@ async function battleEvent() {
   fighters.forEach(fg => fg.p.hand.push(...new Set(fg.loadout.filter(c => c.gimmick === 'grow'))));
   const winF = fighters.find(f => f.hp > 0), loseF = fighters.find(f => f.hp <= 0);
   const prize = Math.min(BATTLE_PRIZE, loseF.p.coins);
-  winF.p.coins += prize;
   loseF.p.coins -= prize;
+  const won = gainCoins(winF.p, prize); // winner's Money stat boosts what they receive
   await waitGo('See result');
   title.textContent = `${winF.p.name} wins!`;
   sfx('win');
   flash('#ffd23f', 0.5);
   burst(title, ['#ffd23f', '#fff', '#ff5d5d', '#6aa8ff', '#3cdc3c'], 60, 2);
-  msg.textContent = `${winF.p.name} takes ${prize} coin${prize === 1 ? '' : 's'} from ${loseF.p.name}.`;
+  msg.textContent = `${winF.p.name} takes ${prize} coin${prize === 1 ? '' : 's'} from ${loseF.p.name}` + (won > prize ? ` (+${won - prize} Money bonus).` : '.');
   body.innerHTML = hpRow();
   render();
   await waitGo('Done');

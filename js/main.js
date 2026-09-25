@@ -12,6 +12,7 @@ const EVENTS = [
   { name: 'Card square', desc: `Draw up to ${CARDS_PER_SQUARE} cards`, run: () => cardEvent() },
   { name: 'Give 2 of every card', desc: 'Testing: adds 2 of each card type to your hand',
     run: async () => { CARD_TYPES.filter(c => c.count).forEach(c => players[turn].hand.push(copyCard(c), copyCard(c))); } },
+  { name: 'Show FPS', desc: 'Toggle a frames-per-second counter', run: async () => toggleFps() },
   { name: 'Fusion', desc: 'Move a gimmick from one card onto another', run: fuseEvent },
   { name: 'Battle', desc: `${LOADOUT_MIN}–${LOADOUT_MAX} card spinner battle for ${BATTLE_PRIZE} coins`, run: battleEvent },
 ];

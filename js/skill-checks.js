@@ -3,8 +3,9 @@
 // Run the coin skill check for the current player and pay out
 async function coinEvent(range) {
   const p = players[turn];
-  const amt = Math.max(-p.coins, await skillCheck(range)); // negative = lost coins (never below 0)
-  p.coins += amt;
+  const result = Math.max(-p.coins, await skillCheck(range)); // negative = lost coins (never below 0)
+  // Winnings are boosted by the Money stat; losses aren't
+  const amt = result > 0 ? gainCoins(p, result) : (p.coins += result, result);
   if (amt > 0) sfx('coin', 0.85 + amt * 0.04);
   const [cx, cy] = center(p);
   const pop = document.createElement('div');
@@ -42,6 +43,8 @@ async function cardEvent(maxCards = CARDS_PER_SQUARE) {
 
 // Make a 7th-grade question: negative numbers, order of operations and 2-step problems using
 // only +, − and ×. `level` 0..1 picks harder forms for bigger rewards.
+const QUIZ_COLORS = ['#d42020', '#2a6ad1', '#1e9e3a', '#e0b000']; // red, blue, green, yellow
+
 function makeQuestion(level) {
   const rnd = (lo, hi) => lo + Math.floor(Math.random() * (hi - lo + 1));
   const neg = n => (Math.random() < 0.5 ? -n : n);            // randomly flip the sign
@@ -84,8 +87,10 @@ function askQuestion(q, timeLimit) {
   const cheat = document.getElementById('quizCheat');
   const timerBar = document.getElementById('timerBar');
   qEl.textContent = q.text;
-  cheat.textContent = q.answer;
-  grid.innerHTML = q.choices.map(c => `<button class="quiz-choice">${c}</button>`).join('');
+  // Each answer button gets its own color; the secret corner hint is just a square of the right one's color
+  grid.innerHTML = q.choices.map((c, i) => `<button class="quiz-choice" style="--c:${QUIZ_COLORS[i]}">${c}</button>`).join('');
+  cheat.textContent = '';
+  cheat.style.background = QUIZ_COLORS[q.choices.indexOf(q.answer)];
   return new Promise(resolve => {
     const start = performance.now();
     let finished = false;

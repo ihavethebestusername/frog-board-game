@@ -24,6 +24,24 @@ function pickNext(p) {
     });
   });
 }
+// Special tiles: anything that does something when you land on it
+const isSpecial = i => SHOP_SQUARES.includes(i) || COIN_SQUARES[i] || CARD_SQUARES.includes(i) ||
+                       BATTLE_SQUARES.includes(i) || FUSE_SQUARES.includes(i);
+// Tiles you could end up on after exactly `steps` hops (following every fork)
+function reachable(from, steps) {
+  let now = new Set([from]);
+  for (let s = 0; s < steps; s++) now = new Set([...now].flatMap(i => nextOf[i]));
+  return [...now];
+}
+// Roll the die. Luck: a chance that the roll is changed to one that can reach a special tile
+// (if the normal roll can't already, and some roll can)
+function luckyRoll(p) {
+  const roll = 1 + Math.floor(Math.random() * 6);
+  const good = r => reachable(p.pos, r).some(isSpecial);
+  if (Math.random() >= p.luck || good(roll)) return roll;
+  const goodRolls = [1, 2, 3, 4, 5, 6].filter(good);
+  return goodRolls.length ? goodRolls[Math.floor(Math.random() * goodRolls.length)] : roll;
+}
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 
 async function rollDice() {
@@ -40,7 +58,7 @@ async function rollDice() {
     await sleep(50 + i * 8);
   }
   if (rollSound) rollSound.pause();
-  const roll = 1 + Math.floor(Math.random() * 6);
+  const roll = luckyRoll(players[turn]);
   showDieFace(roll);
   sfx('dice_land', 1.15 - roll * 0.05); // bigger rolls land a little deeper
   void dieEl.offsetWidth;

@@ -8,6 +8,7 @@
 <script>var V = Date.now(); document.write('<link rel="stylesheet" href="css/style.css?v=' + V + '">');</script>
 </head>
 <body>
+<div class="balloons" id="balloons"></div>
 <div id="view">
   <div class="label" id="label"></div>
   <button class="events-btn" id="eventsBtn">Events</button>
@@ -58,9 +59,10 @@
     <div class="check-timer"><div id="timerBar"></div></div>
     <div class="check-result" id="checkResult"></div>
     <button id="checkBtn">Collect</button>
-    <div class="quiz-cheat" id="quizCheat"></div>
   </div>
 </div>
+<!-- Outside the quiz pop-up so it sits above the water balloon blur; only shown while the quiz is open -->
+<div class="quiz-cheat" id="quizCheat"></div>
 <div id="shop" hidden>
   <div class="shop-panel">
     <div class="shop-head"><h2><svg class="coin" viewBox="0 0 24 24"><circle cx="12" cy="12" r="11" fill="#e0a800"/><circle cx="12" cy="12" r="8" fill="#ffd23f" stroke="#b07f00" stroke-width="1.5"/><text x="12" y="16.5" text-anchor="middle" font-size="11" font-weight="bold" font-family="sans-serif" fill="#b07f00">$</text></svg> Shop</h2><div class="shop-balance" id="shopBalance"></div></div>
@@ -70,7 +72,7 @@
 </div>
 <!-- Loaded in order (they share one global scope), each with the same fresh ?v= stamp -->
 <script>
-['config', 'board', 'effects', 'turn', 'skill-checks', 'shop', 'battle', 'hand', 'fusion', 'main']
+['config', 'board', 'effects', 'turn', 'skill-checks', 'shop', 'battle', 'hand', 'fusion', 'fireflies', 'rain', 'balloon', 'fps', 'main']
   .forEach(f => document.write('<script src="js/' + f + '.js?v=' + V + '"><\/script>'));
 </script>
 </body>
