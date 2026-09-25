@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>Board Game</title>
+<!-- Every file is requested with a fresh ?v= stamp so browsers and Cloudflare can never serve a stale copy -->
+<script>var V = Date.now(); document.write('<link rel="stylesheet" href="css/style.css?v=' + V + '">');</script>
+</head>
+<body>
+<div id="view">
+  <div class="label" id="label"></div>
+  <button class="events-btn" id="eventsBtn">Events</button>
+  <button class="hand-btn" id="handBtn"></button>
+  <div class="wallet" id="wallet"></div>
+  <div class="world" id="world"></div>
+  <div class="hud"><button id="roll">Roll</button><div class="die" id="die">–</div>
+    <button class="shop-btn" id="shopBtn"><svg class="coin" viewBox="0 0 24 24"><circle cx="12" cy="12" r="11" fill="#e0a800"/><circle cx="12" cy="12" r="8" fill="#ffd23f" stroke="#b07f00" stroke-width="1.5"/><text x="12" y="16.5" text-anchor="middle" font-size="11" font-weight="bold" font-family="sans-serif" fill="#b07f00">$</text></svg> Shop</button></div>
+</div>
+<div id="events" hidden>
+  <div class="shop-panel">
+    <div class="shop-head"><h2>Events</h2></div>
+    <div id="eventList"></div>
+    <button class="shop-close" id="eventsClose">Close</button>
+  </div>
+</div>
+<div id="battle" hidden>
+  <div class="shop-panel battle-panel">
+    <div class="shop-head" style="justify-content:center"><h2 id="battleTitle">Battle!</h2></div>
+    <div class="battle-msg" id="battleMsg"></div>
+    <div id="battleBody"></div>
+    <button class="battle-go" id="battleGo"></button>
+  </div>
+</div>
+<div id="fuse" hidden>
+  <div class="shop-panel battle-panel">
+    <div class="shop-head" style="justify-content:center"><h2 id="fuseTitle">Fusion</h2></div>
+    <div class="battle-msg" id="fuseMsg"></div>
+    <div id="fuseBody"></div>
+    <button class="battle-go" id="fuseGo" hidden>Fuse!</button>
+    <button class="shop-close" id="fuseCancel">Cancel</button>
+  </div>
+</div>
+<div id="hand" hidden>
+  <div class="shop-panel draw-panel">
+    <div class="shop-head"><h2 id="handTitle">Your cards</h2></div>
+    <div id="handCards"></div>
+    <button class="shop-close" id="handClose">Close</button>
+  </div>
+</div>
+<div id="check" hidden>
+  <div class="check-panel">
+    <h2><img id="checkIcon" alt=""><span id="checkTitle"></span></h2>
+    <div class="check-hint" id="quizHint"></div>
+    <div class="draw-pips" id="quizPips"></div>
+    <div class="quiz-question" id="quizQuestion"></div>
+    <div class="quiz-choices" id="quizChoices"></div>
+    <div class="check-timer"><div id="timerBar"></div></div>
+    <div class="check-result" id="checkResult"></div>
+    <button id="checkBtn">Collect</button>
+    <div class="quiz-cheat" id="quizCheat"></div>
+  </div>
+</div>
+<div id="shop" hidden>
+  <div class="shop-panel">
+    <div class="shop-head"><h2><svg class="coin" viewBox="0 0 24 24"><circle cx="12" cy="12" r="11" fill="#e0a800"/><circle cx="12" cy="12" r="8" fill="#ffd23f" stroke="#b07f00" stroke-width="1.5"/><text x="12" y="16.5" text-anchor="middle" font-size="11" font-weight="bold" font-family="sans-serif" fill="#b07f00">$</text></svg> Shop</h2><div class="shop-balance" id="shopBalance"></div></div>
+    <div id="shopItems"></div>
+    <button class="shop-close" id="shopClose">Close</button>
+  </div>
+</div>
+<!-- Loaded in order (they share one global scope), each with the same fresh ?v= stamp -->
+<script>
+['config', 'board', 'effects', 'turn', 'skill-checks', 'shop', 'battle', 'hand', 'fusion', 'main']
+  .forEach(f => document.write('<script src="js/' + f + '.js?v=' + V + '"><\/script>'));
+</script>
+</body>
+</html>
