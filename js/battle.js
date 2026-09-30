@@ -233,228 +233,6 @@ async function battleEvent(enemy = null) {
     document.body.appendChild(fx);
     setTimeout(() => fx.remove(), 1000);
   }
-  // Orbital Laser charging: a satellite light on the wheel and a charge meter (1/3, 2/3)
-  function orbitalChargeFx(n, wi) {
-    try {
-      const [x, y] = fxPoint(body.querySelectorAll('.wheel-window')[wi]);
-      fxPop(x, y - 20, `🛰️ CHARGE ${n}/${ORBITAL_CHARGES}`, { cls: 'orbital-charge', ms: 1100, size: 26 + n * 6 });
-      fxRing(x, y, { color: '#7af7ff', size: 120 + n * 50, width: 3 + n * 2 });
-      fxParticles(x, y, { count: 8 + n * 6, colors: ['#7af7ff', '#ff2bd6', '#fff'], spread: 70 + n * 30, size: [2, 5], ms: 700 });
-      sfx('buff', 0.7 + n * 0.2, 0.8); comboSfx(n);
-      if (n === ORBITAL_CHARGES - 1) banner('🛰️ ONE MORE FOR ORBITAL LASER!', 'legendary');
-    } catch (e) { console.warn('orbital charge fx', e); }
-  }
-  // Orbital Laser pieces (the full timeline is described above orbitalLaserFx below)
-  const OL_RAINBOW = ['#ff1744', '#ff9100', '#ffea00', '#00e676', '#00b0ff', '#d500f9'];
-  function olWarp(el, k) { // brief screen "distortion": squash, skew and snap back
-    try { el?.animate?.([{ transform: 'none' }, { transform: `scale(${1 + 0.04 * k}, ${1 - 0.05 * k}) skewX(${-3 * k}deg)` },
-      { transform: `scale(${1 - 0.03 * k}, ${1 + 0.04 * k}) skewX(${2 * k}deg)` }, { transform: `scale(${1 + 0.015 * k}) skewX(${-1 * k}deg)` }, { transform: 'none' }], { duration: 520, easing: 'ease-out' }); } catch (e) {}
-  }
-  function olDetonate(x, y, colors, k) {
-    for (let i = 0; i < 4; i++) setTimeout(() => fxRing(x, y, { color: colors[i % colors.length], size: (420 + i * 260) * k, width: 14 - i * 2, ms: 700 + i * 180 }), i * 90);
-    // Heat ripples: thin fast rings that read as the air bending
-    for (let i = 0; i < 3; i++) setTimeout(() => fxRing(x, y, { color: '#ffffff88', size: 260 * k + i * 120, width: 2, ms: 500, cls: 'ol-ripple' }), 60 + i * 110);
-    fxParticles(x, y, { count: 36, colors, spread: 420 * k, size: [4, 12], gravity: 160, ms: 1300 });
-    fxParticles(x, y, { count: 14, colors: ['#fff'], spread: 260 * k, size: [2, 4], cone: 120, angle: -90, ms: 900 });
-    const orb = fxSpawn(x, y, { cls: 'ol-orb', ms: 1100, size: [300 * k, 300 * k] });
-    fxAnimate(orb, [{ transform: 'scale(0.15)', opacity: 1 }, { transform: 'scale(1.5)', opacity: 0.95, offset: 0.3 }, { transform: 'scale(2.6)', opacity: 0 }], 1100, 'ease-out');
-  }
-  // Lightning arc: a jagged bolt between two points that flickers for a moment
-  function olBolt(a, b, color, ms = 160) {
-    const dx = b[0] - a[0], dy = b[1] - a[1], len = Math.hypot(dx, dy) || 1, n = 7;
-    let pts = '0,10';
-    for (let i = 1; i < n; i++) pts += ` ${(i / n * 100).toFixed(1)},${(10 + fxRand(-9, 9)).toFixed(1)}`;
-    pts += ' 100,10';
-    const el = fxSpawn(a[0], a[1], { cls: 'ol-bolt', ms, style: { width: len + 'px', height: '40px', transformOrigin: '0 50%' },
-      html: `<svg viewBox="0 0 100 20" preserveAspectRatio="none" width="100%" height="100%"><polyline points="${pts}" fill="none" stroke="${color}" stroke-width="3" stroke-linejoin="round"/>` +
-        `<polyline points="${pts}" fill="none" stroke="#fff" stroke-width="1.2" stroke-linejoin="round"/></svg>` });
-    el?.animate([{ transform: `translate(0, -50%) rotate(${Math.atan2(dy, dx)}rad)`, opacity: 1 }, { transform: `translate(0, -50%) rotate(${Math.atan2(dy, dx)}rad)`, opacity: 0 }],
-      { duration: ms, easing: 'steps(3)', fill: 'forwards' });
-  }
-  // Rune circle: a flattened, spinning ring of glyphs on the ground under the target
-  const OL_GLYPHS = 'ᚠᚢᚦᚨᚱᚲᚷᚹᚺᚾᛁᛃᛇᛈᛉᛊᛏᛒᛖᛗᛚᛜᛞᛟ☉☽♄♃♂♀☿✶⟁';
-  const olGlyph = i => OL_GLYPHS[i % OL_GLYPHS.length];
-  // A big, detailed sigil: three rings of glyphs, a hexagram, spokes and tick marks
-  const OL_SIGIL = (c1, c2, c3) => '<svg viewBox="0 0 400 400" width="100%" height="100%"><g fill="none">' +
-    `<circle cx="200" cy="200" r="192" stroke="${c1}" stroke-width="5"/><circle cx="200" cy="200" r="178" stroke="${c2}" stroke-width="2"/>` +
-    `<circle cx="200" cy="200" r="142" stroke="${c1}" stroke-width="3" stroke-dasharray="14 6"/><circle cx="200" cy="200" r="104" stroke="${c3}" stroke-width="3"/>` +
-    `<circle cx="200" cy="200" r="60" stroke="${c2}" stroke-width="4"/><circle cx="200" cy="200" r="22" stroke="${c1}" stroke-width="3"/>` +
-    `<polygon points="200,58 323,271 77,271" stroke="${c2}" stroke-width="3"/><polygon points="200,342 77,129 323,129" stroke="${c2}" stroke-width="3"/>` +
-    Array.from({ length: 24 }, (_, i) => `<line x1="200" y1="8" x2="200" y2="${i % 2 ? 22 : 34}" stroke="${c1}" stroke-width="3" transform="rotate(${i * 15} 200 200)"/>`).join('') +
-    Array.from({ length: 8 }, (_, i) => `<line x1="200" y1="104" x2="200" y2="142" stroke="${c3}" stroke-width="2" transform="rotate(${i * 45 + 22.5} 200 200)"/>`).join('') + '</g>' +
-    Array.from({ length: 24 }, (_, i) => `<text x="200" y="48" transform="rotate(${i * 15} 200 200)" text-anchor="middle" font-size="22" fill="${c1}">${olGlyph(i)}</text>`).join('') +
-    Array.from({ length: 16 }, (_, i) => `<text x="200" y="92" transform="rotate(${i * 22.5 + 11} 200 200)" text-anchor="middle" font-size="18" fill="${c3}">${olGlyph(i + 7)}</text>`).join('') +
-    Array.from({ length: 6 }, (_, i) => `<text x="200" y="166" transform="rotate(${i * 60} 200 200)" text-anchor="middle" font-size="20" fill="${c2}">${olGlyph(i + 24)}</text>`).join('') + '</svg>';
-  // A full-screen sigil turning slowly behind everything
-  function olBigSigil(x, y, size, ms, colors, spin) {
-    const el = fxSpawn(x, y, { cls: 'ol-sigil', ms, size: [size, size], html: OL_SIGIL(...colors) });
-    fxAnimate(el, [{ transform: 'scale(0.4) rotate(0deg)', opacity: 0 }, { transform: `scale(1) rotate(${spin * 0.15}deg)`, opacity: 0.55, offset: 0.15 },
-      { transform: `scale(1.02) rotate(${spin * 0.8}deg)`, opacity: 0.55, offset: 0.85 }, { transform: `scale(1.3) rotate(${spin}deg)`, opacity: 0 }], ms, 'linear');
-    return el;
-  }
-  // A stack of flattened rune rings down the beam's path, lighting up one after another
-  function olRuneColumn(x, y, n, size, ms, colors, gap) {
-    for (let i = 0; i < n; i++) setTimeout(() => {
-      const ry = y * (i + 0.5) / n, el = fxSpawn(x, ry, { cls: 'ol-runes', ms: ms - i * gap, size: [size * (0.6 + i / n * 0.5), size * (0.6 + i / n * 0.5)],
-        html: OL_RUNES(colors[i % colors.length], colors[(i + 1) % colors.length]) }); // the lighter ring art: these are flattened and small anyway
-      const dir = i % 2 ? -1 : 1;
-      fxAnimate(el, [{ transform: 'scale(0.1, 0.03) rotate(0deg)', opacity: 0 }, { transform: 'scale(1, 0.26) rotate(0deg)', opacity: 1, offset: 0.1 },
-        { transform: `scale(1, 0.26) rotate(${dir * 300}deg)`, opacity: 1, offset: 0.88 }, { transform: `scale(1.5, 0.4) rotate(${dir * 360}deg)`, opacity: 0 }], ms - i * gap, 'linear');
-      sfx('wheel_tick', 0.8 + i * 0.12, 0.9);
-    }, i * gap);
-  }
-  // Glowing glyphs that float up around the target, or swirl inward toward it
-  function olGlyphs(x, y, n, colors, { inward = false, radius = 300, ms = 1100 } = {}) {
-    for (let i = 0; i < n; i++) setTimeout(() => {
-      const a = fxRand(0, Math.PI * 2), rr = fxRand(radius * 0.4, radius), c = colors[i % colors.length];
-      const from = inward ? [x + Math.cos(a) * rr, y + Math.sin(a) * rr * 0.7] : [x + fxRand(-radius, radius), y + fxRand(-20, 40)];
-      const g = fxSpawn(from[0], from[1], { cls: 'ol-glyph', html: olGlyph(i * 5 + 3), ms, style: { color: c, textShadow: `0 0 8px ${c}`, fontSize: fxRand(20, 42) + 'px' } });
-      const end = inward ? `translate(${x - from[0]}px, ${y - from[1]}px) scale(0.3) rotate(${fxRand(-180, 180)}deg)` : `translate(${fxRand(-40, 40)}px, ${-fxRand(180, 380)}px) scale(1.3) rotate(${fxRand(-90, 90)}deg)`;
-      fxAnimate(g, [{ transform: 'scale(0.2)', opacity: 0 }, { transform: 'scale(1)', opacity: 1, offset: 0.2 }, { transform: end, opacity: 0 }], ms, inward ? 'ease-in' : 'ease-out');
-    }, i * (ms / n) * 0.8);
-  }
-  // Glowing cracks spreading across the screen from the impact (like reality splitting)
-  function olCracks(x, y, colors) {
-    let paths = '';
-    for (let i = 0; i < 10; i++) {
-      let px = 500, py = 500, d = `M500 500`;
-      const a = i / 10 * Math.PI * 2 + fxRand(-0.2, 0.2);
-      for (let k = 1; k <= 6; k++) { px += Math.cos(a + fxRand(-0.5, 0.5)) * 70; py += Math.sin(a + fxRand(-0.5, 0.5)) * 70; d += ` L${px.toFixed(0)} ${py.toFixed(0)}`; }
-      paths += `<path d="${d}" stroke="${colors[i % colors.length]}" stroke-width="5" fill="none" stroke-linejoin="round"/><path d="${d}" stroke="#fff" stroke-width="2" fill="none"/>`;
-    }
-    const size = Math.max(innerWidth, innerHeight) * 1.2;
-    const el = fxSpawn(x, y, { cls: 'ol-cracks', ms: 1500, size: [size, size], html: `<svg viewBox="0 0 1000 1000" width="100%" height="100%">${paths}</svg>` });
-    fxAnimate(el, [{ transform: 'scale(0.1)', opacity: 1 }, { transform: 'scale(1)', opacity: 1, offset: 0.25 }, { transform: 'scale(1.05)', opacity: 0.8, offset: 0.7 }, { transform: 'scale(1.1)', opacity: 0 }], 1500, 'cubic-bezier(.1,.9,.3,1)');
-  }
-  const OL_RUNES = (c1, c2) => '<svg viewBox="0 0 200 200" width="100%" height="100%"><g fill="none">' +
-    `<circle cx="100" cy="100" r="92" stroke="${c1}" stroke-width="4"/><circle cx="100" cy="100" r="74" stroke="${c2}" stroke-width="2" stroke-dasharray="6 5"/>` +
-    `<circle cx="100" cy="100" r="40" stroke="${c1}" stroke-width="3"/>` +
-    `<polygon points="100,12 176,144 24,144" stroke="${c2}" stroke-width="2"/><polygon points="100,188 24,56 176,56" stroke="${c2}" stroke-width="2"/></g>` +
-    Array.from({ length: 12 }, (_, i) => `<text x="100" y="22" transform="rotate(${i * 30} 100 100)" text-anchor="middle" font-size="13" fill="${c1}">${'ᚠᚢᚦᚨᚱᚲᚷᚹᚺᚾᛁᛃ'[i]}</text>`).join('') + '</svg>';
-  function olRunes(x, y, size, c1, c2, ms) {
-    const el = fxSpawn(x, y, { cls: 'ol-runes', ms, size: [size, size], html: OL_RUNES(c1, c2) });
-    fxAnimate(el, [{ transform: 'scale(0.2, 0.07) rotate(0deg)', opacity: 0 }, { transform: 'scale(1, 0.35) rotate(0deg)', opacity: 1, offset: 0.12 },
-      { transform: 'scale(1.05, 0.37) rotate(200deg)', opacity: 1, offset: 0.85 }, { transform: 'scale(1.4, 0.5) rotate(260deg)', opacity: 0 }], ms, 'linear');
-  }
-  // Energy rings and helix sparks travelling down the beam from the sky into the target
-  function olDescend(x, y, W, colors, count, every) {
-    for (let i = 0; i < count; i++) setTimeout(() => {
-      const ring = fxSpawn(x, -40, { cls: 'ol-descend', ms: 460, size: [W * 1.1, W * 0.28], style: { borderColor: colors[i % colors.length] } });
-      fxAnimate(ring, [{ transform: 'translateY(0) scale(0.7)', opacity: 0.9 }, { transform: `translateY(${y + 40}px) scale(1.15)`, opacity: 0.2 }], 440, 'ease-in');
-      // Two helix sparks spiralling round the beam
-      [0, 1].forEach(k => {
-        const spark = fxSpawn(x, -20, { cls: 'ol-helix', ms: 560, style: { background: colors[(i + k) % colors.length], boxShadow: `0 0 12px ${colors[(i + k) % colors.length]}` } });
-        const frames = [];
-        for (let f = 0; f <= 8; f++) { const t = f / 8; frames.push({ transform: `translate(${Math.sin(t * Math.PI * 3 + k * Math.PI) * W * 0.6}px, ${(y + 20) * t}px) scale(${1 + Math.cos(t * Math.PI * 3 + k * Math.PI) * 0.5})` }); }
-        fxAnimate(spark, frames, 540, 'linear');
-      });
-    }, i * every);
-  }
-  // Orbital Laser firing. Timeline (t = 0 is the impact, when orbital_laser plays):
-  //   -1.2s  the screen goes to deep space, a reticle + rune circle lock onto the target, targeting lines sweep in
-  //    0s    a screen-wide beam slams down: a pure white core (with energy flowing through it) inside a vivid
-  //          cyan beam and a glow that fills the screen; white-out, shockwaves, lightning, debris, screen warp
-  //    1.9s  ESCALATION (matches the second hit in the sound): an edge-to-edge rainbow laser erupts over it,
-  //          strobing and pulsing, side lasers converge from the corners, a second, bigger detonation
-  //    ~3.6s everything collapses back into the sky
-  // No words at impact: it's all light, energy and motion.
-  async function orbitalLaserFx(targetI) {
-    const capBefore = FX_MAX_NODES;
-    FX_MAX_NODES = 700; // the ultimate gets room for all its layers
-    try {
-      // The beam comes straight down the middle of the screen, landing level with the target
-      const to = hpBox(targetI), y = fxPoint(to)[1], x = innerWidth / 2;
-      const VW = innerWidth, VH = innerHeight;
-      banner('🛰️ ORBITAL LASER 🛰️', 'fire');
-      // Deep-space darkness for the whole sequence, and a pulsing energy vignette round the screen edges
-      const dark = fxSpawn(0, 0, { cls: 'fx-tint orbital-dark', ms: 5000 });
-      dark?.animate([{ opacity: 0 }, { opacity: 0.9, offset: 0.12 }, { opacity: 0.9, offset: 0.82 }, { opacity: 0 }], { duration: 5000, fill: 'forwards' });
-      const edge = fxSpawn(0, 0, { cls: 'fx-tint ol-edge', ms: 5000 });
-      edge?.animate([{ opacity: 0 }, { opacity: 0.4, offset: 0.25 }, { opacity: 0.9, offset: 0.28 }, { opacity: 0.5, offset: 0.5 }, { opacity: 1, offset: 0.62 },
-        { opacity: 0.6, offset: 0.75 }, { opacity: 0 }], { duration: 5000, fill: 'forwards' });
-      // Lock-on: reticle, rune circle, and targeting lines sweeping in from the screen corners
-      const lock = fxSpawn(x, y, { cls: 'orbital-lock', ms: 1200, size: [240, 240] });
-      fxAnimate(lock, [{ transform: 'scale(3) rotate(-120deg)', opacity: 0 }, { transform: 'scale(1) rotate(0)', opacity: 1, offset: 0.55 },
-        { transform: 'scale(0.92)', opacity: 1, offset: 0.85 }, { transform: 'scale(0.5)', opacity: 0 }], 1200);
-      olRunes(x, y + 20, Math.min(VW, 700), '#00e5ff', '#ff2bd6', 5200);
-      // A giant sigil fills the screen behind everything, a column of rune rings stacks down the beam's path,
-      // and glyphs swirl in toward the target
-      olBigSigil(VW / 2, VH / 2, Math.max(VW, VH) * 1.25, 5400, ['#00e5ff', '#ff2bd6', '#7af7ff'], 140);
-      olRuneColumn(x, y, 3, Math.min(VW * 0.7, 460), 5000, ['#00e5ff', '#ff2bd6', '#7a5cff'], 300);
-      olGlyphs(x, y, 12, ['#7af7ff', '#ff2bd6', '#ffffff'], { inward: true, radius: Math.min(VW, 700) * 0.7, ms: 1500 });
-      // Rune seals spin up in the four corners, then fire their targeting lines
-      [[70, 70], [VW - 70, 70], [70, VH - 70], [VW - 70, VH - 70]].forEach((c, i) => setTimeout(() => olRunes(c[0], c[1], 150, '#ff2b2b', '#ffea00', 1800), i * 100));
-      [[70, 70], [VW - 70, 70], [70, VH - 70], [VW - 70, VH - 70]].forEach((c, i) => setTimeout(() => fxBeam(c, [x, y], { cls: 'ol-target', ms: 900, width: 4 }), 500 + i * 140));
-      for (let i = 0; i < 12; i++) setTimeout(() => sfx('wheel_tick', 1.2 + i * 0.12, 1), 400 + i * 110);
-      setTimeout(() => {
-        const sight = fxSpawn(x, y / 2, { cls: 'ol-sight', ms: 1250, size: [6, y + 40] });
-        fxAnimate(sight, [{ transform: 'scaleY(0)', opacity: 0 }, { transform: 'scaleY(1)', opacity: 0.9, offset: 0.4 }, { transform: 'scaleY(1) scaleX(3)', opacity: 1 }], 1200, 'ease-in');
-      }, 500);
-      await sleep(1750);
-
-      // ---- IMPACT (t = 0) ----
-      sfx('orbital_laser', 1, 1);
-      const H = VH + 120, cy = H / 2 - 80; // the beam runs top to bottom of the whole screen
-      const W = VW * 0.5;
-      const beam = fxSpawn(x, cy, { cls: 'ol-beam', ms: 3800, size: [W, H],
-        html: '<div class="ol-glow"></div><div class="ol-outer"></div><div class="ol-core"><div class="ol-flow"></div></div>' });
-      fxAnimate(beam, [
-        { transform: 'scaleX(0.02)', opacity: 1 }, { transform: 'scaleX(1.35)', opacity: 1, offset: 0.05 },
-        { transform: 'scaleX(0.94)', opacity: 1, offset: 0.1 }, { transform: 'scaleX(1.06)', opacity: 1, offset: 0.3 },
-        { transform: 'scaleX(0.96)', opacity: 1, offset: 0.5 }, { transform: 'scaleX(1.1)', opacity: 1, offset: 0.8 },
-        { transform: 'scaleX(1)', opacity: 1, offset: 0.9 }, { transform: 'scaleX(0) scaleY(1.05)', opacity: 0 },
-      ], 3800, 'ease-out');
-      // Chromatic split copies jittering either side
-      [-1, 1].forEach(side => {
-        const ghost = fxSpawn(x + side * 14, cy, { cls: 'ol-ghost ' + (side < 0 ? 'l' : 'r'), ms: 1500, size: [W, H] });
-        fxAnimate(ghost, [{ transform: 'translateX(0)', opacity: 0.55 }, { transform: `translateX(${side * 22}px)`, opacity: 0.45, offset: 0.2 },
-          { transform: `translateX(${-side * 8}px)`, opacity: 0.3, offset: 0.5 }, { transform: `translateX(${side * 30}px)`, opacity: 0 }], 1500, 'linear');
-      });
-      flash('#ffffff', 0.95); haptic(300);
-      fxShake(panel, 28, 900); fxShake(to, 22, 800); olWarp(panel, 1.2);
-      olDetonate(x, y, ['#ffffff', '#00e5ff', '#18ffff', '#40c4ff'], 1.2);
-      olDescend(x, y, W * 0.6, ['#ffffff', '#00e5ff', '#18ffff'], 12, 150);
-      olGlyphs(x, y, 10, ['#ffffff', '#18ffff', '#7af7ff'], { radius: W * 0.9, ms: 1500 });
-      // Lightning crawling off the beam's edges
-      for (let i = 0; i < 6; i++) setTimeout(() => {
-        const side = i % 2 ? 1 : -1, sy = fxRand(40, y);
-        olBolt([x + side * W * 0.35, sy], [x + side * fxRand(W * 0.6, W * 1.1), sy + fxRand(-120, 120)], '#18ffff');
-      }, 80 + i * 250);
-      await sleep(1900);
-
-      // ---- ESCALATION (t = 1.9s): the rainbow laser, edge to edge ----
-      const RW = VW * 1.15;
-      const rb = fxSpawn(x, cy, { cls: 'ol-rainbow', ms: 1900, size: [RW, H],
-        // three strobing layers, two colours each, cycle through the whole rainbow
-        html: [[0, 1], [2, 3], [4, 5]].map(([a, b]) => `<div class="ol-rb" style="--c:${OL_RAINBOW[a]};--c2:${OL_RAINBOW[b]}"></div>`).join('') + '<div class="ol-rb-edge"></div>' });
-      const pulse = [{ transform: 'scaleX(0.05)', opacity: 0 }, { transform: 'scaleX(1.1)', opacity: 1, offset: 0.07 }];
-      for (let i = 0; i < 7; i++) pulse.push({ transform: `scaleX(${i % 2 ? 1.08 : 0.62})`, opacity: 1, offset: 0.14 + i * 0.105 });
-      pulse.push({ transform: 'scaleX(0)', opacity: 0 });
-      fxAnimate(rb, pulse, 1900, 'ease-in-out');
-      flash('#ffffff', 1); haptic(400);
-      setTimeout(() => flash(OL_RAINBOW[4], 0.5), 120);
-      setTimeout(() => flash(OL_RAINBOW[5], 0.45), 260);
-      fxShake(panel, 36, 1200); fxShake(to, 28, 1100); olWarp(panel, 1.8);
-      olDetonate(x, y, OL_RAINBOW, 1.3);
-      olCracks(x, y, OL_RAINBOW);
-      olGlyphs(x, y, 14, OL_RAINBOW, { radius: RW * 0.45, ms: 1700 });
-      olDescend(x, y, W * 0.8, OL_RAINBOW, 6, 240);
-      // Satellite lasers converge from the top corners and sides
-      [[0, 0], [VW, 0], [0, VH * 0.4], [VW, VH * 0.4]].forEach((c, i) =>
-        setTimeout(() => fxBeam(c, [x, y], { cls: 'ol-side', ms: 900, width: 22 }), 80 + i * 110));
-      // Rainbow lightning everywhere
-      for (let i = 0; i < 6; i++) setTimeout(() => {
-        const a = fxRand(0, Math.PI * 2), r = fxRand(200, 520);
-        olBolt([x, y], [x + Math.cos(a) * r, y + Math.sin(a) * r * 0.6], OL_RAINBOW[i % 6], 180);
-      }, 60 + i * 220);
-      for (let i = 1; i <= 3; i++) setTimeout(() => {
-        fxRing(x, y, { color: OL_RAINBOW[i * 2 % 6], size: 600 + i * 160, width: 9, ms: 850 });
-        fxShake(panel, 18, 300); haptic(80);
-      }, i * 420);
-      await sleep(1800);
-    } catch (e) { console.warn('orbital laser fx', e); }
-    FX_MAX_NODES = capBefore;
-  }
   // Match combo callout: link the matching wheels with gold frames and beams, then stamp PAIR / JACKPOT
   function matchFx(n, wis, newest, mult) {
     try {
@@ -954,10 +732,10 @@ async function battleEvent(enemy = null) {
       if (card.orbital) {
         // Orbital Laser: each landing charges it; the ORBITAL_CHARGES-th landing this turn fires the laser
         orbitalCharges++;
-        if (orbitalCharges % ORBITAL_CHARGES) orbitalChargeFx(orbitalCharges % ORBITAL_CHARGES, wi);
+        if (orbitalCharges % ORBITAL_CHARGES) orbitalChargeFx(orbitalCharges % ORBITAL_CHARGES, body.querySelectorAll('.wheel-window')[wi]);
         else {
           const dmg = Math.round(dmgOf({ mult: ORBITAL_MULT }) * matchMult);
-          await orbitalLaserFx(foeI);
+          await orbitalLaserFx(hpBox(foeI), panel);
           const before = foe.hp;
           foe.hp = Math.max(0, foe.hp - dmg); // straight from orbit: shields can't stop it
           turnTotal += before - foe.hp;
@@ -1151,4 +929,228 @@ async function battleEvent(enemy = null) {
   render();
   await waitGo('Done');
   el.hidden = true;
+}
+
+// ---------- Orbital Laser (global so the card animation viewer can play it too) ----------
+// Orbital Laser charging: a satellite light on the wheel and a charge meter (1/3, 2/3)
+function orbitalChargeFx(n, win) {
+  try {
+    const [x, y] = fxPoint(win);
+    fxPop(x, y - 20, `🛰️ CHARGE ${n}/${ORBITAL_CHARGES}`, { cls: 'orbital-charge', ms: 1100, size: 26 + n * 6 });
+    fxRing(x, y, { color: '#7af7ff', size: 120 + n * 50, width: 3 + n * 2 });
+    fxParticles(x, y, { count: 8 + n * 6, colors: ['#7af7ff', '#ff2bd6', '#fff'], spread: 70 + n * 30, size: [2, 5], ms: 700 });
+    sfx('buff', 0.7 + n * 0.2, 0.8); comboSfx(n);
+    if (n === ORBITAL_CHARGES - 1) banner('🛰️ ONE MORE FOR ORBITAL LASER!', 'legendary');
+  } catch (e) { console.warn('orbital charge fx', e); }
+}
+// Orbital Laser pieces (the full timeline is described above orbitalLaserFx below)
+const OL_RAINBOW = ['#ff1744', '#ff9100', '#ffea00', '#00e676', '#00b0ff', '#d500f9'];
+function olWarp(el, k) { // brief screen "distortion": squash, skew and snap back
+  try { el?.animate?.([{ transform: 'none' }, { transform: `scale(${1 + 0.04 * k}, ${1 - 0.05 * k}) skewX(${-3 * k}deg)` },
+    { transform: `scale(${1 - 0.03 * k}, ${1 + 0.04 * k}) skewX(${2 * k}deg)` }, { transform: `scale(${1 + 0.015 * k}) skewX(${-1 * k}deg)` }, { transform: 'none' }], { duration: 520, easing: 'ease-out' }); } catch (e) {}
+}
+function olDetonate(x, y, colors, k) {
+  for (let i = 0; i < 4; i++) setTimeout(() => fxRing(x, y, { color: colors[i % colors.length], size: (420 + i * 260) * k, width: 14 - i * 2, ms: 700 + i * 180 }), i * 90);
+  // Heat ripples: thin fast rings that read as the air bending
+  for (let i = 0; i < 3; i++) setTimeout(() => fxRing(x, y, { color: '#ffffff88', size: 260 * k + i * 120, width: 2, ms: 500, cls: 'ol-ripple' }), 60 + i * 110);
+  fxParticles(x, y, { count: 36, colors, spread: 420 * k, size: [4, 12], gravity: 160, ms: 1300 });
+  fxParticles(x, y, { count: 14, colors: ['#fff'], spread: 260 * k, size: [2, 4], cone: 120, angle: -90, ms: 900 });
+  const orb = fxSpawn(x, y, { cls: 'ol-orb', ms: 1100, size: [300 * k, 300 * k] });
+  fxAnimate(orb, [{ transform: 'scale(0.15)', opacity: 1 }, { transform: 'scale(1.5)', opacity: 0.95, offset: 0.3 }, { transform: 'scale(2.6)', opacity: 0 }], 1100, 'ease-out');
+}
+// Lightning arc: a jagged bolt between two points that flickers for a moment
+function olBolt(a, b, color, ms = 160) {
+  const dx = b[0] - a[0], dy = b[1] - a[1], len = Math.hypot(dx, dy) || 1, n = 7;
+  let pts = '0,10';
+  for (let i = 1; i < n; i++) pts += ` ${(i / n * 100).toFixed(1)},${(10 + fxRand(-9, 9)).toFixed(1)}`;
+  pts += ' 100,10';
+  const el = fxSpawn(a[0], a[1], { cls: 'ol-bolt', ms, style: { width: len + 'px', height: '40px', transformOrigin: '0 50%' },
+    html: `<svg viewBox="0 0 100 20" preserveAspectRatio="none" width="100%" height="100%"><polyline points="${pts}" fill="none" stroke="${color}" stroke-width="3" stroke-linejoin="round"/>` +
+      `<polyline points="${pts}" fill="none" stroke="#fff" stroke-width="1.2" stroke-linejoin="round"/></svg>` });
+  el?.animate([{ transform: `translate(0, -50%) rotate(${Math.atan2(dy, dx)}rad)`, opacity: 1 }, { transform: `translate(0, -50%) rotate(${Math.atan2(dy, dx)}rad)`, opacity: 0 }],
+    { duration: ms, easing: 'steps(3)', fill: 'forwards' });
+}
+// Rune circle: a flattened, spinning ring of glyphs on the ground under the target
+const OL_GLYPHS = 'ᚠᚢᚦᚨᚱᚲᚷᚹᚺᚾᛁᛃᛇᛈᛉᛊᛏᛒᛖᛗᛚᛜᛞᛟ☉☽♄♃♂♀☿✶⟁';
+const olGlyph = i => OL_GLYPHS[i % OL_GLYPHS.length];
+// A big, detailed sigil: three rings of glyphs, a hexagram, spokes and tick marks
+const OL_SIGIL = (c1, c2, c3) => '<svg viewBox="0 0 400 400" width="100%" height="100%"><g fill="none">' +
+  `<circle cx="200" cy="200" r="192" stroke="${c1}" stroke-width="5"/><circle cx="200" cy="200" r="178" stroke="${c2}" stroke-width="2"/>` +
+  `<circle cx="200" cy="200" r="142" stroke="${c1}" stroke-width="3" stroke-dasharray="14 6"/><circle cx="200" cy="200" r="104" stroke="${c3}" stroke-width="3"/>` +
+  `<circle cx="200" cy="200" r="60" stroke="${c2}" stroke-width="4"/><circle cx="200" cy="200" r="22" stroke="${c1}" stroke-width="3"/>` +
+  `<polygon points="200,58 323,271 77,271" stroke="${c2}" stroke-width="3"/><polygon points="200,342 77,129 323,129" stroke="${c2}" stroke-width="3"/>` +
+  Array.from({ length: 24 }, (_, i) => `<line x1="200" y1="8" x2="200" y2="${i % 2 ? 22 : 34}" stroke="${c1}" stroke-width="3" transform="rotate(${i * 15} 200 200)"/>`).join('') +
+  Array.from({ length: 8 }, (_, i) => `<line x1="200" y1="104" x2="200" y2="142" stroke="${c3}" stroke-width="2" transform="rotate(${i * 45 + 22.5} 200 200)"/>`).join('') + '</g>' +
+  Array.from({ length: 24 }, (_, i) => `<text x="200" y="48" transform="rotate(${i * 15} 200 200)" text-anchor="middle" font-size="22" fill="${c1}">${olGlyph(i)}</text>`).join('') +
+  Array.from({ length: 16 }, (_, i) => `<text x="200" y="92" transform="rotate(${i * 22.5 + 11} 200 200)" text-anchor="middle" font-size="18" fill="${c3}">${olGlyph(i + 7)}</text>`).join('') +
+  Array.from({ length: 6 }, (_, i) => `<text x="200" y="166" transform="rotate(${i * 60} 200 200)" text-anchor="middle" font-size="20" fill="${c2}">${olGlyph(i + 24)}</text>`).join('') + '</svg>';
+// A full-screen sigil turning slowly behind everything
+function olBigSigil(x, y, size, ms, colors, spin) {
+  const el = fxSpawn(x, y, { cls: 'ol-sigil', ms, size: [size, size], html: OL_SIGIL(...colors) });
+  fxAnimate(el, [{ transform: 'scale(0.4) rotate(0deg)', opacity: 0 }, { transform: `scale(1) rotate(${spin * 0.15}deg)`, opacity: 0.55, offset: 0.15 },
+    { transform: `scale(1.02) rotate(${spin * 0.8}deg)`, opacity: 0.55, offset: 0.85 }, { transform: `scale(1.3) rotate(${spin}deg)`, opacity: 0 }], ms, 'linear');
+  return el;
+}
+// A stack of flattened rune rings down the beam's path, lighting up one after another
+function olRuneColumn(x, y, n, size, ms, colors, gap) {
+  for (let i = 0; i < n; i++) setTimeout(() => {
+    const ry = y * (i + 0.5) / n, el = fxSpawn(x, ry, { cls: 'ol-runes', ms: ms - i * gap, size: [size * (0.6 + i / n * 0.5), size * (0.6 + i / n * 0.5)],
+      html: OL_RUNES(colors[i % colors.length], colors[(i + 1) % colors.length]) }); // the lighter ring art: these are flattened and small anyway
+    const dir = i % 2 ? -1 : 1;
+    fxAnimate(el, [{ transform: 'scale(0.1, 0.03) rotate(0deg)', opacity: 0 }, { transform: 'scale(1, 0.26) rotate(0deg)', opacity: 1, offset: 0.1 },
+      { transform: `scale(1, 0.26) rotate(${dir * 300}deg)`, opacity: 1, offset: 0.88 }, { transform: `scale(1.5, 0.4) rotate(${dir * 360}deg)`, opacity: 0 }], ms - i * gap, 'linear');
+    sfx('wheel_tick', 0.8 + i * 0.12, 0.9);
+  }, i * gap);
+}
+// Glowing glyphs that float up around the target, or swirl inward toward it
+function olGlyphs(x, y, n, colors, { inward = false, radius = 300, ms = 1100 } = {}) {
+  for (let i = 0; i < n; i++) setTimeout(() => {
+    const a = fxRand(0, Math.PI * 2), rr = fxRand(radius * 0.4, radius), c = colors[i % colors.length];
+    const from = inward ? [x + Math.cos(a) * rr, y + Math.sin(a) * rr * 0.7] : [x + fxRand(-radius, radius), y + fxRand(-20, 40)];
+    const g = fxSpawn(from[0], from[1], { cls: 'ol-glyph', html: olGlyph(i * 5 + 3), ms, style: { color: c, textShadow: `0 0 8px ${c}`, fontSize: fxRand(20, 42) + 'px' } });
+    const end = inward ? `translate(${x - from[0]}px, ${y - from[1]}px) scale(0.3) rotate(${fxRand(-180, 180)}deg)` : `translate(${fxRand(-40, 40)}px, ${-fxRand(180, 380)}px) scale(1.3) rotate(${fxRand(-90, 90)}deg)`;
+    fxAnimate(g, [{ transform: 'scale(0.2)', opacity: 0 }, { transform: 'scale(1)', opacity: 1, offset: 0.2 }, { transform: end, opacity: 0 }], ms, inward ? 'ease-in' : 'ease-out');
+  }, i * (ms / n) * 0.8);
+}
+// Glowing cracks spreading across the screen from the impact (like reality splitting)
+function olCracks(x, y, colors) {
+  let paths = '';
+  for (let i = 0; i < 10; i++) {
+    let px = 500, py = 500, d = `M500 500`;
+    const a = i / 10 * Math.PI * 2 + fxRand(-0.2, 0.2);
+    for (let k = 1; k <= 6; k++) { px += Math.cos(a + fxRand(-0.5, 0.5)) * 70; py += Math.sin(a + fxRand(-0.5, 0.5)) * 70; d += ` L${px.toFixed(0)} ${py.toFixed(0)}`; }
+    paths += `<path d="${d}" stroke="${colors[i % colors.length]}" stroke-width="5" fill="none" stroke-linejoin="round"/><path d="${d}" stroke="#fff" stroke-width="2" fill="none"/>`;
+  }
+  const size = Math.max(innerWidth, innerHeight) * 1.2;
+  const el = fxSpawn(x, y, { cls: 'ol-cracks', ms: 1500, size: [size, size], html: `<svg viewBox="0 0 1000 1000" width="100%" height="100%">${paths}</svg>` });
+  fxAnimate(el, [{ transform: 'scale(0.1)', opacity: 1 }, { transform: 'scale(1)', opacity: 1, offset: 0.25 }, { transform: 'scale(1.05)', opacity: 0.8, offset: 0.7 }, { transform: 'scale(1.1)', opacity: 0 }], 1500, 'cubic-bezier(.1,.9,.3,1)');
+}
+const OL_RUNES = (c1, c2) => '<svg viewBox="0 0 200 200" width="100%" height="100%"><g fill="none">' +
+  `<circle cx="100" cy="100" r="92" stroke="${c1}" stroke-width="4"/><circle cx="100" cy="100" r="74" stroke="${c2}" stroke-width="2" stroke-dasharray="6 5"/>` +
+  `<circle cx="100" cy="100" r="40" stroke="${c1}" stroke-width="3"/>` +
+  `<polygon points="100,12 176,144 24,144" stroke="${c2}" stroke-width="2"/><polygon points="100,188 24,56 176,56" stroke="${c2}" stroke-width="2"/></g>` +
+  Array.from({ length: 12 }, (_, i) => `<text x="100" y="22" transform="rotate(${i * 30} 100 100)" text-anchor="middle" font-size="13" fill="${c1}">${'ᚠᚢᚦᚨᚱᚲᚷᚹᚺᚾᛁᛃ'[i]}</text>`).join('') + '</svg>';
+function olRunes(x, y, size, c1, c2, ms) {
+  const el = fxSpawn(x, y, { cls: 'ol-runes', ms, size: [size, size], html: OL_RUNES(c1, c2) });
+  fxAnimate(el, [{ transform: 'scale(0.2, 0.07) rotate(0deg)', opacity: 0 }, { transform: 'scale(1, 0.35) rotate(0deg)', opacity: 1, offset: 0.12 },
+    { transform: 'scale(1.05, 0.37) rotate(200deg)', opacity: 1, offset: 0.85 }, { transform: 'scale(1.4, 0.5) rotate(260deg)', opacity: 0 }], ms, 'linear');
+}
+// Energy rings and helix sparks travelling down the beam from the sky into the target
+function olDescend(x, y, W, colors, count, every) {
+  for (let i = 0; i < count; i++) setTimeout(() => {
+    const ring = fxSpawn(x, -40, { cls: 'ol-descend', ms: 460, size: [W * 1.1, W * 0.28], style: { borderColor: colors[i % colors.length] } });
+    fxAnimate(ring, [{ transform: 'translateY(0) scale(0.7)', opacity: 0.9 }, { transform: `translateY(${y + 40}px) scale(1.15)`, opacity: 0.2 }], 440, 'ease-in');
+    // Two helix sparks spiralling round the beam
+    [0, 1].forEach(k => {
+      const spark = fxSpawn(x, -20, { cls: 'ol-helix', ms: 560, style: { background: colors[(i + k) % colors.length], boxShadow: `0 0 12px ${colors[(i + k) % colors.length]}` } });
+      const frames = [];
+      for (let f = 0; f <= 8; f++) { const t = f / 8; frames.push({ transform: `translate(${Math.sin(t * Math.PI * 3 + k * Math.PI) * W * 0.6}px, ${(y + 20) * t}px) scale(${1 + Math.cos(t * Math.PI * 3 + k * Math.PI) * 0.5})` }); }
+      fxAnimate(spark, frames, 540, 'linear');
+    });
+  }, i * every);
+}
+// Orbital Laser firing. Timeline (t = 0 is the impact, when orbital_laser plays):
+//   -1.2s  the screen goes to deep space, a reticle + rune circle lock onto the target, targeting lines sweep in
+//    0s    a screen-wide beam slams down: a pure white core (with energy flowing through it) inside a vivid
+//          cyan beam and a glow that fills the screen; white-out, shockwaves, lightning, debris, screen warp
+//    1.9s  ESCALATION (matches the second hit in the sound): an edge-to-edge rainbow laser erupts over it,
+//          strobing and pulsing, side lasers converge from the corners, a second, bigger detonation
+//    ~3.6s everything collapses back into the sky
+// No words at impact: it's all light, energy and motion.
+async function orbitalLaserFx(to, panel) {
+  const capBefore = FX_MAX_NODES;
+  FX_MAX_NODES = 700; // the ultimate gets room for all its layers
+  try {
+    // The beam comes straight down the middle of the screen, landing level with the target
+    const y = fxPoint(to)[1], x = innerWidth / 2;
+    const VW = innerWidth, VH = innerHeight;
+    banner('🛰️ ORBITAL LASER 🛰️', 'fire');
+    // Deep-space darkness for the whole sequence, and a pulsing energy vignette round the screen edges
+    const dark = fxSpawn(0, 0, { cls: 'fx-tint orbital-dark', ms: 5000 });
+    dark?.animate([{ opacity: 0 }, { opacity: 0.9, offset: 0.12 }, { opacity: 0.9, offset: 0.82 }, { opacity: 0 }], { duration: 5000, fill: 'forwards' });
+    const edge = fxSpawn(0, 0, { cls: 'fx-tint ol-edge', ms: 5000 });
+    edge?.animate([{ opacity: 0 }, { opacity: 0.4, offset: 0.25 }, { opacity: 0.9, offset: 0.28 }, { opacity: 0.5, offset: 0.5 }, { opacity: 1, offset: 0.62 },
+      { opacity: 0.6, offset: 0.75 }, { opacity: 0 }], { duration: 5000, fill: 'forwards' });
+    // Lock-on: reticle, rune circle, and targeting lines sweeping in from the screen corners
+    const lock = fxSpawn(x, y, { cls: 'orbital-lock', ms: 1200, size: [240, 240] });
+    fxAnimate(lock, [{ transform: 'scale(3) rotate(-120deg)', opacity: 0 }, { transform: 'scale(1) rotate(0)', opacity: 1, offset: 0.55 },
+      { transform: 'scale(0.92)', opacity: 1, offset: 0.85 }, { transform: 'scale(0.5)', opacity: 0 }], 1200);
+    olRunes(x, y + 20, Math.min(VW, 700), '#00e5ff', '#ff2bd6', 5200);
+    // A giant sigil fills the screen behind everything, a column of rune rings stacks down the beam's path,
+    // and glyphs swirl in toward the target
+    olBigSigil(VW / 2, VH / 2, Math.max(VW, VH) * 1.25, 5400, ['#00e5ff', '#ff2bd6', '#7af7ff'], 140);
+    olRuneColumn(x, y, 3, Math.min(VW * 0.7, 460), 5000, ['#00e5ff', '#ff2bd6', '#7a5cff'], 300);
+    olGlyphs(x, y, 12, ['#7af7ff', '#ff2bd6', '#ffffff'], { inward: true, radius: Math.min(VW, 700) * 0.7, ms: 1500 });
+    // Rune seals spin up in the four corners, then fire their targeting lines
+    [[70, 70], [VW - 70, 70], [70, VH - 70], [VW - 70, VH - 70]].forEach((c, i) => setTimeout(() => olRunes(c[0], c[1], 150, '#ff2b2b', '#ffea00', 1800), i * 100));
+    [[70, 70], [VW - 70, 70], [70, VH - 70], [VW - 70, VH - 70]].forEach((c, i) => setTimeout(() => fxBeam(c, [x, y], { cls: 'ol-target', ms: 900, width: 4 }), 500 + i * 140));
+    for (let i = 0; i < 12; i++) setTimeout(() => sfx('wheel_tick', 1.2 + i * 0.12, 1), 400 + i * 110);
+    setTimeout(() => {
+      const sight = fxSpawn(x, y / 2, { cls: 'ol-sight', ms: 1250, size: [6, y + 40] });
+      fxAnimate(sight, [{ transform: 'scaleY(0)', opacity: 0 }, { transform: 'scaleY(1)', opacity: 0.9, offset: 0.4 }, { transform: 'scaleY(1) scaleX(3)', opacity: 1 }], 1200, 'ease-in');
+    }, 500);
+    await sleep(1750);
+
+    // ---- IMPACT (t = 0) ----
+    sfx('orbital_laser', 1, 1);
+    const H = VH + 120, cy = H / 2 - 80; // the beam runs top to bottom of the whole screen
+    const W = VW * 0.5;
+    const beam = fxSpawn(x, cy, { cls: 'ol-beam', ms: 3800, size: [W, H],
+      html: '<div class="ol-glow"></div><div class="ol-outer"></div><div class="ol-core"><div class="ol-flow"></div></div>' });
+    fxAnimate(beam, [
+      { transform: 'scaleX(0.02)', opacity: 1 }, { transform: 'scaleX(1.35)', opacity: 1, offset: 0.05 },
+      { transform: 'scaleX(0.94)', opacity: 1, offset: 0.1 }, { transform: 'scaleX(1.06)', opacity: 1, offset: 0.3 },
+      { transform: 'scaleX(0.96)', opacity: 1, offset: 0.5 }, { transform: 'scaleX(1.1)', opacity: 1, offset: 0.8 },
+      { transform: 'scaleX(1)', opacity: 1, offset: 0.9 }, { transform: 'scaleX(0) scaleY(1.05)', opacity: 0 },
+    ], 3800, 'ease-out');
+    // Chromatic split copies jittering either side
+    [-1, 1].forEach(side => {
+      const ghost = fxSpawn(x + side * 14, cy, { cls: 'ol-ghost ' + (side < 0 ? 'l' : 'r'), ms: 1500, size: [W, H] });
+      fxAnimate(ghost, [{ transform: 'translateX(0)', opacity: 0.55 }, { transform: `translateX(${side * 22}px)`, opacity: 0.45, offset: 0.2 },
+        { transform: `translateX(${-side * 8}px)`, opacity: 0.3, offset: 0.5 }, { transform: `translateX(${side * 30}px)`, opacity: 0 }], 1500, 'linear');
+    });
+    flash('#ffffff', 0.95); haptic(300);
+    fxShake(panel, 28, 900); fxShake(to, 22, 800); olWarp(panel, 1.2);
+    olDetonate(x, y, ['#ffffff', '#00e5ff', '#18ffff', '#40c4ff'], 1.2);
+    olDescend(x, y, W * 0.6, ['#ffffff', '#00e5ff', '#18ffff'], 12, 150);
+    olGlyphs(x, y, 10, ['#ffffff', '#18ffff', '#7af7ff'], { radius: W * 0.9, ms: 1500 });
+    // Lightning crawling off the beam's edges
+    for (let i = 0; i < 6; i++) setTimeout(() => {
+      const side = i % 2 ? 1 : -1, sy = fxRand(40, y);
+      olBolt([x + side * W * 0.35, sy], [x + side * fxRand(W * 0.6, W * 1.1), sy + fxRand(-120, 120)], '#18ffff');
+    }, 80 + i * 250);
+    await sleep(1900);
+
+    // ---- ESCALATION (t = 1.9s): the rainbow laser, edge to edge ----
+    const RW = VW * 1.15;
+    const rb = fxSpawn(x, cy, { cls: 'ol-rainbow', ms: 1900, size: [RW, H],
+      // three strobing layers, two colours each, cycle through the whole rainbow
+      html: [[0, 1], [2, 3], [4, 5]].map(([a, b]) => `<div class="ol-rb" style="--c:${OL_RAINBOW[a]};--c2:${OL_RAINBOW[b]}"></div>`).join('') + '<div class="ol-rb-edge"></div>' });
+    const pulse = [{ transform: 'scaleX(0.05)', opacity: 0 }, { transform: 'scaleX(1.1)', opacity: 1, offset: 0.07 }];
+    for (let i = 0; i < 7; i++) pulse.push({ transform: `scaleX(${i % 2 ? 1.08 : 0.62})`, opacity: 1, offset: 0.14 + i * 0.105 });
+    pulse.push({ transform: 'scaleX(0)', opacity: 0 });
+    fxAnimate(rb, pulse, 1900, 'ease-in-out');
+    flash('#ffffff', 1); haptic(400);
+    setTimeout(() => flash(OL_RAINBOW[4], 0.5), 120);
+    setTimeout(() => flash(OL_RAINBOW[5], 0.45), 260);
+    fxShake(panel, 36, 1200); fxShake(to, 28, 1100); olWarp(panel, 1.8);
+    olDetonate(x, y, OL_RAINBOW, 1.3);
+    olCracks(x, y, OL_RAINBOW);
+    olGlyphs(x, y, 14, OL_RAINBOW, { radius: RW * 0.45, ms: 1700 });
+    olDescend(x, y, W * 0.8, OL_RAINBOW, 6, 240);
+    // Satellite lasers converge from the top corners and sides
+    [[0, 0], [VW, 0], [0, VH * 0.4], [VW, VH * 0.4]].forEach((c, i) =>
+      setTimeout(() => fxBeam(c, [x, y], { cls: 'ol-side', ms: 900, width: 22 }), 80 + i * 110));
+    // Rainbow lightning everywhere
+    for (let i = 0; i < 6; i++) setTimeout(() => {
+      const a = fxRand(0, Math.PI * 2), r = fxRand(200, 520);
+      olBolt([x, y], [x + Math.cos(a) * r, y + Math.sin(a) * r * 0.6], OL_RAINBOW[i % 6], 180);
+    }, 60 + i * 220);
+    for (let i = 1; i <= 3; i++) setTimeout(() => {
+      fxRing(x, y, { color: OL_RAINBOW[i * 2 % 6], size: 600 + i * 160, width: 9, ms: 850 });
+      fxShake(panel, 18, 300); haptic(80);
+    }, i * 420);
+    await sleep(1800);
+  } catch (e) { console.warn('orbital laser fx', e); }
+  FX_MAX_NODES = capBefore;
 }

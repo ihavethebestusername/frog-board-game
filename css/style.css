@@ -1290,3 +1290,22 @@ body.region-volcano .vignette { background: radial-gradient(ellipse at center, t
 .region-arrow { font-size: 22px; color: #b07f00; }
 .region-foes { display: flex; gap: 10px; justify-content: center; font-size: 34px; }
 .region-foes .boss { font-size: 46px; filter: drop-shadow(0 0 8px #ff2b2b); }
+
+/* ===== Touch screens (phones, tablets) ===== */
+@media (pointer: coarse) {
+  /* Card rows scroll sideways with a finger instead of mouse-panning */
+  #handCards .hand-grid, .pick-grid, #fuseBody .hand-grid, .prog-panel .hand-grid {
+    translate: none !important; overflow-x: auto !important; overflow-y: visible; justify-content: flex-start !important;
+    -webkit-overflow-scrolling: touch; touch-action: pan-x pan-y; overscroll-behavior-x: contain;
+    scroll-snap-type: x proximity; scrollbar-width: thin; padding-bottom: 36px; }
+  #handCards .hand-grid .card-face, .pick-grid .card-face, #fuseBody .hand-grid .card-face { scroll-snap-align: center; }
+  /* Big hands wrap to extra rows anyway, so keep those rows scrollable too */
+  .hand-grid.multi-row { max-width: none; }
+  /* Tall menus scroll up and down instead of running off small screens */
+  .shop-panel, .check-panel { max-height: 92dvh; overflow-y: auto; -webkit-overflow-scrolling: touch; touch-action: pan-y; }
+  /* No hover on touch: skip the hover lift so a tap doesn't leave cards stuck raised */
+  #handCards .card-face:hover, .pick-grid .card-face:not(.picked):not(.nofit):hover, #fuseBody .hand-grid .card-face:hover { transform: none; }
+  /* Bigger tap targets */
+  .shop-tab, .card-tabs button, .tut-btn, .menu-length button { min-height: 40px; }
+  .pick-minus { width: 32px; height: 32px; }
+}

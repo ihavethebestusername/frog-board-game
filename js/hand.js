@@ -110,7 +110,10 @@ function cardPanLoop() {
   if (grids.length && Math.abs(cardPanTarget - cardPanX) > 0.3) requestAnimationFrame(cardPanLoop);
   else cardPanRunning = false;
 }
+// Touch screens scroll the rows with a finger instead (see the pointer: coarse rules in style.css)
+const TOUCH_ROWS = matchMedia('(pointer: coarse)').matches;
 window.addEventListener('mousemove', e => {
+  if (TOUCH_ROWS) return; // taps send fake mouse moves; don't let them shove the row around
   cardPanTarget = -(e.clientX / window.innerWidth * 2 - 1) * window.innerWidth * CARD_PAN;
   if (!cardPanRunning) {
     panGrids = [...document.querySelectorAll(CARD_ROWS)].filter(g => g.offsetParent); // only rows on screen

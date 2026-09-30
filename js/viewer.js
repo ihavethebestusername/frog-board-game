@@ -105,7 +105,14 @@ async function openAnimViewer() {
       gimmickFx(g, s.ctx(s.side, { card, win: s.win(0), blocked }));
     };
     // The whole card, in battle order: land, (super move), cleave/frenzy, the strike(s), then its gimmick
+    // Orbital Laser: land it on the wheels to charge it up, then the laser fires (battle.js)
+    const laser = async () => {
+      for (let n = 1; n < ORBITAL_CHARGES; n++) { land(); orbitalChargeFx(n, s.win(0)); await sleep(900); }
+      land(); await sleep(400);
+      await orbitalLaserFx(s.ctx(s.side).to, s.panel);
+    };
     const full = async crit => {
+      if (card.orbital) return laser();
       land(); await sleep(450);
       if (card.superMove) if (typeof superMoveFx === 'function') await superMoveFx(card, s.ctx(s.side, { card, win: s.win(0) }));
       if (pre) { gimmick(!!crit); await sleep(250); }
@@ -121,6 +128,7 @@ async function openAnimViewer() {
     btn('▶ Play', () => full(false));
     if (card.mult > 0) btn('💥 Play as a crit', () => full(true));
     btn('🎰 Land', land);
+    if (card.orbital) { btn('🛰️ Charge', () => orbitalChargeFx(1, s.win(0))); btn('☄️ Fire the laser', () => orbitalLaserFx(s.ctx(s.side).to, s.panel)); }
     if (card.mult > 0) btn('⚔️ Attack', () => attack(false));
     if (g) btn(`✨ ${g[0].toUpperCase() + g.slice(1)}`, () => gimmick(false));
     if (g === 'cleave') btn('🛡️ Smash shields', () => gimmick(true));
