@@ -9,8 +9,10 @@ rainCanvas.className = 'rain';
 view.appendChild(rainCanvas);
 const rainCtx = rainCanvas.getContext('2d');
 
+// Thin rain streaks don't need a retina canvas: drawing at 1x is 4x fewer pixels on an iPad
+const RAIN_DPR = 1;
 function sizeRain() {
-  const dpr = window.devicePixelRatio || 1;
+  const dpr = RAIN_DPR;
   rainCanvas.width = view.clientWidth * dpr;
   rainCanvas.height = view.clientHeight * dpr;
 }
@@ -30,19 +32,39 @@ const newDrop = (area, anywhere) => ({
   y: anywhere ? area.y + Math.random() * area.h : area.y - 10 - Math.random() * 40,
   len: 6 + Math.random() * 7,            // streak length (board units)
   speed: 0.22 + Math.random() * 0.15,    // board units per ms
-  alpha: 0.15 + Math.random() * 0.25,
+  alpha: [0.18, 0.28, 0.38][Math.floor(Math.random() * 3)], // 3 brightness levels, so drops draw in 3 batches
   land: 0.3 + Math.random() * 0.7,       // how far down the view it lands
 });
 let drops = null;
+// Weather for the current region: 'rain' (Swamp), 'snow' (Ice Lake) or 'embers' (Volcano)
+let WEATHER = 'rain';
+function setWeather(w) { WEATHER = w; drops = null; splashes.length = 0; }
 const splashes = [];
 
-let lastRain = performance.now();
+let lastRain = performance.now(), rainFrame = 0, rainCovered = false;
+// Reading the camera's live transform forces a style recalculation, so only do it while the camera is
+// actually moving (a CSS transition) or its target changed; otherwise reuse the last matrix.
+let camMoving = false, camMatrix = null, camStyle = '';
+world.addEventListener('transitionrun', e => { if (e.target === world) camMoving = true; });
+world.addEventListener('transitionend', e => { if (e.target === world) { camMoving = false; camMatrix = null; } });
+world.addEventListener('transitioncancel', e => { if (e.target === world) { camMoving = false; camMatrix = null; } });
+// Full-screen menus hide the board, so the rain can rest while one is open
+const RAIN_COVERS = '#check:not([hidden]), #shop:not([hidden]), #battle:not([hidden]), #hand:not([hidden]), #flies:not([hidden]), #cups:not([hidden]), #fuse:not([hidden]), #events:not([hidden])';
 (function drawRain(t) {
   const dt = Math.min(50, t - lastRain);
   lastRain = t;
-  const dpr = window.devicePixelRatio || 1;
+  if (rainFrame++ % 20 === 0) {
+    rainCovered = !!document.querySelector(RAIN_COVERS);
+    document.body.classList.toggle('board-covered', rainCovered); // pauses ambient board animations (style.css)
+  }
+  if (rainCovered || document.hidden) { requestAnimationFrame(drawRain); return; }
+  const dpr = RAIN_DPR;
   // The camera's live transform (includes its pan/zoom animations)
-  const m = new DOMMatrix(getComputedStyle(world).transform);
+  if (camMoving || !camMatrix || camStyle !== world.style.transform) {
+    camMatrix = new DOMMatrix(getComputedStyle(world).transform);
+    camStyle = world.style.transform;
+  }
+  const m = camMatrix;
   const area = visibleArea(m);
   drops ||= Array.from({ length: RAIN_DROPS }, () => newDrop(area, true));
 
@@ -52,6 +74,8 @@ let lastRain = performance.now();
   rainCtx.lineWidth = 1 / m.a; // keep streaks 1px thin at any zoom
   rainCtx.lineCap = 'round';
 
+  if (WEATHER !== 'rain') { drawFlakes(t, dt, area, m); requestAnimationFrame(drawRain); return; }
+  const batches = new Map(); // alpha -> drops to stroke in one path
   for (const d of drops) {
     const fall = d.speed * dt;
     d.y += fall;
@@ -63,10 +87,13 @@ let lastRain = performance.now();
       Object.assign(d, newDrop(area, offscreen && d.y < area.y + area.h));
       continue;
     }
-    rainCtx.strokeStyle = `rgba(190, 220, 255, ${d.alpha})`;
+    if (!batches.has(d.alpha)) batches.set(d.alpha, []);
+    batches.get(d.alpha).push(d);
+  }
+  for (const [alpha, list] of batches) {
+    rainCtx.strokeStyle = `rgba(190, 220, 255, ${alpha})`;
     rainCtx.beginPath();
-    rainCtx.moveTo(d.x, d.y);
-    rainCtx.lineTo(d.x - d.len * WIND, d.y - d.len);
+    for (const d of list) { rainCtx.moveTo(d.x, d.y); rainCtx.lineTo(d.x - d.len * WIND, d.y - d.len); }
     rainCtx.stroke();
   }
   // Ripples on the ground: small ellipses that grow and fade, staying where they landed on the map
@@ -82,3 +109,55 @@ let lastRain = performance.now();
   }
   requestAnimationFrame(drawRain);
 })(lastRain);
+
+// Snow drifts down slowly and sways; embers float up and flicker. Batched into one path per brightness.
+function drawFlakes(t, dt, area, m) {
+  const snow = WEATHER === 'snow', batches = new Map();
+  for (const d of drops) {
+    d.phase = d.phase ?? Math.random() * 6;
+    const move = d.speed * dt * (snow ? 0.22 : 0.18);
+    d.y += snow ? move : -move;
+    d.x += Math.sin(t / 700 + d.phase) * (snow ? 0.35 : 0.25);
+    if (d.y > area.y + area.h + 20 || d.y < area.y - 30 || d.x < area.x - 60 || d.x > area.x + area.w + 60) {
+      Object.assign(d, newDrop(area, false));
+      d.x = area.x + Math.random() * area.w;
+      d.y = snow ? area.y - 10 : area.y + area.h + 10;
+      continue;
+    }
+    if (!batches.has(d.alpha)) batches.set(d.alpha, []);
+    batches.get(d.alpha).push(d);
+  }
+  const r = (snow ? 1.8 : 1.4) / m.a * 1.6;
+  for (const [alpha, list] of batches) {
+    rainCtx.fillStyle = snow ? `rgba(255, 255, 255, ${alpha + 0.35})` : `rgba(255, ${140 + Math.round(alpha * 200)}, 60, ${alpha + 0.4})`;
+    rainCtx.beginPath();
+    for (const d of list) { rainCtx.moveTo(d.x + r, d.y); rainCtx.arc(d.x, d.y, r * (0.6 + d.len / 20), 0, Math.PI * 2); }
+    rainCtx.fill();
+  }
+}
+function stopRainSound() { try { rainAudio?.pause(); } catch (e) {} }
+
+// --- Rain ambience: sounds/rain.mp3 on a loop, softened (quiet + muffled with a low-pass filter) ---
+// Browsers only allow sound after the player taps something, so this starts from the start menu.
+const RAIN_VOLUME = 0.07;     // overall loudness (kept very low: background only)
+const RAIN_MUFFLE_HZ = 700;   // lower = softer, more muffled
+let rainAudio = null;
+function startRainSound() {
+  if (rainAudio) return;
+  rainAudio = new Audio('sounds/rain.mp3');
+  rainAudio.loop = true;
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const src = ctx.createMediaElementSource(rainAudio);
+    const muffle = ctx.createBiquadFilter();
+    muffle.type = 'lowpass';
+    muffle.frequency.value = RAIN_MUFFLE_HZ;
+    const gain = ctx.createGain();
+    gain.gain.value = RAIN_VOLUME;
+    src.connect(muffle).connect(gain).connect(ctx.destination);
+    ctx.resume();
+  } catch (e) {
+    rainAudio.volume = RAIN_VOLUME; // no Web Audio: just play it quietly
+  }
+  rainAudio.play().catch(() => {});
+}

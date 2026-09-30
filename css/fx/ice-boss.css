@@ -1,0 +1,172 @@
+/* Card effects: Ice Lake boss - the Glacier Walrus, the Walrus Warlord and the Glacier Titan (see js/fx/ice-boss.js).
+   Deep glacier blues and ivory. Every class and keyframe here is prefixed fxib-. Only transform/opacity animate;
+   shadows, gradients and filters below are static on small spawned elements. */
+
+/* Big graphics: glacier, falling chunk, tusks, icebergs, spikes, walruses */
+.fx.fxib-glacier   { filter: drop-shadow(0 0 12px #7ae0ff) drop-shadow(0 4px 0 #041a3a); }
+.fx.fxib-chunk     { width: 120px; height: 100px; filter: drop-shadow(0 0 10px #7ae0ff) drop-shadow(0 6px 0 #041a3a88); }
+.fx.fxib-piece     { filter: drop-shadow(0 3px 0 #041a3a88); }
+.fx.fxib-tusk      { filter: drop-shadow(0 0 6px #fff6e0) drop-shadow(0 2px 0 #5a402088); }
+.fx.fxib-tusk-fly  { width: 110px; height: 25px; filter: drop-shadow(0 0 8px #bfe6ff) drop-shadow(0 2px 0 #5a402088); }
+.fx.fxib-stab      { filter: drop-shadow(0 0 8px #7ae0ff); }
+.fx.fxib-icicle-down { filter: drop-shadow(0 0 5px #7ae0ff); }
+.fx.fxib-berg-fly  { width: 110px; height: 102px; filter: drop-shadow(0 0 10px #7ae0ff) drop-shadow(0 6px 0 #041a3a88); }
+.fx.fxib-spike     { filter: drop-shadow(0 0 6px #7ae0ff); }
+.fx.fxib-splash    { filter: drop-shadow(0 0 6px #7ac8ff); }
+.fx.fxib-floorcrack { filter: drop-shadow(0 0 4px #7ae0ff); }
+.fx.fxib-walrus    { filter: drop-shadow(0 3px 0 #0006); }
+.fx.fxib-bigflake  { filter: drop-shadow(0 0 14px #7ae0ff) drop-shadow(0 0 4px #fff); }
+.fx.fxib-crystal-fly { width: 22px; height: 33px; filter: drop-shadow(0 0 6px #7ae0ff); }
+.fxib-twinkle { color: #fff; text-shadow: 0 0 6px #fff6e0, 0 0 12px #7ae0ff; font-weight: 900; }
+
+/* Things that orbit the walrus (sized in em by RFX.orbit's font size) */
+.fxib-oicicle { display: block; width: 0.6em; height: 1.8em; filter: drop-shadow(0 0 3px #7ae0ff); }
+.fxib-owalrus { display: block; width: 2.4em; height: 1.8em; }
+.fxib-oicicle svg, .fxib-owalrus svg { display: block; width: 100%; height: 100%; overflow: visible; }
+.fxib-wisp { display: block; width: 1em; height: 1em; border-radius: 50%; background: radial-gradient(circle, #fff 0 18%, #dff4ffcc 40%, #7ae0ff00 70%); }
+
+/* Stamped words (added on top of the kit's fxr-frost / fxr-deep stamps) */
+.fx.fxr-stamp.fxib-glacier { color: #f4fbff; -webkit-text-stroke-color: #0a2a6a;
+  text-shadow: 0 3px 0 #2a6ad1, 0 6px 0 #0d3b7a, 0 9px 0 #041a3a, 0 0 24px #7ae0ff; }
+.fx.fxr-stamp.fxib-ivory { color: #fff8e6; -webkit-text-stroke-color: #4a2e10;
+  text-shadow: 0 4px 0 #8a6a3a, 0 7px 0 #2a1a08, 0 0 18px #7ae0ff; }
+.fx.fxr-stamp.fxib-zero { color: #bff4ff; -webkit-text-stroke-color: #020a1a;
+  text-shadow: 0 3px 0 #0d3b7a, 0 6px 0 #020a1a, 0 0 18px #7ae0ff, 0 0 34px #2a6ad1; }
+.fx.fx-pop.fxib-gulp { font-family: Impact, 'Arial Black', sans-serif; color: #fff; -webkit-text-stroke: 1.5px #0d3b7a;
+  text-shadow: 0 3px 0 #0d3b7a, 0 0 10px #5fd1ff; }
+
+/* The boss's name plate: deeper glacier blue with icicles hanging off it */
+.fx.fxr-plate.fxib-plate { font-size: 14px; padding: 6px 12px; border-width: 3px;
+  background: linear-gradient(#2a6ad1, #0d3b7a 45%, #041a3a);
+  box-shadow: 0 0 0 2px #041a3a, 0 0 18px var(--c, #7ae0ff), 0 4px 0 #000, inset 0 2px 0 #ffffff55; }
+.fx.fxr-plate.fxib-plate::after { content: ''; position: absolute; left: 10px; right: 10px; top: 100%; height: 9px;
+  background: conic-gradient(from -22deg at 50% 100%, #dff4ff 0 44deg, #0000 0) 0 0 / 10px 9px repeat-x; }
+
+/* Blue-and-white hazard tape (Glacier Slam) */
+.fx.fxib-tape { z-index: 2; display: flex; align-items: center; justify-content: center; border-radius: 2px;
+  background: repeating-linear-gradient(-45deg, #2a6ad1 0 12px, #eaf8ff 12px 24px);
+  border-top: 2px solid #0d3b7a; border-bottom: 2px solid #0d3b7a; box-shadow: 0 4px 10px #000b; }
+.fxib-tape span { background: #041a3a; color: #dff4ff; padding: 3px 8px; letter-spacing: 2px;
+  font: 900 13px/1 Impact, 'Arial Black', sans-serif; text-shadow: 0 0 6px #7ae0ff; }
+
+/* Beams: the tusk charge streak, a crack racing along the floor, and the cone of freezing breath */
+.fx.fxib-charge { border-radius: 50%; background: linear-gradient(90deg, #fff0, #dff4ff88 40%, #ffffffcc 80%, #fff0); }
+.fx.fxib-crackline { border-radius: 3px; background: linear-gradient(#0000 34%, #fff 34% 66%, #0000 66%), #1f5fbf; box-shadow: 0 0 6px #7ae0ff; }
+.fx.fxib-cone { border-radius: 0; clip-path: polygon(0 42%, 100% 0, 100% 100%, 0 58%);
+  background: repeating-linear-gradient(90deg, #ffffff00 0 18px, #ffffff66 18px 22px),
+              linear-gradient(90deg, #ffffffee, #dff4ffcc 35%, #7ae0ff77 75%, #7ae0ff00); }
+.fx.fxib-breath { width: 40px; height: 40px; border-radius: 50%; background: radial-gradient(circle, #ffffffee 0, #dff4ffaa 38%, #bfe6ff00 70%); }
+
+/* Chunky ice bits, seawater drops, meltwater drips and flat ground rings */
+.fx.fxib-bit { border-radius: 0 !important; clip-path: polygon(20% 0, 85% 10%, 100% 60%, 60% 100%, 0 75%);
+  background: linear-gradient(135deg, #ffffff, #bfe6ff 45%, #5fa8e8) !important; box-shadow: none !important; }
+.fx.fxib-drop { border-radius: 50% 50% 50% 50% / 60% 60% 40% 40% !important; box-shadow: none !important; }
+.fx.fxib-drip { border-radius: 50% 50% 50% 50% / 40% 40% 60% 60%; background: radial-gradient(circle at 40% 65%, #fff 0 15%, #7ac8ff 45%, #2a78d6); }
+.fx.fxib-flatring { box-sizing: border-box; border-style: solid; border-radius: 50%; }
+.fx.fxib-trail-drip { width: 10px; height: 13px; border-radius: 50% 50% 50% 50% / 40% 40% 60% 60%;
+  background: radial-gradient(circle at 40% 65%, #fff 0 15%, #7ac8ff 45%, #2a78d6); animation: fxib-fall 0.42s ease-in forwards; }
+@keyframes fxib-fall { from { transform: translate(-50%, -50%) scale(1); opacity: 0.95; } to { transform: translate(-50%, -50%) translateY(26px) scale(0.4); opacity: 0; } }
+
+/* Fish Feast: the ice hole, leaping fish and the seafood shower */
+.fx.fxib-hole { border-radius: 50%; background: radial-gradient(ellipse, #041a3a 0 38%, #1f5fbf 52%, #7ab8ff 60%, #ffffff 64%, #e6f6ff 80%, #e6f6ff00 86%);
+  box-shadow: 0 2px 6px #0d3b7a66; }
+.fx.fxib-fish { font-size: 24px; filter: drop-shadow(0 2px 0 #0d3b7a88); }
+.fx.fxib-food { font-size: 26px; filter: drop-shadow(0 2px 0 #0006); }
+
+/* Arctic Breath: rime coating the victim; Absolute Zero: frost spreading over the card and the screen edges */
+.fx.fxib-coat, .fx.fxib-frostcard { box-sizing: border-box; border-radius: 12px; border: 3px solid #fff;
+  background: radial-gradient(circle at 30% 30%, #fff 0 2px, #0000 3px) 0 0 / 16px 14px,
+              radial-gradient(circle at 70% 70%, #ffffffcc 0 1.5px, #0000 2.5px) 0 0 / 12px 11px,
+              linear-gradient(135deg, #ffffffcc, #dff4ff88 35%, #bfe6ff66 65%, #ffffffaa);
+  box-shadow: 0 0 16px #bfe6ff, inset 0 0 14px #fff; }
+.fx.fxib-frostcard { border-radius: 6px; border-width: 2px; }
+.fx.fxib-edgefrost { background: radial-gradient(ellipse at 50% 50%, #bfe6ff00 40%, #bfe6ff44 56%, #eaf8ffbb 74%, #ffffff 96%);
+  box-shadow: inset 0 0 70px #7ae0ff; }
+
+/* Iceberg Toss: a patch of sea with the iceberg bobbing up through the waves */
+.fx.fxib-sea { overflow: hidden; border-radius: 0 0 40% 40% / 0 0 16% 16%; }
+.fxib-sea .fxib-berg { position: absolute; left: 12%; width: 76%; bottom: 16%; height: 66%; animation: fxib-bob 1s cubic-bezier(.3,.8,.4,1) both; }
+.fxib-berg svg { display: block; width: 100%; height: 100%; overflow: visible; filter: drop-shadow(0 0 8px #7ae0ff); }
+.fxib-sea .fxib-wave { position: absolute; left: -12%; width: 124%; bottom: 0; height: 30%;
+  background: radial-gradient(circle at 50% 100%, #7ac8ff 0 7px, #0000 7.5px) 0 0 / 16px 8px repeat-x,
+              linear-gradient(#7ac8ff, #2a78d6 45%, #0d3b7a) 0 8px / 100% 100% no-repeat;
+  animation: fxib-wave 1.05s ease-in-out both; }
+@keyframes fxib-bob { 0% { transform: translateY(100%) rotate(-6deg); } 34% { transform: translateY(-8%) rotate(3deg); }
+  52% { transform: translateY(5%) rotate(-2deg); } 70% { transform: translateY(-3%) rotate(1deg); } 100% { transform: translateY(0) rotate(0deg); } }
+@keyframes fxib-wave { 0% { transform: translateX(-8px); } 50% { transform: translateX(8px); } 100% { transform: translateX(-4px); } }
+
+/* Absolute Zero: the thermometer (glass, mercury that drops and turns from red to blue, outline and scale) */
+.fx.fxib-thermo { filter: drop-shadow(0 0 10px #7ae0ff) drop-shadow(0 4px 0 #041a3a); }
+.fxib-thermo > svg { position: absolute; left: 0; top: 0; width: 100%; height: 100%; overflow: visible; }
+.fxib-merc { position: absolute; left: 41.7%; width: 16.7%; top: 8%; height: 76%; border-radius: 6px 6px 0 0; transform-origin: 50% 100%;
+  animation: fxib-drop 0.6s 0.3s cubic-bezier(.5,0,.75,1) both; }
+.fxib-merc.fxib-cold { background: linear-gradient(90deg, #7ae0ff, #2a6ad1); }
+.fxib-merc.fxib-hot { background: linear-gradient(90deg, #ff7a7a, #e0162b);
+  animation: fxib-drop 0.6s 0.3s cubic-bezier(.5,0,.75,1) both, fxib-out 0.35s 0.45s linear both; }
+.fxib-bulb { position: absolute; left: 25%; top: 77%; width: 50%; height: 15%; border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #ffa0a0, #e0162b 60%); animation: fxib-out 0.35s 0.45s linear both; }
+@keyframes fxib-drop { from { transform: scaleY(1); } to { transform: scaleY(0.05); } }
+@keyframes fxib-out { from { opacity: 1; } to { opacity: 0; } }
+
+/* ---- Card faces: the boss's cards are frosted glacier glass with deep-blue edges and a fringe of icicles;
+   the Warlord's add the sea and shattered ice, the Titan's wear an icy crown. Text stays dark blue on light ice. ---- */
+/* Glacier Slam: icicles over a range of ice mountains */
+.card-face[data-card="glacier-slam"] { --design:
+  conic-gradient(from -18deg at 50% 100%, #9fd0ffcc 0 36deg, #0000 0) 0 0 / 11px 14px repeat-x,
+  conic-gradient(from 138deg at 30% 64%, #b4dcff 0 84deg, #0000 0),
+  conic-gradient(from 136deg at 30% 60%, #ffffff 0 88deg, #0000 0),
+  conic-gradient(from 140deg at 72% 56%, #d0eaff 0 80deg, #0000 0),
+  radial-gradient(ellipse at 50% 40%, #0000 55%, #2a6ad140 100%), linear-gradient(#f4fbff, #d2ecff); }
+/* Tusk Spear: two ivory tusks crossed like spears */
+.card-face[data-card="tusk-spear"] { --design:
+  conic-gradient(from -18deg at 50% 100%, #9fd0ffcc 0 36deg, #0000 0) 0 0 / 11px 14px repeat-x,
+  linear-gradient(62deg, #0000 44%, #c9a36a77 44% 45.5%, #fff8e6 45.5% 52.5%, #c9a36a77 52.5% 54%, #0000 54%),
+  linear-gradient(-62deg, #0000 44%, #c9a36a77 44% 45.5%, #fff8e6 45.5% 52.5%, #c9a36a77 52.5% 54%, #0000 54%),
+  radial-gradient(ellipse at 50% 40%, #0000 55%, #2a6ad140 100%), linear-gradient(#f4fbff, #cfe8ff); }
+/* Icicle Barrage: a thick double row of icicles and falling drips */
+.card-face[data-card="icicle-barrage"] { --design:
+  conic-gradient(from -12deg at 50% 100%, #8ec8ffdd 0 24deg, #0000 0) 0 0 / 12px 30px repeat-x,
+  conic-gradient(from -15deg at 50% 100%, #c6e6ffee 0 30deg, #0000 0) 6px 0 / 12px 20px repeat-x,
+  radial-gradient(circle at 30% 70%, #7ab8ff66 0 1.8px, #0000 2.6px) 0 0 / 14px 17px,
+  radial-gradient(ellipse at 50% 40%, #0000 55%, #2a6ad140 100%), linear-gradient(#f4fbff, #d2ecff); }
+/* Fish Feast: an ice-fishing hole on fish scales */
+.card-face[data-card="fish-feast"] { --design:
+  radial-gradient(ellipse 36% 11% at 50% 86%, #0d3b7aaa 0 52%, #7ab8ff 56% 64%, #ffffff 67% 80%, #0000 84%),
+  radial-gradient(circle at 50% 0, #0000 0 4px, #7ac8ff55 4.5px 6px, #0000 6.5px) 0 0 / 12px 8px,
+  radial-gradient(ellipse at 50% 40%, #0000 55%, #2a6ad140 100%), linear-gradient(#f4fbff, #d6f0ff); }
+/* Arctic Breath: frosty breath clouds on a gusting wind */
+.card-face[data-card="arctic-breath"] { --design:
+  radial-gradient(ellipse 30% 13% at 28% 72%, #ffffffdd 0 60%, #0000 64%),
+  radial-gradient(ellipse 26% 11% at 72% 60%, #ffffffbb 0 60%, #0000 64%),
+  repeating-linear-gradient(165deg, #0000 0 9px, #9fd0ff55 9px 11px, #0000 11px 20px),
+  radial-gradient(ellipse at 50% 40%, #0000 55%, #2a6ad140 100%), linear-gradient(#f4fbff, #d2ecff); }
+/* Iceberg Toss: an iceberg rising out of a wavy sea */
+.card-face[data-card="iceberg-toss"] { --design:
+  radial-gradient(circle at 50% 100%, #7ac8ffaa 0 6px, #0000 6.5px) 0 66% / 14px 7px repeat-x,
+  linear-gradient(#0000 70%, #7ac8ff88 70%, #5fa8ffaa),
+  conic-gradient(from 142deg at 48% 30%, #ffffff 0 76deg, #0000 0),
+  conic-gradient(from 139deg at 48% 26%, #7ab8ff 0 82deg, #0000 0),
+  radial-gradient(ellipse at 50% 40%, #0000 50%, #0d3b7a55 100%), linear-gradient(#eef8ff, #cfe6ff); }
+/* Ice Quake: shattered floor ice with dark cracks */
+.card-face[data-card="ice-quake"] { --design:
+  linear-gradient(72deg, #0000 49%, #1f5fbf88 49.5% 50.5%, #0000 51%),
+  linear-gradient(-38deg, #0000 58%, #1f5fbf77 58.5% 59.5%, #0000 60%),
+  linear-gradient(15deg, #0000 30%, #1f5fbf66 30.5% 31.3%, #0000 32%),
+  conic-gradient(from 0deg at 50% 78%, #7ab8ff33 0 50deg, #0000 50deg 110deg, #9fd0ff44 110deg 160deg, #0000 160deg 230deg, #7ab8ff33 230deg 290deg, #0000 290deg),
+  radial-gradient(ellipse at 50% 40%, #0000 50%, #0d3b7a55 100%), linear-gradient(#eef8ff, #cfe6ff); }
+/* Walrus Stampede: an icy crown over snow drifts and flying snow */
+.card-face[data-card="walrus-stampede"] { --design:
+  conic-gradient(from 160deg at 50% 0, #9fd0ff 0 40deg, #0000 0) 0 2px / 10px 9px repeat-x,
+  linear-gradient(#5fa8ff, #dff4ff) 0 11px / 100% 3px no-repeat,
+  radial-gradient(ellipse 42% 18% at 22% 100%, #ffffff 0 60%, #0000 64%),
+  radial-gradient(ellipse 46% 22% at 80% 100%, #ffffffee 0 60%, #0000 64%),
+  repeating-linear-gradient(100deg, #0000 0 14px, #ffffffaa 14px 16px, #0000 16px 30px),
+  radial-gradient(ellipse at 50% 45%, #0000 45%, #0d3b7a66 100%), linear-gradient(#eaf6ff, #c4e0ff); }
+/* Absolute Zero: an icy crown over a giant snowflake's rays, with an aurora shimmer */
+.card-face[data-card="absolute-zero"] { --design:
+  conic-gradient(from 160deg at 50% 0, #9fd0ff 0 40deg, #0000 0) 0 2px / 10px 9px repeat-x,
+  linear-gradient(#5fa8ff, #dff4ff) 0 11px / 100% 3px no-repeat,
+  radial-gradient(circle at 50% 50%, #ffffffcc 0 12%, #dff4ff00 30%),
+  repeating-conic-gradient(from 0deg at 50% 50%, #7ae0ff33 0 5deg, #0000 5deg 30deg),
+  linear-gradient(160deg, #0000 25%, #5fffb02e 35%, #b07cff2e 45%, #0000 55%),
+  radial-gradient(ellipse at 50% 45%, #0000 45%, #0d3b7a66 100%), linear-gradient(#eaf6ff, #c4e0ff); }

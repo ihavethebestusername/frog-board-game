@@ -5,12 +5,15 @@ async function coinEvent(range) {
   const p = players[turn];
   const result = Math.max(-p.coins, await skillCheck(range)); // negative = lost coins (never below 0)
   // Winnings are boosted by the Money stat; losses aren't
-  const amt = result > 0 ? gainCoins(p, result) : (p.coins += result, result);
-  if (amt > 0) sfx('coin', 0.85 + amt * 0.04);
+  const sm = streakMult(p) * (swampActive('golden') ? 2 : 1); // answer streak x2 / x3, Golden Hour x2
+  const amt = result > 0 ? gainCoins(p, result * sm) : (p.coins += result, result);
+  if (amt > 0) { sfx('coin', 0.85 + amt * 0.04); coinFly(innerWidth / 2, innerHeight / 2, amt); }
+  if (amt >= 15) { sfx('jackpot', 1, 0.7); confetti(50); }
   const [cx, cy] = center(p);
   const pop = document.createElement('div');
   pop.className = 'popup' + (amt < 0 ? ' lose' : '');
-  pop.textContent = (amt < 0 ? '' : '+') + amt;
+  pop.textContent = (amt < 0 ? '' : '+') + amt + (amt > 0 && sm > 1 ? ` 🔥x${sm}` : '');
+  pop.style.fontSize = Math.min(64, 22 + Math.abs(amt) * 2) + 'px'; // bigger wins, bigger numbers
   Object.assign(pop.style, { left: cx + 'px', top: cy + 'px' });
   world.appendChild(pop);
   setTimeout(() => pop.remove(), 1000);
@@ -22,13 +25,14 @@ async function coinEvent(range) {
 async function cardEvent(maxCards = CARDS_PER_SQUARE) {
   const p = players[turn];
   const got = Math.min(await drawCheck(maxCards), deck.length);
+  const picks = got ? await pickCards(p, got) : []; // each card earned is a choice of 3 (progression.js)
   const [px, py] = center(p);
-  for (let i = 0; i < got; i++) {
+  for (let i = 0; i < picks.length; i++) {
     const fc = document.createElement('div');
     fc.className = 'flying-card';
     Object.assign(fc.style, { left: DECK_POS[0] + 'px', top: DECK_POS[1] + 'px' });
     world.appendChild(fc);
-    p.hand.push(deck.pop());
+    p.hand.push(picks[i]);
     render();
     requestAnimationFrame(() => requestAnimationFrame(() =>
       Object.assign(fc.style, { left: px + 'px', top: py + 'px', opacity: 0.2 })));
@@ -37,6 +41,24 @@ async function cardEvent(maxCards = CARDS_PER_SQUARE) {
   }
   render();
   await sleep(500);
+}
+
+// Four answer choices for any number: the answer plus tempting near-misses
+function choicesFor(answer) {
+  const choices = new Set([answer]);
+  if (answer) choices.add(-answer);
+  const spread = Math.max(4, Math.round(Math.abs(answer) * 0.15));
+  while (choices.size < 4) choices.add(answer + (Math.random() < 0.5 ? -1 : 1) * (1 + Math.floor(Math.random() * spread)));
+  return [...choices].sort(() => Math.random() - 0.5);
+}
+// End-of-minigame equation (Memory Match, Lily Pad Hop): right = full reward, wrong = half
+function solveEquation(title, text, answer) {
+  return quizPanel('', title, 'Solve it to collect your full reward! (Wrong = half.)', async result => {
+    const res = await askQuestion({ text: `${text} = ?`, answer, choices: choicesFor(answer) }, 25000);
+    result.textContent = res.correct ? 'Correct! Full reward.' : `It was ${answer}. Half reward.`;
+    if (!res.correct) sfx('fail');
+    return res.correct;
+  });
 }
 
 // --- Math quiz: multiple-choice +, − and × questions. The answer is hidden in tiny text in the corner. ---
@@ -81,7 +103,7 @@ function makeQuestion(level) {
 }
 
 // Show one question in the #check panel. Resolves with { correct, timeLeft (0..1) }.
-function askQuestion(q, timeLimit) {
+function askQuestion(q, timeLimit, player = players[turn]) {
   const qEl = document.getElementById('quizQuestion');
   const grid = document.getElementById('quizChoices');
   const cheat = document.getElementById('quizCheat');
@@ -92,31 +114,37 @@ function askQuestion(q, timeLimit) {
   cheat.textContent = '';
   cheat.style.background = QUIZ_COLORS[q.choices.indexOf(q.answer)];
   return new Promise(resolve => {
+    timeLimit += 2000 * perkCount(player, 'fast'); // Fast Fingers perk
     const start = performance.now();
     let finished = false;
     const finish = (correct, btn) => {
       if (finished) return;
       finished = true;
-      clearInterval(tick);
       const timeLeft = Math.max(0, 1 - (performance.now() - start) / timeLimit);
       grid.querySelectorAll('button').forEach(b => {
         b.disabled = true;
         if (+b.textContent === q.answer) b.classList.add('right');
       });
       if (btn && !correct) btn.classList.add('wrong');
+      onAnswer(correct, player);
+      if (correct) { gainXp(player, 2); questEvent(player, 'answer'); }
       resolve({ correct, timeLeft });
     };
-    const tick = setInterval(() => {
+    // Timer bar shrinks with a transform (no layout work), once per frame until answered or out of time
+    timerBar.style.width = '100%';
+    timerBar.style.transformOrigin = '0 50%';
+    (function frame() {
+      if (finished) return;
       const left = 1 - (performance.now() - start) / timeLimit;
-      timerBar.style.width = Math.max(0, left * 100) + '%';
-      if (left <= 0) finish(false);
-    }, 30);
+      timerBar.style.transform = `scaleX(${Math.max(0, left)})`;
+      if (left <= 0) finish(false); else requestAnimationFrame(frame);
+    })();
     grid.querySelectorAll('button').forEach(b => b.onclick = () => finish(+b.textContent === q.answer, b));
   });
 }
 
 // Open the quiz panel with a title/icon, run `body`, then wait for Collect
-async function quizPanel(icon, title, hint, body) {
+async function quizPanel(icon, title, hint, body, player = players[turn]) {
   const el = document.getElementById('check');
   const result = document.getElementById('checkResult');
   const btn = document.getElementById('checkBtn');
@@ -124,7 +152,7 @@ async function quizPanel(icon, title, hint, body) {
   document.getElementById('checkTitle').textContent = title;
   document.getElementById('quizHint').textContent = hint;
   document.getElementById('quizPips').innerHTML = '';
-  document.body.classList.toggle('cheats', !!players[turn].cheats); // answer only shows for a player who unlocked it
+  document.body.classList.toggle('cheats', !!player.cheats); // answer only shows for a player who unlocked it
   result.textContent = '';
   btn.hidden = true;
   el.hidden = false;
@@ -182,4 +210,21 @@ function drawCheck(maxCards) {
       (lost ? ` <span class="lose-text">−${lost} coins</span>` : '');
     return got;
   });
+}
+
+// Battle skill check card: one question. Right answer deals damage scaled by speed (up to 2x);
+// wrong or too slow returns a negative number = how much the foe heals.
+function battleCheck(p, card, base) {
+  return quizPanel('', `🧠 ${card.name}`, `Answer fast for up to ${base * 2} damage! Get it wrong and the foe heals ${base}.`, async result => {
+    const { correct, timeLeft } = await askQuestion(makeQuestion(0.5), 10000, p);
+    if (!correct) {
+      sfx('fail');
+      result.innerHTML = `${timeLeft <= 0 ? 'Too slow!' : 'Wrong!'} <span class="lose-text">Foe heals ${base}</span>`;
+      return -base;
+    }
+    const dmg = Math.max(1, Math.round(base * 2 * timeLeft));
+    sfx('card_pick', 0.9 + timeLeft * 0.5);
+    result.textContent = (timeLeft > 0.6 ? 'Lightning fast! ' : 'Correct! ') + `${dmg} damage`;
+    return dmg;
+  }, p);
 }

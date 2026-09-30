@@ -1,0 +1,87 @@
+/* Card effects: toxic group - Poison Dart, Stun Slime, Leech and the poison / stun / leech statuses.
+   Every class here is prefixed fxt-. These are static looks only (gradients, shadows); all motion is
+   done in js/fx/toxic.js with transform and opacity, so nothing here re-paints while it animates. */
+
+/* Inline-SVG graphics fill the box they were spawned with */
+.fxt-svg > svg { display: block; width: 100%; height: 100%; overflow: visible; }
+.fxt-dart > svg { filter: drop-shadow(0 0 5px #7cff3a); }
+.fxt-dart-crit > svg { filter: drop-shadow(0 0 7px #ffd23f) drop-shadow(0 0 2px #fff); }
+.fxt-splat > svg { filter: drop-shadow(0 3px 0 #0005); }
+.fxt-fang > svg { filter: drop-shadow(0 3px 2px #000a); }
+.fxt-bolt > svg { filter: drop-shadow(0 0 5px #fff45c); }
+.fxt-sigil > svg { filter: drop-shadow(0 0 6px #ff1f3d); }
+
+/* Glossy hollow bubble, tinted by the particle's colour (fxParticles sets `color`) */
+.fxt-bub { display: block; width: 0.5em; height: 0.5em; border-radius: 50%; box-sizing: border-box;
+           border: 1.5px solid currentColor; box-shadow: 0 0 6px currentColor;
+           background: radial-gradient(circle at 32% 30%, #fffe 0 14%, transparent 24%),
+                       radial-gradient(circle, transparent 40%, currentColor 110%); }
+
+/* Glowing specks: charge-up motes and flight trails (colour comes from the inline `color`) */
+.fxt-mote { width: 7px; height: 7px; border-radius: 50%; background: currentColor; box-shadow: 0 0 8px 2px currentColor; }
+.fxt-trail { border-radius: 50%; background: currentColor; box-shadow: 0 0 9px currentColor; }
+
+/* Teardrop of goo, point up (the inner square is turned so its sharp corner is on top) */
+.fxt-drip > i { display: block; width: 100%; height: 100%; border-radius: 0 50% 50% 50%; transform: rotate(45deg);
+                background: radial-gradient(circle at 62% 62%, #fffb 0 14%, transparent 26%), currentColor;
+                box-shadow: 0 0 6px currentColor; }
+
+/* Soft toxic cloud puff (its gradient colour is set inline) */
+.fxt-cloud { border-radius: 50%; }
+
+/* Stun Slime's mascot: a glossy lime blob with googly eyes */
+.fxt-slime { width: 66px; height: 54px; box-sizing: border-box; border: 2px solid #1f5c00;
+             border-radius: 50% 50% 44% 44% / 64% 64% 36% 36%;
+             background: radial-gradient(ellipse at 34% 26%, #fffd 0 8%, transparent 15%),
+                         radial-gradient(ellipse at 50% 35%, #efff8a 0%, #9cf51a 42%, #3a9e00 100%);
+             box-shadow: 0 0 18px #b6ff3a, inset 0 -7px 10px #1f5c0088; }
+.fxt-slime::before, .fxt-slime::after { content: ''; position: absolute; top: 40%; width: 17%; height: 22%; border-radius: 50%;
+                                        background: radial-gradient(circle at 50% 62%, #111 0 40%, #fff 46%); }
+.fxt-slime::before { left: 26%; }
+.fxt-slime::after { right: 26%; }
+
+/* Flying slime glob */
+.fxt-glob { width: 26px; height: 26px; border-radius: 50%; box-sizing: border-box; border: 2px solid #1f5c00;
+            background: radial-gradient(circle at 35% 30%, #fff 0 10%, #e9ff7a 18%, #8bf000 50%, #2f8f00 100%);
+            box-shadow: 0 0 14px #b6ff3a; }
+.fxt-glob.fxt-crit { border-color: #7a5a00; box-shadow: 0 0 16px #ffd23f, 0 0 4px #fff; }
+
+/* Translucent block of jelly dropped over a stunned fighter / their wheels */
+.fxt-jelly { border-radius: 16px; box-sizing: border-box; border: 3px solid #c8ff5acc;
+             background: linear-gradient(160deg, #f0ffc8b0 0%, #a8ff4a70 35%, #4fbf0070 100%);
+             box-shadow: inset 0 6px 0 #ffffff70, inset 0 -8px 14px #1f5c0060, 0 0 22px #b6ff3a90; }
+
+/* Blood orb siphoned by Leech */
+.fxt-orb { width: 16px; height: 16px; border-radius: 50%;
+           background: radial-gradient(circle at 35% 30%, #ffd0d6 0 12%, #ff1f3d 42%, #6a0010 100%);
+           box-shadow: 0 0 12px #ff1f3d; }
+.fxt-orb.fxt-big { width: 26px; height: 26px; }
+.fx.fxt-siphon { background: linear-gradient(90deg, #ff1f3d00, #ff1f3dcc 22%, #b0001e 65%, #ff6b7d);
+                 box-shadow: 0 0 14px #ff1f3d; }
+
+/* Epic "gacha pull" rays wheeling out behind Leech (a ring of spokes, clear in the middle) */
+.fxt-rays { border-radius: 50%;
+            background: repeating-conic-gradient(#ff1f3d 0 9deg, #ff1f3d00 9deg 22deg);
+            -webkit-mask-image: radial-gradient(circle, transparent 20%, #000 32%, transparent 70%);
+            mask-image: radial-gradient(circle, transparent 20%, #000 32%, transparent 70%); }
+
+/* Big text stamps ("TOXIC!", "SPLORCH!", "SLURP!") */
+.fx-pop.fxt-stamp { font-family: 'Arial Black', Impact, 'Helvetica Neue', sans-serif; font-weight: 900; font-style: italic;
+                    letter-spacing: 1px; -webkit-text-stroke: 1.5px #0b2a00; }
+.fx.fxt-stamp-toxic { color: #9dff3a; -webkit-text-stroke-color: #2a0a4a; text-shadow: 0 4px 0 #2a0a4a, 0 0 18px #7cff3a; }
+.fx.fxt-stamp-slime { color: #eaff5a; -webkit-text-stroke-color: #1f5200; text-shadow: 0 4px 0 #1f5200, 0 0 16px #b6ff3a; }
+.fx.fxt-stamp-zap   { color: #fff45c; -webkit-text-stroke-color: #4a3c00; text-shadow: 0 4px 0 #4a3c00, 0 0 18px #fff45c; }
+.fx.fxt-stamp-blood { color: #ff2a45; -webkit-text-stroke-color: #2a0008; text-shadow: 0 4px 0 #2a0008, 0 0 18px #ff1f3d;
+                      font-family: Georgia, 'Times New Roman', serif; font-style: normal; letter-spacing: 3px; }
+.fx.fxt-stamp-fire  { color: #ffd23f; -webkit-text-stroke-color: #5a1400; text-shadow: 0 4px 0 #5a1400, 0 0 18px #ff8a1f; }
+
+/* Glowing symbols */
+.fx.fxt-hazard { color: #9dff3a; text-shadow: 0 0 18px #39ff14, 0 0 4px #eaffb0;
+                 font-family: 'Apple Symbols', 'Segoe UI Symbol', 'Noto Sans Symbols', sans-serif; }
+.fx.fxt-skull { text-shadow: 0 0 12px #7cff3a, 0 0 26px #39d353; }
+.fx.fxt-glow-tox { text-shadow: 0 0 16px #7cff3a, 0 0 4px #fff; }
+.fx.fxt-glow-blood { text-shadow: 0 0 16px #ff1f3d, 0 0 30px #b0001e; }
+.fx.fxt-glow-zap { text-shadow: 0 0 10px #fff45c; }
+.fx.fxt-syringe { text-shadow: 0 0 12px #7cff3a; }
+.fx.fxt-zz { color: #eaff5a; font-family: 'Arial Black', Impact, sans-serif; font-weight: 900;
+             -webkit-text-stroke: 1px #1f5200; text-shadow: 0 0 8px #b6ff3a; }

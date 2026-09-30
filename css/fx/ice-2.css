@@ -1,0 +1,153 @@
+/* Card effects: Ice Lake - Polar Owl and Frost Wolf lines (see js/fx/ice-2.js).
+   Every class and keyframe here is prefixed fxi2-. Only transform/opacity animate; shadows, gradients and
+   filters below are static on small spawned elements. */
+
+/* Inline SVG graphics fill their box (also inside the wrappers used to flip / turn them) */
+.fx.fxi2-svg svg, .fxi2-flip svg, .fxi2-down svg, .fxi2-fp svg, .fxi2-rune svg { display: block; width: 100%; height: 100%; overflow: visible; }
+.fxi2-flip, .fxi2-down { display: block; width: 100%; height: 100%; }
+.fxi2-down { transform: rotate(78deg); }
+
+/* Owls: the snowy owl, its night silhouette, its ghostly trail, feathers, wings and quills */
+.fx.fxi2-owl { filter: drop-shadow(0 4px 0 #0d1f3a88) drop-shadow(0 0 10px #bfe6ff); }
+.fx.fxi2-owl-dark { filter: drop-shadow(0 0 6px #bfd4ff); }
+.fx.fxi2-ghost { filter: drop-shadow(0 0 8px #7ae0ff); }
+.fx.fxi2-feather { filter: drop-shadow(0 1px 0 #27466e88); }
+.fxi2-fp { display: block; width: 1.5em; height: 0.55em; filter: drop-shadow(0 1px 0 #27466e88); }
+.fx.fxi2-wing { filter: drop-shadow(0 0 8px #bfe6ff) drop-shadow(0 3px 0 #0d3b7a66); }
+.fx.fxi2-quill { filter: drop-shadow(0 0 4px #7ae0ff) drop-shadow(0 2px 0 #0d3b7a66); }
+.fx.fxi2-talons { filter: drop-shadow(0 0 8px #7ae0ff) drop-shadow(0 0 3px #fff); }
+.fx.fxi2-twinkle { color: #fff; font-size: 18px; text-shadow: 0 0 6px #7ae0ff, 0 0 12px #fff; }
+.fx.fxi2-trail-quill { width: 14px; height: 14px; border-radius: 50%; background: radial-gradient(circle, #fff 0 25%, #bfe6ff99 50%, #bfe6ff00 70%);
+  animation: fxi2-fade 0.36s ease-out forwards; }
+
+/* Moonlight */
+.fx.fxi2-moon { filter: drop-shadow(0 0 12px #fff6c8) drop-shadow(0 0 26px #fff6c888); }
+.fx.fxi2-moonglow { filter: drop-shadow(0 0 8px #fff6c8); }
+.fx.fxi2-moonhalo { border-radius: 50%; background: radial-gradient(circle, #fff6c8aa 0 30%, #fff6c833 50%, #fff6c800 70%); }
+
+/* Blizzard: storm clouds, wind streaks, the gust itself */
+.fx.fxi2-cloud { filter: drop-shadow(0 3px 0 #0d1f3a44); }
+.fx.fxi2-gust { background: linear-gradient(90deg, #fff0, #ffffffcc 40%, #fff); box-shadow: 0 0 6px #fff; }
+.fx.fxi2-flakefly { font-size: 16px; }
+.fx.fxi2-gustball { width: 56px; height: 36px; border-radius: 50%; background: radial-gradient(ellipse, #fff 0 25%, #ffffffaa 45%, #fff0 70%); }
+
+/* Deep Freeze: rime over the card, the freezing ray and icy eyes */
+.fx.fxi2-rime { box-sizing: border-box; border-radius: 8px; background: radial-gradient(ellipse at 50% 50%, #fff0 30%, #e6f7ffcc 72%, #ffffff 100%);
+  box-shadow: inset 0 0 12px #fff, 0 0 10px #7ae0ff; }
+.fx.fxi2-ray { background: linear-gradient(90deg, #7ae0ff00, #bff4ff 15%, #fff 50%, #7ae0ff); box-shadow: 0 0 10px #7ae0ff, 0 0 18px #2a6ad1; }
+.fx.fxi2-eyes-ice { filter: drop-shadow(0 0 8px #7ae0ff) drop-shadow(0 0 16px #2a8ad1); }
+.fx.fxi2-crystal, .fx.fxi2-spike { filter: drop-shadow(0 0 5px #7ae0ff); }
+
+/* Owl Eyes: the card goes dark, the eyes glow, the stare */
+.fx.fxi2-darkcard { border-radius: 8px; background: radial-gradient(ellipse, #0d1f3af0 35%, #0d1f3aaa 75%, #0d1f3a00); }
+.fx.fxi2-eyes { filter: drop-shadow(0 0 8px #ffd23f) drop-shadow(0 0 16px #ffb300aa); }
+.fx.fxi2-gaze { background: repeating-linear-gradient(90deg, #ffd23f 0 8px, #ffd23f00 8px 15px); box-shadow: 0 0 6px #ffd23f88; }
+
+/* Crystal Spell: crystal ball, swirling mist, runes, the orb and its prism shards */
+.fx.fxi2-ball { filter: drop-shadow(0 0 10px #b07cff) drop-shadow(0 0 4px #7ae0ff); }
+.fx.fxi2-mist { border-radius: 50%; background: conic-gradient(from 0deg, #fff0, #f0e6ffdd 12%, #fff0 30%, #c8f4ffdd 50%, #fff0 66%, #e8d0ffbb 82%, #fff0); }
+.fx.fxi2-glow-violet { border-radius: 50%; background: radial-gradient(circle, #e8d8ffaa 0, #b07cff55 35%, #7ae0ff22 55%, #b07cff00 70%); }
+.fxi2-rune { display: block; width: 1em; height: 1em; filter: drop-shadow(0 0 3px #b07cff); }
+.fx.fxi2-runeflash { filter: drop-shadow(0 0 4px #b07cff) drop-shadow(0 0 8px #7ae0ff); }
+.fx.fxi2-runecircle { filter: drop-shadow(0 0 6px #b07cff) drop-shadow(0 0 3px #7ae0ff); }
+.fxi2-orb { display: block; width: 30px; height: 30px; border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #fff 0 12%, #e0f6ff 24%, #9ad8ff 48%, #8a6aff 78%, #3a2a8a); box-shadow: 0 0 14px #b07cff, 0 0 26px #7ae0ff; }
+.fx.fxi2-prism { border-radius: 0 !important; clip-path: polygon(50% 0, 100% 100%, 0 72%); box-shadow: none !important; }
+.fx.fxi2-trail-prism { width: 16px; height: 16px; border-radius: 50%; background: radial-gradient(circle, #fff 0 20%, #e0d0ff 40%, #b07cff88 55%, #7ae0ff00 70%);
+  animation: fxi2-fade 0.4s ease-out forwards; }
+
+/* Frost Nova: the diamond, its light rays and the starburst */
+.fx.fxi2-diamond { filter: drop-shadow(0 0 10px #bfe6ff) drop-shadow(0 3px 0 #1f5fbf88); }
+.fx.fxi2-rays { border-radius: 50%; background: repeating-conic-gradient(from 0deg, #ffffffdd 0 5deg, #fff0 5deg 30deg);
+  -webkit-mask-image: radial-gradient(circle, #000 18%, #0000 70%); mask-image: radial-gradient(circle, #000 18%, #0000 70%); }
+.fx.fxi2-star { filter: drop-shadow(0 0 14px #7ae0ff); }
+
+/* Wolves: jaws, teeth marks, paw prints, claw slashes and gashes */
+.fx.fxi2-jaw { filter: drop-shadow(0 0 6px #7ae0ff) drop-shadow(0 3px 0 #0d3b7a88); }
+.fx.fxi2-maw { filter: drop-shadow(0 0 8px #7a8cff) drop-shadow(0 0 3px #dfe6ff); }
+.fx.fxi2-marks, .fx.fxi2-bite { filter: drop-shadow(0 0 4px #7ae0ff); }
+.fx.fxi2-paw { filter: drop-shadow(0 0 8px #7ae0ff) drop-shadow(0 3px 0 #0d3b7a88); }
+.fx.fxi2-gash { filter: drop-shadow(0 0 6px #7ae0ff); }
+.fx.fxi2-slash-claw { border-radius: 50%; background: linear-gradient(90deg, #fff0, #fff 20%, #bff4ff 45%, #2a6ad1 80%, #0d3b7a00); box-shadow: 0 0 16px #5aa8ff, 0 0 4px #fff; }
+.fx.fxi2-clawglow { border-radius: 50%; background: linear-gradient(90deg, #7ae0ff00, #bff4ff 40%, #fff); box-shadow: 0 0 12px #7ae0ff, 0 0 20px #2a6ad1; }
+
+/* The pack: pines, glowing eyes in the dark, leaping wolves */
+.fx.fxi2-pine { filter: drop-shadow(0 3px 0 #0d1f3a66); }
+.fx.fxi2-nightcard { border-radius: 8px; background: linear-gradient(#0d1f3ae6, #1a3050d0); }
+.fx.fxi2-weyes { filter: drop-shadow(0 0 4px #7ae0ff) drop-shadow(0 0 10px #7ae0ff); }
+.fx.fxi2-weyes-gold { filter: drop-shadow(0 0 4px #ffd23f) drop-shadow(0 0 10px #ffb300); }
+.fx.fxi2-wolf { filter: drop-shadow(0 0 6px #bfe6ff) drop-shadow(0 4px 0 #0d1f3a88); }
+.fx.fxi2-howler { filter: drop-shadow(0 0 3px #fff6c8); }
+.fx.fxi2-arc { filter: drop-shadow(0 0 5px #fff6c8); }
+
+/* Avalanche: the mountain, snow chunks and the pouncing wolf */
+.fx.fxi2-mountain { filter: drop-shadow(0 3px 0 #0d3b7a66); }
+.fx.fxi2-chunk { border-radius: 42% 58% 46% 54% / 55% 45% 55% 45% !important;
+  background: radial-gradient(circle at 35% 30%, #fff 0 35%, #e6f5ff 60%, #a9c8e8) !important; box-shadow: 0 2px 0 #6a8cb088 !important; }
+.fx.fxi2-chunk-big { width: 20px; height: 17px; border-radius: 42% 58% 46% 54% / 55% 45% 55% 45%;
+  background: radial-gradient(circle at 35% 30%, #fff 0 35%, #e6f5ff 60%, #a9c8e8); box-shadow: 0 2px 0 #6a8cb088; }
+.fx.fxi2-pouncer { width: 124px; height: 62px; filter: drop-shadow(0 0 8px #bfe6ff) drop-shadow(0 5px 0 #0d1f3a88); }
+.fx.fxi2-trail-chunk { width: 14px; height: 12px; border-radius: 45%; background: radial-gradient(circle at 35% 30%, #fff 0 40%, #cfe6fa);
+  box-shadow: 0 1px 0 #6a8cb088; animation: fxi2-tumble 0.45s ease-in forwards; }
+
+/* Wolf Spirit */
+.fx.fxi2-spirit { filter: drop-shadow(0 0 8px #7ae0ff) drop-shadow(0 0 18px #2a6ad1); }
+.fx.fxi2-slash-ghost { border-radius: 50%; background: linear-gradient(90deg, #fff0, #e8fbff 22%, #9fdcffcc 50%, #2a6ad188 82%, #2a6ad100); box-shadow: 0 0 16px #7ae0ff; }
+
+/* Moon Eater: the eclipse shadow, the corona, the dark aura and its stamp */
+.fx.fxi2-shadowdisc { border-radius: 50%; background: radial-gradient(circle at 45% 40%, #1f2548, #05070f 70%); box-shadow: 0 0 6px #000; }
+.fx.fxi2-corona { border-radius: 50%; background: radial-gradient(circle, #05070f 0 44%, #fff 46%, #dff4ff 49%, #7a8cffaa 56%, #2a3a9a44 64%, #2a3a9a00 71%); }
+.fx.fxi2-eclipse { border-radius: 50%; background: radial-gradient(circle, #05070f 0 56%, #fff 58%, #bfe6ff 61%, #7a8cff99 66%, #7a8cff00 71%); }
+.fx.fxi2-darkaura { border-radius: 50%; background: radial-gradient(ellipse, #1a0a4aaa 0, #2a1a6a66 40%, #0a052000 70%); }
+.fx.fxr-stamp.fxi2-eclipse-word { color: #dfe4ff; -webkit-text-stroke-color: #05070f; text-shadow: 0 4px 0 #05070f, 0 0 16px #7a8cff, 0 0 30px #2a3a9a; }
+
+@keyframes fxi2-fade { from { transform: translate(-50%, -50%) scale(1); opacity: 0.9; } to { transform: translate(-50%, -50%) scale(0.2); opacity: 0; } }
+@keyframes fxi2-tumble { from { transform: translate(-50%, -50%) rotate(0deg) scale(1); opacity: 1; }
+                         to { transform: translate(-50%, -50%) translateY(30px) rotate(200deg) scale(0.4); opacity: 0; } }
+
+/* ---- Card faces: each card's own pattern over the Ice Lake frosty-glass look (kept light so the text reads) ---- */
+/* Silent Swoop: a pale crescent moon over a swooping flight curve */
+.card-face[data-card="silent-swoop"] { --design: radial-gradient(circle at 80% 16%, #fff6c8 0 5px, #fff6c800 6px), radial-gradient(circle at 76% 18%, #fffbe6 0 7px, #fff6c866 8px, transparent 12px),
+  radial-gradient(ellipse 90% 55% at 40% 0%, transparent 0 62%, #7a9cd855 63% 66%, transparent 67%), linear-gradient(#eef3ff, #c9d6f2); }
+/* Blizzard: a grey storm cloud and driving diagonal snow */
+.card-face[data-card="blizzard"] { --design: radial-gradient(ellipse 75% 26% at 50% 0%, #9fb2cf99 0 60%, transparent 64%),
+  repeating-linear-gradient(115deg, transparent 0 7px, #ffffffcc 7px 9px, transparent 9px 15px), linear-gradient(#f2f6fb, #cddcee); }
+/* Deep Freeze: ice-block tiles with frosted corners */
+.card-face[data-card="deep-freeze"] { --design: radial-gradient(circle at 0 0, #ffffff 0 12%, transparent 30%), radial-gradient(circle at 100% 100%, #ffffff 0 12%, transparent 30%),
+  repeating-linear-gradient(0deg, #6aa8f033 0 1px, transparent 1px 14px), repeating-linear-gradient(90deg, #6aa8f033 0 1px, transparent 1px 14px), linear-gradient(#e6f7ff, #b6ddfa); }
+/* Quill Volley: a fan of feather lines spreading up from the bottom */
+.card-face[data-card="quill-volley"] { --design: repeating-conic-gradient(from -70deg at 50% 105%, #7ab8ff33 0 4deg, transparent 4deg 16deg),
+  radial-gradient(ellipse 60% 40% at 50% 100%, #ffffffcc 0 40%, transparent 70%), linear-gradient(#f5fbff, #d3e9fb); }
+/* Owl Eyes: two big golden eyes watching from the top of the card */
+.card-face[data-card="owl-eyes"] { --design: radial-gradient(circle at 32% 22%, #1a2a4a 0 2.5px, #ffd23f 3.5px 8px, #ffb30066 9px, transparent 12px),
+  radial-gradient(circle at 68% 22%, #1a2a4a 0 2.5px, #ffd23f 3.5px 8px, #ffb30066 9px, transparent 12px), linear-gradient(#eef1fb, #cdd8f0); }
+/* Crystal Spell: a glowing crystal ball in a rune ring, with violet-and-cyan mist */
+.card-face[data-card="crystal-spell"] { --design: radial-gradient(circle at 50% 42%, #ffffffee 0 12%, #e2d6ff99 22%, transparent 34%),
+  radial-gradient(circle at 50% 42%, transparent 0 35%, #9a7cff55 36% 38%, transparent 39% 42%, #7ae0ff44 43% 44%, transparent 45%),
+  linear-gradient(160deg, #f4efff, #dcd4ff 50%, #d2ecff); }
+/* Frost Nova: diamond facets under a spray of light rays */
+.card-face[data-card="frost-nova"] { --design: repeating-conic-gradient(from 0deg at 50% 42%, #ffffff88 0 5deg, transparent 5deg 22deg),
+  conic-gradient(from 45deg at 50% 42%, #bfe6ff66 0 25%, #ffffff99 0 50%, #9fd0ff66 0 75%, #ffffff99 0), linear-gradient(#f0faff, #c2e4ff); }
+/* Frost Bite: rows of icy teeth along the top and bottom edges */
+.card-face[data-card="frost-bite"] { --design: linear-gradient(135deg, #7ab8ff66 25%, transparent 25%) 0 0 / 12px 10px repeat-x,
+  linear-gradient(225deg, #7ab8ff66 25%, transparent 25%) 0 0 / 12px 10px repeat-x,
+  linear-gradient(45deg, #7ab8ff66 25%, transparent 25%) 0 100% / 12px 10px repeat-x, linear-gradient(-45deg, #7ab8ff66 25%, transparent 25%) 0 100% / 12px 10px repeat-x,
+  linear-gradient(#eef7ff, #c6e2fb); }
+/* Frost Claw: three diagonal claw scratches */
+.card-face[data-card="frost-claw"] { --design: linear-gradient(120deg, transparent 30%, #4a86d05a 31% 33%, transparent 34% 46%, #4a86d05a 47% 49%, transparent 50% 62%, #4a86d05a 63% 65%, transparent 66%),
+  linear-gradient(#eef7ff, #c8e2fb); }
+/* Pack Hunt: a row of pine silhouettes along the bottom */
+.card-face[data-card="pack-hunt"] { --design: conic-gradient(from 150deg at 18% 62%, #5a8ab04d 0 60deg, transparent 0), conic-gradient(from 150deg at 50% 56%, #5a8ab04d 0 60deg, transparent 0),
+  conic-gradient(from 150deg at 82% 64%, #5a8ab04d 0 60deg, transparent 0), linear-gradient(#f0f6ff, #d0e2f2); }
+/* Moon Howl: a big full moon glowing in a twilight sky */
+.card-face[data-card="moon-howl"] { --design: radial-gradient(circle at 50% 36%, #fffbe6 0 16px, #fff3b099 17px 21px, transparent 27px),
+  radial-gradient(circle at 18% 16%, #fff 0 1.5px, transparent 2px), radial-gradient(circle at 84% 24%, #fff 0 1.5px, transparent 2px), linear-gradient(#dfe6ff, #bccaf0); }
+/* Avalanche Pounce: snowy peaks and falling snow */
+.card-face[data-card="avalanche-pounce"] { --design: conic-gradient(from 135deg at 34% 48%, #8fb0d055 0 90deg, transparent 0), conic-gradient(from 135deg at 70% 38%, #8fb0d044 0 90deg, transparent 0),
+  radial-gradient(circle, #ffffff 0 1.5px, transparent 2px) 0 0 / 11px 11px, linear-gradient(#f4f9ff, #d2e4f5); }
+/* Wolf Spirit: a ghostly glow with an aurora shimmer (a legendary card) */
+.card-face[data-card="wolf-spirit"] { --design: radial-gradient(ellipse 34% 40% at 50% 40%, #bfe8ffcc 0, transparent 70%),
+  repeating-radial-gradient(ellipse at 50% 40%, transparent 0 8px, #9fdcff2a 8px 10px), linear-gradient(160deg, #e6fff6, #d8e4ff 50%, #ecdcff); }
+/* Moon Eater: an eclipsed moon with a bright corona, on a dusky sky */
+.card-face[data-card="moon-eater"] { --design: radial-gradient(circle at 50% 38%, #3a4480aa 0 12px, #ffffff 13px 15px, #bfd0ffaa 16px 20px, transparent 26px),
+  linear-gradient(160deg, #e8ebff, #c6cdf0 60%, #d8d0f4); }

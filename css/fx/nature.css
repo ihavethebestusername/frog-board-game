@@ -1,0 +1,83 @@
+/* Card effects: nature group (Lily Pad Shield, Healing Pond, Late Bloomer, shield / heal / grow, blocks).
+   See js/fx/nature.js. Only transform and opacity are ever animated; gradients and shadows are static. */
+
+/* Graphics */
+.fxn-pad svg, .fxn-crack svg { display: block; width: 100%; height: 100%; overflow: visible; }
+.fxn-pad-fly { width: 58px; height: 58px; }
+.fxn-ripple { border-style: solid; border-radius: 50%; box-sizing: border-box; }
+.fxn-glow { border-radius: 50%; background: radial-gradient(circle, var(--c, #9dff6a) 0%, transparent 68%); }
+/* Jelly shield bubble over an HP box */
+.fxn-bubble { border-radius: 50%; box-sizing: border-box; border: 3px solid #c8ffe6;
+  background: radial-gradient(ellipse at 32% 28%, #ffffffcc 0 8%, #b8ffe055 18%, #3fd49a33 55%, #1fae7a88 100%);
+  box-shadow: 0 0 22px #54ffb0aa, inset 0 0 18px #7dffc8aa; }
+/* Healing Pond geyser: grows up from its bottom edge */
+.fxn-geyser { transform-origin: 50% 100%; border-radius: 50% 50% 10px 10px / 24% 24% 10px 10px;
+  background: linear-gradient(to top, #1a78d6 0%, #4fc3ff 45%, #c9f1ff 80%, #ffffff00 100%); box-shadow: 0 0 16px #4fc3ff88; }
+.fxn-geyser.fxn-core { background: linear-gradient(to top, #ffffffee, #ffffff00); box-shadow: none; }
+/* Pillar of healing light rising out of an HP box */
+.fxn-lightcol { transform-origin: 50% 100%; border-radius: 50% 50% 0 0 / 18% 18% 0 0;
+  background: linear-gradient(to top, #d8ffe6dd, #5dff8f77 45%, #5dff8f00); }
+/* Rotating rays of sunlight behind big blooms */
+.fxn-sunburst { border-radius: 50%;
+  background: repeating-conic-gradient(from 0deg, #fff6a0cc 0deg 7deg, #fff6a000 7deg 18deg);
+  -webkit-mask-image: radial-gradient(circle, #000 18%, #0000 70%); mask-image: radial-gradient(circle, #000 18%, #0000 70%); }
+/* Shadow of the tree about to fall on the foe */
+.fxn-shadow { border-radius: 50%; background: radial-gradient(ellipse, #000a 0%, #0000 70%); }
+/* Broken lily pad shards */
+.fxn-shard { width: 22px; height: 18px; background: linear-gradient(135deg, #b4ff9a, #3fae3a 55%, #17642a); }
+.fxn-s0 { clip-path: polygon(0 0, 100% 20%, 40% 100%); }
+.fxn-s1 { clip-path: polygon(10% 10%, 100% 0, 80% 100%, 0 70%); }
+.fxn-s2 { clip-path: polygon(50% 0, 100% 100%, 0 80%); }
+
+/* Emoji and symbols */
+.fxn-emoji { text-shadow: 0 3px 0 #0006; }
+.fxn-proj { font-size: 34px; text-shadow: 0 0 14px #b6ff6a; }
+.fxn-proj.fxn-small { font-size: 20px; }
+.fxn-tree { font-size: 84px; text-shadow: 0 6px 0 #0005; }
+.fxn-flydrop { font-size: 26px; text-shadow: 0 0 10px #4fc3ff; }
+.fxn-bug { font-size: 26px; }
+.fxn-cross { color: #7dffa0; font-weight: 900; font-family: sans-serif; text-shadow: 0 0 10px #2dff6a, 0 2px 0 #0b5a1c; }
+.fxn-chev { color: #c6ff6a; font-weight: 900; font-family: sans-serif; text-shadow: 0 0 10px #5fff3a, 0 2px 0 #1e5a14; }
+.fxn-glint { color: #fff; text-shadow: 0 0 8px #fff6a0, 0 0 14px #9ff5ff; }
+.fxn-ricochet { font-size: 30px; }
+
+/* Particle shapes (fxParticles colours them with an inline background) */
+.fx-particle.fxn-petal { border-radius: 0 100% 0 100%; }
+.fx-particle.fxn-leafp { border-radius: 100% 0 100% 0; }
+.fx-particle.fxn-drop { border-radius: 50% 50% 50% 50% / 62% 62% 38% 38%; }
+.fx-particle.fxn-bub { box-sizing: border-box; border: 2px solid #d9fff0; box-shadow: none !important;
+  background: radial-gradient(circle at 35% 30%, #ffffffcc 0 12%, #c9ffe833 30%, #7dffb855 100%) !important; }
+.fx-particle.fxn-rain { height: 13px !important; border-radius: 3px; box-shadow: none !important; }
+
+/* Trails dropped behind flying things: each fades and shrinks once, then is removed */
+.fxn-drip, .fxn-leaftrail, .fxn-petaltrail, .fxn-sparktrail { animation: fxn-trail 0.4s ease-out forwards; }
+.fxn-drip { width: 10px; height: 10px; border-radius: 50%; background: #9fe8ff; box-shadow: 0 0 6px #4fc3ff; }
+.fxn-leaftrail { width: 11px; height: 11px; border-radius: 100% 0 100% 0; background: #6fdc3a; }
+.fxn-petaltrail { width: 12px; height: 12px; border-radius: 0 100% 0 100%; background: #ffb3dc; box-shadow: 0 0 6px #ff6ac1; }
+.fxn-sparktrail { width: 7px; height: 7px; border-radius: 50%; background: #fffbe0; box-shadow: 0 0 8px #ffd23f; }
+@keyframes fxn-trail {
+  from { transform: translate(-50%, -50%) scale(1) rotate(0deg); opacity: 0.95; }
+  to { transform: translate(-50%, -50%) scale(0.15) rotate(120deg); opacity: 0; }
+}
+
+/* Beams: a leafy vine lash and short thorns */
+.fx-beam.fxn-vine { background: repeating-linear-gradient(90deg, #2f8a1f 0 14px, #6fdc3a 14px 22px, #2f8a1f 22px 30px);
+  box-shadow: 0 0 10px #7dff4a, inset 0 2px 0 #c6ff9a88; }
+.fx-beam.fxn-thorn { background: linear-gradient(90deg, #1d5a14, #4caf2a 55%, #e0ffb0); box-shadow: 0 0 6px #7dff4a; }
+
+/* Comic stamps: chunky text with a drawn outline (stacked shadows) and a glow in the tone's colour */
+.fxn-stamp { font-family: 'Arial Black', Impact, system-ui, sans-serif; font-weight: 900; letter-spacing: 0.5px; }
+.fxn-t-leaf { color: #c6ff6a; text-shadow: 2px 2px 0 #134d17, -2px 2px 0 #134d17, 2px -2px 0 #134d17, -2px -2px 0 #134d17,
+  0 5px 0 #0b3310, 0 0 18px #5fff6a; }
+.fxn-t-water { color: #e9fbff; text-shadow: 2px 2px 0 #0b4d8a, -2px 2px 0 #0b4d8a, 2px -2px 0 #0b4d8a, -2px -2px 0 #0b4d8a,
+  0 5px 0 #06305a, 0 0 18px #4fc3ff; }
+.fxn-t-gold { color: #ffe45a; text-shadow: 2px 2px 0 #6b3d00, -2px 2px 0 #6b3d00, 2px -2px 0 #6b3d00, -2px -2px 0 #6b3d00,
+  0 5px 0 #452700, 0 0 20px #ffb300; }
+.fxn-t-pink { color: #ffe0f2; text-shadow: 2px 2px 0 #8a1c5c, -2px 2px 0 #8a1c5c, 2px -2px 0 #8a1c5c, -2px -2px 0 #8a1c5c,
+  0 5px 0 #5a0f3a, 0 0 18px #ff6ac1; }
+.fxn-t-steel { color: #fff; text-shadow: 2px 2px 0 #1d5a3a, -2px 2px 0 #1d5a3a, 2px -2px 0 #1d5a3a, -2px -2px 0 #1d5a3a,
+  0 5px 0 #0f3522, 0 0 18px #b8ffe0; }
+.fxn-t-sad { color: #cfc8bb; font-style: italic; text-shadow: 1px 1px 0 #3a332b, -1px 1px 0 #3a332b, 1px -1px 0 #3a332b,
+  -1px -1px 0 #3a332b, 0 3px 0 #1f1a14; }
+.fxn-t-sprout { color: #bff59a; font-family: sans-serif; text-shadow: 1px 1px 0 #1e4a17, -1px 1px 0 #1e4a17, 1px -1px 0 #1e4a17,
+  -1px -1px 0 #1e4a17; }

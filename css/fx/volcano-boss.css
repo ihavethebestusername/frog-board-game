@@ -1,0 +1,159 @@
+/* Card effects: Volcano boss - the Inferno Dragon (the final boss), the Twin-Headed Dragon and the Dragon Emperor
+   (see js/fx/volcano-boss.js). Crimson dragon scales, gold and glowing lava. Every class and keyframe here is
+   prefixed fxvb-. Only transform/opacity animate; shadows, gradients and filters below are static on small spawned elements. */
+
+/* Big graphics: dragon heads, wings, the tail, scales, stars, crescents, the swoosh and the eyes in the dark */
+.fx.fxvb-head      { filter: drop-shadow(0 0 10px #ff6a00) drop-shadow(0 4px 0 #1a0400aa); }
+.fx.fxvb-wing      { opacity: 0.95; filter: drop-shadow(0 0 8px #ff3d00) drop-shadow(0 3px 0 #1a0400aa); }
+.fx.fxvb-tail      { filter: drop-shadow(0 0 8px #ff6a00) drop-shadow(0 4px 0 #1a0400aa); }
+.fx.fxvb-scale     { filter: drop-shadow(0 0 5px #ff8a1f) drop-shadow(0 2px 0 #3a0a0088); }
+.fx.fxr-plate-fly svg { filter: drop-shadow(0 0 4px #ff8a1f); }
+.fx.fxvb-star      { filter: drop-shadow(0 0 14px #ffd23f) drop-shadow(0 0 26px #b07cff); }
+.fx.fxvb-starburst { filter: drop-shadow(0 0 12px #ff8a1f); }
+.fx.fxvb-crescent  { width: 48px; height: 64px; filter: drop-shadow(0 0 8px #ff6a00) drop-shadow(0 0 2px #fff3a0); }
+.fx.fxvb-swoosh    { filter: drop-shadow(0 0 10px #ff6a00); }
+.fx.fxvb-eyes      { filter: drop-shadow(0 0 8px #ffd23f) drop-shadow(0 0 18px #ff3d00); }
+.fx.fxvb-pebble    { width: 22px; height: 18px; filter: drop-shadow(0 0 6px #ff6a00); }
+.fxvb-oflame { display: block; width: 0.8em; height: 1.2em; filter: drop-shadow(0 0 4px #ff6a00); }
+.fxvb-oflame svg, .fxvb-coin svg, .fxvb-mrock svg { display: block; width: 100%; height: 100%; overflow: visible; }
+
+/* Coins and gems */
+.fxvb-coin { display: block; width: 1em; height: 1em; filter: drop-shadow(0 0 3px #ffd23f) drop-shadow(0 1px 0 #6a4000); }
+.fx.fxvb-loot { font-size: 22px; line-height: 1; filter: drop-shadow(0 0 5px #ffd23f) drop-shadow(0 2px 0 #0006); }
+.fx.fxvb-goldglow { border-radius: 50%; background: radial-gradient(ellipse, #fff6c8cc 0, #ffd23f88 30%, #ffb30033 52%, #ffb30000 70%); }
+
+/* Twinkling stars */
+.fx.fxvb-twinkle { color: #fffbe0; font-weight: 900; text-shadow: 0 0 6px #ffd23f, 0 0 12px #ff8a1f; }
+.fx.fxvb-twinkle-gold { color: #ffe066; text-shadow: 0 0 6px #fff6c8, 0 0 12px #ffb300; }
+.fx.fxvb-twinkle-cosmic { color: #fff; text-shadow: 0 0 6px #ffd23f, 0 0 14px #b07cff, 0 0 22px #ff7ad9; }
+
+/* The meteor: its rock sits at the centre of the element (where it lands), the fire tail streams out behind it */
+.fx.fxvb-meteor { width: 210px; height: 66px; filter: drop-shadow(0 0 12px #ff6a00); }
+.fxvb-mtail { position: absolute; left: 0; top: 6%; width: 54%; height: 88%; border-radius: 0 50% 50% 0;
+  clip-path: polygon(0 44%, 30% 30%, 55% 22%, 75% 8%, 100% 0, 100% 100%, 75% 92%, 55% 78%, 30% 70%, 0 56%);
+  background: radial-gradient(ellipse at 100% 50%, #fffbe0 0 14%, #0000 40%), linear-gradient(90deg, #ff3d0000, #ff5a00aa 30%, #ffb300 70%, #fff3a0); }
+.fxvb-mrock { position: absolute; left: 50%; top: 50%; width: 58px; height: 48px; transform: translate(-50%, -50%) rotate(90deg);
+  filter: drop-shadow(0 0 8px #ffb300) drop-shadow(0 0 3px #fff3a0); }
+.fx.fxvb-trail-meteor { width: 30px; height: 30px; border-radius: 50%;
+  background: radial-gradient(circle, #fff3a0 0 12%, #ff9a1f 28%, #ff3d00aa 42%, #4a3a34aa 56%, #2a242000 70%); animation: fxvb-smoke 0.45s ease-out forwards; }
+@keyframes fxvb-smoke { from { transform: translate(-50%, -50%) scale(0.8); opacity: 0.95; } to { transform: translate(-50%, -50%) translateY(-14px) scale(1.7); opacity: 0; } }
+.fx.fxvb-night { box-sizing: border-box; border-radius: 10px;
+  background: radial-gradient(circle at 20% 30%, #fff 0 1px, #0000 2px) 0 0 / 23px 19px, radial-gradient(ellipse at 50% 20%, #3a1a6acc, #12081acc 70%); }
+.fx.fxvb-crater { border-radius: 50%; background: radial-gradient(ellipse, #1a0a06ee 0 38%, #3a1a0acc 52%, #ff6a00aa 60%, #ffb30044 66%, #ff6a0000 72%); }
+
+/* Streams of dragon fire (anchored at the mouth), their white-hot core, and fireballs */
+.fx.fxvb-stream { border-radius: 0 50% 50% 0 / 0 50% 50% 0;
+  clip-path: polygon(0 42%, 18% 30%, 30% 26%, 44% 14%, 58% 12%, 70% 3%, 84% 5%, 100% 0, 100% 100%, 84% 95%, 70% 97%, 58% 88%, 44% 86%, 30% 74%, 18% 70%, 0 58%);
+  background: radial-gradient(ellipse at 100% 50%, #fff3a0 0 8%, #0000 30%),
+              linear-gradient(90deg, #fff3a0, #ffd23f 18%, #ff8a1f 45%, #ff3d00dd 78%, #d0200000); }
+.fx.fxvb-core-beam { background: linear-gradient(90deg, #fffbe0, #fff3a0 50%, #ffd23f00); box-shadow: 0 0 12px #ffd23f; }
+.fx.fxvb-fireball { width: 34px; height: 34px; border-radius: 50%;
+  background: radial-gradient(circle at 45% 40%, #fffbe0 0 12%, #ffd23f 28%, #ff8a1f 44%, #ff3d00aa 58%, #d0200000 70%); }
+.fx.fxvb-gust { background: linear-gradient(90deg, #ffb30000, #ffb300aa 50%, #fff3a0); }
+.fx.fxvb-ray { background: linear-gradient(90deg, #ffd23f00, #ffd23f 50%, #fffbe0); box-shadow: 0 0 8px #ffd23f; }
+
+/* Rings: flat ground ring, wind swirls, roar waves ")" and the supernova's halo */
+.fx.fxvb-flatring { box-sizing: border-box; border-style: solid; border-radius: 50%; }
+.fx.fxvb-swirl { box-sizing: border-box; border-radius: 50%; border: 6px solid #0000; border-top-color: #fff3a0; border-right-color: #ff9a1f;
+  box-shadow: 0 0 8px #ff6a0066; }
+.fx.fxvb-swirl-hot { border-width: 5px; border-top-color: #ff3d00; border-right-color: #0000; border-bottom-color: #ffd23f; }
+.fx.fxvb-wave { box-sizing: border-box; border-radius: 50%; border: 8px solid #0000; border-right-color: #ffd23f;
+  filter: drop-shadow(0 0 6px #ff8a1f) drop-shadow(0 0 2px #fff); }
+.fx.fxvb-wave::after { content: ''; position: absolute; inset: 18%; border-radius: 50%; border: 4px solid #0000; border-right-color: #fff3a0; }
+.fx.fxvb-wave-dim { border-right-color: #ffb30088; }
+.fx.fxvb-halo { border-radius: 50%; background: radial-gradient(circle, #fff 0 6%, #ffd23faa 16%, #b07cff66 34%, #b07cff00 62%); }
+
+/* Dragon Roar's terror: darkness closing in and sweat drops */
+.fx.fxvb-dark { background: radial-gradient(ellipse at 50% 45%, #0000 0 14%, #0a0010dd 38%, #000000f5 70%); }
+.fx.fxvb-sweat { border-radius: 50% 50% 50% 50% / 60% 60% 40% 40% !important;
+  background: radial-gradient(circle at 40% 60%, #fff 0 18%, #7ac8ff 45%, #2a78d6) !important; box-shadow: none !important; }
+
+/* Pops and stamped words (on top of the kit's fxr-fire / fxr-lava / fxr-sun stamps) */
+.fx.fx-pop.fxvb-clink, .fx.fx-pop.fxvb-x2 { font-family: Impact, 'Arial Black', sans-serif; color: #ffe066; -webkit-text-stroke: 1.5px #6a4000;
+  text-shadow: 0 3px 0 #6a4000, 0 0 10px #ffd23f; }
+.fx.fx-pop.fxvb-x2 { color: #fff3a0; -webkit-text-stroke-color: #7a1500; text-shadow: 0 3px 0 #7a1500, 0 0 12px #ff6a00; }
+.fx.fxr-stamp.fxvb-dragon { color: #ffe066; -webkit-text-stroke-color: #5a0a00;
+  text-shadow: 0 3px 0 #ff6a00, 0 6px 0 #a01800, 0 9px 0 #3a0400, 0 0 24px #ff3d00, 0 0 40px #ffb300; }
+.fx.fxr-stamp.fxvb-nova { color: #ffffff; -webkit-text-stroke-color: #3a0a6a;
+  text-shadow: 0 3px 0 #ffd23f, 0 6px 0 #b07cff, 0 9px 0 #3a0a6a, 0 0 24px #fff6a0, 0 0 44px #ff7ad9; }
+
+/* The final boss's name plate: crimson and gold with a fringe of dragon scales */
+.fx.fxr-plate.fxvb-plate { font-size: 14px; padding: 6px 12px; border-width: 3px; border-color: #ffd23f; color: #fff6c8;
+  background: linear-gradient(#b01a0a, #6a0a00 45%, #2a0400);
+  box-shadow: 0 0 0 2px #2a0400, 0 0 18px var(--c, #ff6a00), 0 0 30px #ff3d0088, 0 4px 0 #000, inset 0 2px 0 #ffd23f88; }
+.fx.fxr-plate.fxvb-plate::after { content: ''; position: absolute; left: 10px; right: 10px; top: 100%; height: 8px;
+  background: radial-gradient(circle at 50% 0, #ffb300 0 4.5px, #a01800 5px 6px, #0000 6.5px) 0 0 / 12px 8px repeat-x; }
+
+/* Crimson, black and gold hazard tape (Dragon Inferno) */
+.fx.fxvb-tape { z-index: 2; display: flex; align-items: center; justify-content: center; border-radius: 2px;
+  background: repeating-linear-gradient(-45deg, #b01a0a 0 12px, #1a0400 12px 24px);
+  border-top: 2px solid #ffd23f; border-bottom: 2px solid #ffd23f; box-shadow: 0 4px 10px #000b, 0 0 12px #ff3d0088; }
+.fxvb-tape span { background: #1a0400; color: #ffd23f; padding: 3px 8px; letter-spacing: 2px;
+  font: 900 13px/1 Impact, 'Arial Black', sans-serif; text-shadow: 0 0 6px #ff6a00; }
+
+/* ---- Card faces: the final boss's cards are crimson dragon scales on dark basalt, edged in gold with glowing
+   lava seams; the Twin-Headed Dragon's and the Dragon Emperor's add a golden crown along the top.
+   Dark designs, so the region's light text stays readable. ---- */
+/* Dragon Inferno: a jet of dragon fire rising over scales */
+.card-face[data-card="dragon-inferno"] { --design:
+  linear-gradient(#ffd23f, #a86a00) 0 0 / 100% 2px no-repeat,
+  radial-gradient(ellipse 30% 46% at 50% 100%, #ffd23f66 0 20%, #ff5a0055 45%, #0000 70%),
+  radial-gradient(circle at 50% 0, #0000 0 5px, #ff5a1f44 5.5px 7px, #0000 7.5px) 0 0 / 14px 10px,
+  radial-gradient(ellipse at 50% 40%, #0000 50%, #000a 100%), linear-gradient(#5a1208, #1e0604); }
+/* Meteor Strike: a night sky with stars and a meteor's burning streak */
+.card-face[data-card="meteor-strike"] { --design:
+  linear-gradient(#ffd23f, #a86a00) 0 0 / 100% 2px no-repeat,
+  linear-gradient(35deg, #0000 46%, #ff5a0066 48%, #ffd23f99 50%, #0000 52%),
+  radial-gradient(circle at 70% 26%, #fffbe0 0 1.2px, #0000 2px) 0 0 / 19px 17px,
+  radial-gradient(circle at 20% 60%, #ffd23f 0 1px, #0000 1.8px) 0 0 / 23px 21px,
+  radial-gradient(ellipse at 50% 100%, #ff5a0044, #0000 55%), linear-gradient(#24103a, #140606 75%); }
+/* Dragon Wings: the ribs of two spread wings over scales */
+.card-face[data-card="dragon-wings"] { --design:
+  linear-gradient(#ffd23f, #a86a00) 0 0 / 100% 2px no-repeat,
+  repeating-conic-gradient(from 200deg at 12% 100%, #0000 0 14deg, #ff6a1f44 14deg 16deg, #0000 16deg 30deg),
+  repeating-conic-gradient(from 110deg at 88% 100%, #0000 0 14deg, #ff6a1f44 14deg 16deg, #0000 16deg 30deg),
+  radial-gradient(circle at 50% 0, #0000 0 5px, #ff5a1f33 5.5px 7px, #0000 7.5px) 0 0 / 14px 10px,
+  radial-gradient(ellipse at 50% 40%, #0000 50%, #000a 100%), linear-gradient(#4a1008, #1a0604); }
+/* Treasure Hoard: a glinting pile of gold coins */
+.card-face[data-card="treasure-hoard"] { --design:
+  linear-gradient(#ffd23f, #a86a00) 0 0 / 100% 2px no-repeat,
+  radial-gradient(ellipse 60% 26% at 50% 100%, #ffd23f88 0 50%, #ffb30055 66%, #0000 72%),
+  radial-gradient(circle at 50% 50%, #ffd23f77 0 3px, #a86a0066 3.5px 4.5px, #0000 5px) 0 0 / 12px 11px,
+  radial-gradient(ellipse at 50% 40%, #0000 45%, #000b 100%), linear-gradient(#4a2a08, #1a0c02); }
+/* Tail Swipe: a curve of tail spikes across basalt */
+.card-face[data-card="tail-swipe"] { --design:
+  linear-gradient(#ffd23f, #a86a00) 0 0 / 100% 2px no-repeat,
+  conic-gradient(from 150deg at 50% 0, #ffb30055 0 60deg, #0000 0) 0 60% / 14px 12px repeat-x,
+  linear-gradient(170deg, #0000 58%, #c42a1266 60% 68%, #0000 70%),
+  radial-gradient(circle at 50% 0, #0000 0 5px, #ff5a1f33 5.5px 7px, #0000 7.5px) 0 0 / 14px 10px,
+  radial-gradient(ellipse at 50% 40%, #0000 50%, #000a 100%), linear-gradient(#4a1208, #1a0604); }
+/* Twin Inferno: a golden crown, and two jets of flame crossing in an X over lava seams */
+.card-face[data-card="twin-inferno"] { --design:
+  conic-gradient(from 160deg at 50% 0, #ffd23f 0 40deg, #0000 0) 0 2px / 10px 9px repeat-x,
+  linear-gradient(#ffd23f, #a86a00) 0 0 / 100% 3px no-repeat,
+  linear-gradient(55deg, #0000 44%, #ff5a0077 47%, #ffd23f88 50%, #ff5a0077 53%, #0000 56%),
+  linear-gradient(-55deg, #0000 44%, #ff5a0077 47%, #ffd23f88 50%, #ff5a0077 53%, #0000 56%),
+  radial-gradient(circle at 50% 0, #0000 0 5px, #ff5a1f33 5.5px 7px, #0000 7.5px) 0 0 / 14px 10px,
+  radial-gradient(ellipse at 50% 45%, #0000 45%, #000b 100%), linear-gradient(#5a1208, #1a0404); }
+/* Ember Scales: big glowing overlapping scales */
+.card-face[data-card="ember-scales"] { --design:
+  conic-gradient(from 160deg at 50% 0, #ffd23f 0 40deg, #0000 0) 0 2px / 10px 9px repeat-x,
+  linear-gradient(#ffd23f, #a86a00) 0 0 / 100% 3px no-repeat,
+  radial-gradient(circle at 50% 0, #0000 0 7px, #ff8a1f77 7.5px 9.5px, #ffb30022 10px 11px, #0000 11.5px) 0 0 / 20px 13px,
+  radial-gradient(circle at 50% 0, #ff6a1f22 0 7px, #0000 7.5px) 10px 6.5px / 20px 13px,
+  radial-gradient(ellipse at 50% 45%, #0000 45%, #000b 100%), linear-gradient(#5a1a08, #1e0804); }
+/* Supernova: a golden crown over a blazing star on a cosmic purple sky */
+.card-face[data-card="supernova"] { --design:
+  conic-gradient(from 160deg at 50% 0, #ffd23f 0 40deg, #0000 0) 0 2px / 10px 9px repeat-x,
+  linear-gradient(#ffd23f, #a86a00) 0 0 / 100% 3px no-repeat,
+  radial-gradient(circle at 50% 50%, #fff6c877 0 8%, #ffd23f33 18%, #0000 34%),
+  repeating-conic-gradient(from 0deg at 50% 50%, #ffd23f2a 0 4deg, #0000 4deg 22.5deg),
+  radial-gradient(circle at 30% 30%, #fff 0 1px, #0000 1.8px) 0 0 / 17px 19px,
+  radial-gradient(ellipse at 50% 45%, #0000 40%, #0a0212cc 100%), linear-gradient(#3a0a5a, #160424 70%, #2a0808); }
+/* Dragon Roar: sound waves ringing out of a gaping mouth */
+.card-face[data-card="dragon-roar"] { --design:
+  conic-gradient(from 160deg at 50% 0, #ffd23f 0 40deg, #0000 0) 0 2px / 10px 9px repeat-x,
+  linear-gradient(#ffd23f, #a86a00) 0 0 / 100% 3px no-repeat,
+  repeating-radial-gradient(circle at 50% 70%, #0000 0 9px, #ffd23f44 9px 11px, #0000 11px 18px),
+  radial-gradient(ellipse 22% 12% at 50% 70%, #1a0000 0 60%, #ff5a0066 70%, #0000 80%),
+  radial-gradient(ellipse at 50% 45%, #0000 45%, #000b 100%), linear-gradient(#4a1208, #1a0404); }

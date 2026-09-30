@@ -14,7 +14,9 @@ class NoCacheHandler(http.server.SimpleHTTPRequestHandler):
         super().end_headers()
 
 
-socketserver.TCPServer.allow_reuse_address = True
-with socketserver.TCPServer(('', PORT), NoCacheHandler) as httpd:
+# Threaded so the browser can load many sprites/sounds at once without requests failing
+socketserver.ThreadingTCPServer.allow_reuse_address = True
+socketserver.ThreadingTCPServer.daemon_threads = True
+with socketserver.ThreadingTCPServer(('', PORT), NoCacheHandler) as httpd:
     print(f'Serving the game at http://localhost:{PORT} (no caching) - press Ctrl+C to stop')
     httpd.serve_forever()

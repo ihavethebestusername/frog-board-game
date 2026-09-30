@@ -1,0 +1,62 @@
+/* Card effects: saw group (js/fx/saw.js). Every class and keyframe here starts with fxs-.
+   Colours come in as --c1 (sparks / edges), --c2 (hot core) and --glow (halo), set per effect by its heat. */
+
+/* Saw blade sprite. The element is a square centred on the blade (the PNG has it off-centre), so it spins true */
+.fxs-blade { border-radius: 50%; }
+.fxs-blade img { position: absolute; width: 181.8%; left: -50%; top: -22.2%; image-rendering: pixelated; pointer-events: none; }
+/* Motion-blur disc and heat halo behind the blade (static: the whole element spins) */
+.fxs-blade.fxs-blur::before { content: ''; position: absolute; inset: -14%; border-radius: 50%; opacity: 0.85;
+  background: radial-gradient(circle, #fff0 38%, var(--glow, #ffe7a3) 56%, #fff0 70%),
+              repeating-conic-gradient(#ffffff44 0deg 5deg, #fff0 5deg 30deg); }
+/* Red-hot steel */
+.fxs-blade.fxs-hot img { filter: sepia(1) saturate(6) hue-rotate(-22deg) contrast(1.15) brightness(1.05); }
+/* Afterimage left behind in flight */
+.fxs-ghost { opacity: 0; animation: fxs-ghost 0.25s ease-out forwards; }
+@keyframes fxs-ghost {
+  from { opacity: 0.45; transform: translate(-50%, -50%) rotate(var(--r, 0deg)) scale(1); }
+  to   { opacity: 0;    transform: translate(-50%, -50%) rotate(var(--r, 0deg)) scale(0.8); }
+}
+
+/* Spark streak: white-hot head on the right (the direction it flies), fading tail */
+.fxs-spark { border-radius: 3px; background: linear-gradient(90deg, #fff0, var(--c1, #ff9a1f) 40%, var(--c2, #fff1c2) 80%, #fff);
+             box-shadow: 0 0 6px var(--c1, #ff9a1f); }
+
+/* Chrome sheen sweeping across the reel window when the saw lands */
+.fxs-sheen { overflow: hidden; border-radius: 6px; background: linear-gradient(160deg, #ffffff30, #9fb3c833 50%, #ffffff10); }
+.fxs-sheen i { position: absolute; top: -30%; left: -45%; width: 40%; height: 160%;
+               background: linear-gradient(90deg, #fff0, #ffffffb0 40%, #fff 50%, #ffffffb0 60%, #fff0);
+               animation: fxs-sweep 0.5s cubic-bezier(.3,.1,.3,1) forwards; }
+@keyframes fxs-sweep { from { transform: skewX(-22deg) translateX(0); } to { transform: skewX(-22deg) translateX(400%); } }
+
+/* Serrated tooth ring shockwave */
+.fxs-teeth svg { display: block; width: 100%; height: 100%; overflow: visible; }
+.fxs-teeth path { fill: var(--tf, #e6edf5); stroke: var(--c1, #ff9a1f); stroke-width: 1.5; stroke-linejoin: round; }
+
+/* Gacha light rays */
+.fxs-rays { border-radius: 50%; background: repeating-conic-gradient(var(--glow, #ffe7a3) 0deg 6deg, #fff0 6deg 20deg);
+            -webkit-mask-image: radial-gradient(circle, #0000 16%, #000 32%, #0000 70%);
+            mask-image: radial-gradient(circle, #0000 16%, #000 32%, #0000 70%); }
+
+/* Chrome stamp text (hot variant glows in the heat colours); kept above the other effects */
+.fxs-metal { z-index: 2; font: 900 34px 'Arial Black', Impact, sans-serif; letter-spacing: 1px; padding: 2px 6px; color: transparent;
+             background: linear-gradient(180deg, #fff 0%, #e3e9f0 38%, #6f7b88 50%, #f1f5f9 62%, #a3aebb 100%);
+             -webkit-background-clip: text; background-clip: text; -webkit-text-stroke: 1.5px #161b22;
+             filter: drop-shadow(0 3px 0 #000) drop-shadow(0 0 8px var(--glow, #ffe7a3)); }
+.fxs-metal.fxs-metal-hot { background-image: linear-gradient(180deg, #fff 0%, var(--c2, #ffd23f) 40%, var(--c1, #ff7a00) 56%, #fff 100%); }
+
+/* Glint on polished metal */
+.fxs-glint { color: #fff; font-family: sans-serif; text-shadow: 0 0 8px #fff, 0 0 16px #bfe3ff; }
+
+/* Molten gash: heat glow, charred cut, white-hot core */
+.fxs-gash svg { display: block; width: 100%; height: 100%; overflow: visible; }
+.fxs-gash path { fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.fxs-gash .fxs-g1 { stroke: var(--c1, #ff9a1f); stroke-width: 12px; stroke-opacity: 0.55; }
+.fxs-gash .fxs-g2 { stroke: #1d0b04; stroke-width: 6px; }
+.fxs-gash .fxs-g3 { stroke: var(--c2, #fff1c2); stroke-width: 2px; }
+
+/* White-hot slice line on crits (an fxBeam) */
+.fx-beam.fxs-slice { background: linear-gradient(90deg, #fff0, #fff 25%, #fff6c8 75%, #fff0); box-shadow: 0 0 10px #ff9a1f, 0 0 20px #ff5a00; }
+
+/* Glowing seam the saw cuts through the reel */
+.fxs-seam { border-radius: 4px; background: linear-gradient(90deg, #fff0, var(--c1, #ff9a1f) 25%, #fff 50%, var(--c1, #ff9a1f) 75%, #fff0);
+            box-shadow: 0 0 12px var(--glow, #ffe7a3); }

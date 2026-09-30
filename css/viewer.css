@@ -1,0 +1,17 @@
+/* Card animation viewer (js/viewer.js) */
+.anim-viewer .viewer-panel { max-width: 720px; }
+.viewer-tabs { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin-bottom: 8px; }
+.viewer-tabs button { font: bold 13px sans-serif; padding: 6px 10px; border-radius: 8px; border: 2px solid #b07f00; background: #fff6dc; color: #5a3e1b; cursor: pointer; }
+.viewer-tabs button.on { background: #ffd23f; border-color: #8a5a00; }
+.anim-viewer .hand-grid { max-height: 58dvh; overflow-y: auto; padding: 10px 4px; }
+.viewer-card { display: flex; flex-direction: column; gap: 4px; cursor: pointer; transition: transform 0.12s; }
+.viewer-card:hover { transform: translateY(-4px); }
+.viewer-card .card-face { min-height: 150px; }
+.viewer-card small { font: 10px sans-serif; text-align: center; opacity: 0.85; color: #fff; text-shadow: 0 1px 0 #000; }
+.viewer-moments { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 6px; }
+.viewer-moments .battle-go { margin: 0; font-size: 15px; padding: 10px; }
+.viewer-stage .viewer-desc { min-height: 18px; }
+.viewer-btns { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin-top: 8px; }
+.viewer-btns .battle-go { width: auto; flex: 1 1 140px; margin: 0; font-size: 14px; padding: 8px; }
+.anim-viewer .viewer-grid { display: flex; flex-wrap: wrap; justify-content: center; }
+.viewer-grid .viewer-card { flex: 0 0 110px; }

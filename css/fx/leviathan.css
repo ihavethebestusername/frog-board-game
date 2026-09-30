@@ -1,0 +1,29 @@
+/* Card effects: the Ancient Leviathan's Tidal Crush and Abyssal Maw (see js/fx/leviathan.js). Prefix fxl-. */
+.fx.fxl-svg svg { display: block; width: 100%; height: 100%; overflow: visible; }
+.fx.fxl-bigwave { filter: drop-shadow(0 8px 0 #0008) drop-shadow(0 0 14px #3aa0ff); }
+.fx.fxl-jaw { filter: drop-shadow(0 0 12px #7af7ff66) drop-shadow(0 6px 0 #000c); }
+.fx.fxl-lure { filter: drop-shadow(0 0 10px #b6fff6) drop-shadow(0 0 20px #7af7ff); }
+.fx.fxl-stamp { z-index: 3; font-family: Impact, 'Arial Black', sans-serif; font-weight: 900; letter-spacing: 1px; color: #dff6ff;
+  -webkit-text-stroke: 2px #06205a; text-shadow: 0 4px 0 #06205a, 0 6px 0 #020a1a, 0 0 18px #3aa0ff; }
+.fx.fxl-plate { z-index: 2; padding: 5px 10px; border-radius: 7px; border: 2px solid var(--c, #3aa0ff); color: #fff; letter-spacing: 1px;
+  font: 900 13px/1 'Arial Black', Impact, sans-serif; background: linear-gradient(#0a2a6a, #020a1a);
+  box-shadow: 0 0 14px var(--c, #3aa0ff), 0 3px 0 #000; text-shadow: 0 0 6px var(--c, #3aa0ff); }
+.fx.fxl-frame { box-sizing: border-box; border-radius: 10px; border: 4px solid var(--c, #3aa0ff); box-shadow: 0 0 22px var(--c), inset 0 0 22px var(--c); }
+.fx.fxl-drop { border-radius: 50% 50% 50% 50% / 60% 60% 40% 40% !important; }
+.fx.fxl-bubble, .fxl-bubble-i { border-radius: 50%; background: radial-gradient(circle at 35% 30%, #ffffff 0 18%, #bfefff44 40%, #7ad7ff66 70%, #dff6ffcc 100%) !important;
+  box-shadow: none !important; }
+.fxl-bubble-i { display: block; width: 14px; height: 14px; }
+.fx.fxl-foam { border-radius: 50%; background: radial-gradient(circle, #ffffff 0 35%, #dff6ffaa 55%, #fff0 72%); }
+.fx.fxl-whirl { border-radius: 50%; background: repeating-conic-gradient(from 0deg, #1f7ad6cc 0 18deg, #7ad7ff88 18deg 30deg, #0000 30deg 45deg);
+  -webkit-mask: radial-gradient(circle, #0000 12%, #000 30%, #000 60%, #0000 72%); mask: radial-gradient(circle, #0000 12%, #000 30%, #000 60%, #0000 72%); }
+.fx.fxl-shard { border-radius: 0 !important; clip-path: polygon(50% 0, 100% 78%, 18% 100%); box-shadow: none !important; }
+.fx.fxl-abyss { border-radius: 8px; background: radial-gradient(ellipse at 50% 40%, #0a2a4a 0, #020814 70%); }
+.fxl-eye { display: block; width: 1em; height: 0.6em; border-radius: 50%; background: radial-gradient(ellipse, #001 0 22%, #7af7ff 30%, #7af7ff00 72%); }
+.fxl-wisp { display: block; width: 18px; height: 18px; border-radius: 50%; background: radial-gradient(circle, #fff 0 20%, #7af7ff 45%, #7af7ff00 70%); }
+/* Their card faces: rolling waves, and a black deep with a glowing lure */
+.card-face[data-card="tidal-crush"] { --design: radial-gradient(ellipse 60% 20% at 30% 70%, #ffffff55 0 50%, transparent 52%),
+  repeating-radial-gradient(ellipse 120% 40% at 50% 100%, #1f7ad644 0 8px, #7ad7ff33 8px 16px), linear-gradient(#0a2a6a, #1f5aa0); }
+.card-face[data-card="abyssal-maw"] { --design: radial-gradient(circle at 50% 22%, #b6fff6 0 4px, #7af7ff55 6px, transparent 16px),
+  radial-gradient(ellipse at 50% 100%, #0a2a4a, #020814 70%); }
+.card-face[data-card="tidal-crush"], .card-face[data-card="abyssal-maw"] { color: #dff6ff; }
+.card-face[data-card="tidal-crush"] .title, .card-face[data-card="abyssal-maw"] .title { color: #7af7ff; }

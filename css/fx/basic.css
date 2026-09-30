@@ -1,0 +1,83 @@
+/* Card effects: basic group (Tadpole Tackle, Sticky Tongue, Big Leap, Bare Hands). See js/fx/basic.js.
+   Only transform/opacity are animated; gradients, shadows and filters below are static on small elements. */
+
+/* Comic-book stamp text ("POW!", "SLAM!"): thick ink outline and a drop, drawn above everything else */
+.fxb-stamp { font: italic 900 36px/1 Impact, 'Arial Black', 'Helvetica Neue', sans-serif; color: var(--c, #ffd23f);
+             letter-spacing: 1px; z-index: 6; -webkit-text-stroke: 1px var(--ink, #000);
+             text-shadow: 3px 0 0 var(--ink), -3px 0 0 var(--ink), 0 3px 0 var(--ink), 0 -3px 0 var(--ink),
+                          2px 2px 0 var(--ink), -2px 2px 0 var(--ink), 2px -2px 0 var(--ink), -2px -2px 0 var(--ink),
+                          0 6px 0 var(--ink), 0 9px 14px #0008; }
+.fxb-star { z-index: 5; filter: drop-shadow(0 4px 0 #0005); }
+.fxb-star svg { display: block; }
+/* Small bubbly captions ("HATCH!", "BOING!") */
+.fxb-cute { font: 900 20px/1 'Trebuchet MS', 'Arial Rounded MT Bold', sans-serif; color: var(--c, #fff); z-index: 6;
+            text-shadow: 2px 0 0 var(--ink), -2px 0 0 var(--ink), 0 2px 0 var(--ink), 0 -2px 0 var(--ink),
+                         1.5px 1.5px 0 var(--ink), -1.5px 1.5px 0 var(--ink), 1.5px -1.5px 0 var(--ink), -1.5px -1.5px 0 var(--ink),
+                         0 4px 0 var(--ink); }
+/* Manga impact / speed line: fades in from its tail */
+.fxb-line { border-radius: 999px; background: linear-gradient(90deg, transparent, var(--lc, #fff) 60%, #fff); z-index: 4; }
+
+/* ---- Tadpole Tackle ---- */
+.fxb-tadpole { z-index: 4; }
+.fxb-tadpole svg { display: block; }
+.fxb-egg, .fxb-shell { font-size: 54px; filter: drop-shadow(0 3px 0 #0005); z-index: 3; }
+.fxb-shell.l { clip-path: polygon(0 0, 52% 0, 40% 26%, 56% 48%, 38% 70%, 52% 100%, 0 100%); }
+.fxb-shell.r { clip-path: polygon(52% 0, 100% 0, 100% 100%, 52% 100%, 38% 70%, 56% 48%, 40% 26%); }
+.fxb-eggcrack { z-index: 4; }
+.fxb-eggcrack svg { display: block; }
+/* Bubble dropped along a tadpole's swim path: drifts up and pops */
+.fxb-bubble { border-radius: 50%; box-sizing: border-box; border: 2px solid #d6f4ff;
+              background: radial-gradient(circle at 35% 30%, #fff 0 18%, #bfeaff55 40%, #7fd0ff22); z-index: 3;
+              animation: fxb-rise 0.5s ease-out forwards; }
+@keyframes fxb-rise { from { transform: translate(-50%, -50%) scale(0.4); opacity: 0.95; }
+                      to { transform: translate(-50%, -160%) scale(1.15); opacity: 0; } }
+/* Bubble used as a particle (fxParticles html): sized by the particle's font-size */
+.fxb-bub { display: block; width: 1em; height: 1em; border-radius: 50%; box-sizing: border-box; border: 2px solid #d6f4ff;
+           background: radial-gradient(circle at 35% 30%, #fff 0 18%, #bfeaff55 40%, #7fd0ff22); }
+
+/* ---- Sticky Tongue ---- */
+.fxb-lick { font-size: 54px; z-index: 4; filter: drop-shadow(0 3px 0 #0006); }
+.fx-beam.fxb-tongue-beam { background: linear-gradient(90deg, #ff5c9500, #ff5c95 25%, #ff8fb8 70%, #ffd0e1); box-shadow: 0 0 10px #ff5c95aa; }
+/* The tongue: pink, rounded, with a groove down the middle and a darker underside */
+.fxb-tongue { border-radius: 999px; z-index: 3; box-shadow: 0 2px 0 #7a0d3688;
+              background: linear-gradient(180deg, transparent 44%, #b0104d77 50%, transparent 56%),
+                          linear-gradient(180deg, #ffb3cf, #ff5c95 40%, #d81b60 85%, #a3124a); }
+.fxb-tongue.gold { background: linear-gradient(180deg, transparent 44%, #9a6a0077 50%, transparent 56%),
+                               linear-gradient(180deg, #fff2b0, #ffcf3f 40%, #e0a000 85%, #a87400); }
+.fxb-tongue-tip { border-radius: 50%; z-index: 4; box-shadow: 0 2px 0 #7a0d3688;
+                  background: radial-gradient(circle at 35% 30%, #ffe0ec, #ff5c95 45%, #c2185b); }
+.fxb-goo { border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%; }
+.fxb-splat { z-index: 2; filter: drop-shadow(0 3px 0 #6b0f3a88); }
+.fxb-splat svg { display: block; }
+
+/* ---- Big Leap ---- */
+/* Light rays behind a rare pull: hollow in the middle so the card itself stays visible */
+.fxb-rays { border-radius: 50%; z-index: 1;
+            background: repeating-conic-gradient(#f4ffc0cc 0deg 9deg, #f4ffc000 9deg 22.5deg);
+            -webkit-mask-image: radial-gradient(closest-side, #0000 22%, #000 36%, #0000 100%);
+            mask-image: radial-gradient(closest-side, #0000 22%, #000 36%, #0000 100%); }
+.fxb-rays.gold { background: repeating-conic-gradient(#ffd23fdd 0deg 9deg, #ffd23f00 9deg 22.5deg); }
+.fxb-frog { font-size: 46px; z-index: 5; filter: drop-shadow(0 4px 0 #0005); }
+.fxb-frog.gold { text-shadow: 0 0 14px #ffd23f, 0 0 4px #fff; }
+.fxb-shadow { border-radius: 50%; z-index: 1; background: radial-gradient(closest-side, #000b, #0000); }
+/* Green silhouette afterimage left behind by combo leaps */
+.fxb-ghost { font-size: 50px; z-index: 4; color: transparent; text-shadow: 0 0 0 #7dff5a;
+             animation: fxb-ghost 0.3s ease-out forwards; }
+@keyframes fxb-ghost { from { transform: translate(-50%, -50%) scale(1.1); opacity: 0.5; }
+                       to { transform: translate(-50%, -50%) scale(0.8); opacity: 0; } }
+.fxb-crack { z-index: 1; }
+.fxb-crack svg { display: block; }
+.fxb-dust { opacity: 0.8; }
+
+/* ---- Bare Hands ---- */
+.fxb-hand { font-size: 46px; z-index: 5; filter: drop-shadow(0 3px 0 #0006); }
+.fxb-fist { font-size: 44px; z-index: 5; filter: drop-shadow(0 4px 2px #0007); }
+/* Motion smear left behind a flying fist */
+.fxb-smear { width: 34px; height: 34px; border-radius: 50%; z-index: 3; background: radial-gradient(closest-side, #fffc, #fff0);
+             animation: fxb-smear 0.3s ease-out forwards; }
+@keyframes fxb-smear { from { transform: translate(-50%, -50%) scale(1); opacity: 0.8; }
+                       to { transform: translate(-50%, -50%) scale(0.3); opacity: 0; } }
+/* Red handprint left on the foe by a slap (the emoji drawn as a solid silhouette) */
+.fxb-print { font-size: 52px; z-index: 2; color: transparent; text-shadow: 0 0 0 #e8323ccc; }
+.fxb-ora { font-family: Impact, 'Arial Black', sans-serif; font-style: italic; color: #fff;
+           text-shadow: 2px 0 0 #8a1c1c, -2px 0 0 #8a1c1c, 0 2px 0 #8a1c1c, 0 -2px 0 #8a1c1c, 0 4px 0 #8a1c1c; }

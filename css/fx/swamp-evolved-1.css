@@ -1,0 +1,127 @@
+/* Card effects: the Mosquito's and Snapping Turtle's evolutions (see js/fx/swamp-evolved-1.js). Prefix fxs1-. */
+.fx.fxs1-svg svg, .fxs1-mini svg, .fxs1-germ-i svg { display: block; width: 100%; height: 100%; overflow: visible; }
+.fxs1-mini { display: block; width: 30px; height: 18px; filter: drop-shadow(0 2px 0 #0007); }
+.fxs1-germ-i { display: block; width: 1em; height: 1em; }
+
+/* Mosquitoes: wings flutter */
+.fx.fxs1-mosq { filter: drop-shadow(0 2px 0 #0008); }
+.fx.fxs1-queen { filter: drop-shadow(0 0 10px #ffd23f) drop-shadow(0 4px 0 #0008); }
+.fxs1-wings { transform-box: fill-box; transform-origin: 90% 100%; animation: fxs1-flap 0.07s linear infinite alternate; }
+@keyframes fxs1-flap { from { transform: scaleY(1); } to { transform: scaleY(0.3); } }
+.fx-lite .fxs1-wings { animation: none; }
+.fx.fxs1-crown { width: 44px; height: 32px; filter: drop-shadow(0 0 8px #ffd23f) drop-shadow(0 2px 0 #0008); }
+.fx.fxs1-buzztrail, .fx.fxs1-goldtrail, .fx.fxs1-skid { width: 6px; height: 6px; border-radius: 50%; animation: fxs1-fade 0.4s ease-out forwards; }
+.fx.fxs1-buzztrail { background: #2e3a1c; box-shadow: 0 0 6px #9bd36a; }
+.fx.fxs1-goldtrail { width: 9px; height: 9px; background: #fff3a0; box-shadow: 0 0 10px #ffd23f, 0 0 18px #ff9a1f; }
+.fx.fxs1-skid { width: 7px; height: 7px; background: #fff; box-shadow: 0 0 8px #ffd23f; }
+@keyframes fxs1-fade { to { opacity: 0; transform: translate(-50%, -50%) scale(0.2); } }
+.fx-beam.fxs1-needle { background: linear-gradient(90deg, #1b220f00, #1b220f 60%, #ff3b3b); }
+.fx.fxs1-welt { border-radius: 50%; background: radial-gradient(circle, #fff 0 20%, #ff5d6b 35%, #d0282a 60%, #d0282a00 72%); }
+.fx.fxs1-haze { border-radius: 50%; background: radial-gradient(circle, #4d5b3aaa 0, #2e3a1c66 45%, #2e3a1c00 70%); }
+.fx-beam.fxs1-line-swamp { background: linear-gradient(90deg, #9bd36a00, #9bd36a 60%, #fff); }
+.fx-beam.fxs1-line-gold { background: linear-gradient(90deg, #ffd23f00, #ffd23f 60%, #fff); box-shadow: 0 0 8px #ffd23f; }
+
+/* Blood */
+.fx.fxs1-bloodfill { border-radius: 8px; background: linear-gradient(#ff3b4acc, #b0101ce6 40%, #6a0010f0); box-shadow: inset 0 6px 8px #ff8a9480; }
+.fx.fxs1-drop, .fxs1-dropi { border-radius: 50% 50% 50% 50% / 60% 60% 40% 40% !important; box-shadow: none !important;
+  background-image: radial-gradient(circle at 35% 30%, #ffffffcc 0 16%, #fff0 30%) !important; }
+.fxs1-dropi { display: block; width: 12px; height: 14px; background-color: #d0282a; }
+.fx.fxs1-streamfly { filter: drop-shadow(0 0 5px #ff3b4a); }
+.fxs1-goldmote { display: block; width: 14px; height: 14px; border-radius: 50%; background: radial-gradient(circle, #fff 0 20%, #ffd23f 45%, #ffd23f00 72%); }
+.fx.fxs1-pulse-blood { border-radius: 50%; background: radial-gradient(circle, #ff8a94 0 10%, #ff3b4a 28%, #b0101c99 50%, #6a001000 70%); }
+.fx.fxs1-core-gold { border-radius: 50%; background: radial-gradient(circle, #fff 0 12%, #fff3a0 24%, #ffd23f 40%, #ff9a1f 55%, #b01c1caa 64%, #b01c1c00 72%); }
+.fx.fxs1-rays { border-radius: 50%; background: repeating-conic-gradient(#ffd23f99 0 10deg, #ffd23f00 10deg 30deg);
+  -webkit-mask: radial-gradient(circle, #000 20%, #0000 70%); mask: radial-gradient(circle, #000 20%, #0000 70%); }
+
+/* Plague */
+.fx.fxs1-miasma { border-radius: 50%; background: radial-gradient(circle, #9be85acc 0, #5fa82a88 40%, #a259ff33 58%, #5fa82a00 70%); }
+.fx.fxs1-germ { filter: drop-shadow(0 2px 0 #0008) drop-shadow(0 0 6px #7ad13a); }
+.fx.fxs1-bubble { box-shadow: none !important; background: radial-gradient(circle at 35% 30%, #fff 0 18%, #b4ff8a66 40%, #5fd13a88 75%, #d8ffb0cc 100%) !important; }
+.fx.fxs1-splat { filter: drop-shadow(0 4px 0 #0007); }
+
+/* Eggs */
+.fx.fxs1-egg { filter: drop-shadow(0 3px 0 #0007); }
+.fx.fxs1-eggwall { box-sizing: border-box; border-radius: 26px; border: 5px dotted #f5ecd6; background: radial-gradient(ellipse, #f5ecd600 55%, #f5ecd655 100%);
+  box-shadow: 0 0 16px #e8d8a8, inset 0 0 16px #e8d8a8; }
+
+/* Iron shell and rust */
+.fx.fxs1-shell { width: 64px; height: 64px; filter: drop-shadow(0 4px 0 #0009) drop-shadow(0 0 6px #dfe6ee88); }
+.fx.fxs1-puck { filter: drop-shadow(0 0 10px #fff) drop-shadow(0 4px 0 #0009); }
+.fx.fxs1-emoji { line-height: 1; filter: drop-shadow(0 3px 0 #0008); }
+.fx.fxs1-jaw { filter: drop-shadow(0 4px 0 #0009); }
+.fx.fxs1-rust { border-radius: 2px !important; box-shadow: none !important; clip-path: polygon(0 20%, 60% 0, 100% 40%, 80% 100%, 20% 85%); }
+.fx.fxs1-shard { border-radius: 0 !important; clip-path: polygon(50% 0, 100% 78%, 18% 100%); box-shadow: none !important; }
+.fx.fxs1-shieldbub { border-radius: 40%; background: radial-gradient(ellipse, #bcd8ff22 50%, #6aa8ff88 80%, #e3f2ffcc 100%); box-shadow: 0 0 16px #6aa8ff; }
+.fx.fxs1-neck { box-sizing: border-box; border-radius: 999px; border: 3px solid #1e2414;
+  background: repeating-linear-gradient(90deg, #7a8a64 0 7px, #5a684a 7px 11px), #6b7a5a; box-shadow: inset 0 4px 0 #9aa88455; }
+.fx.fxs1-head { filter: drop-shadow(0 3px 0 #0008); }
+
+/* Dragon fire and jade */
+.fx.fxs1-dragon { filter: drop-shadow(0 0 10px #3fd18a) drop-shadow(0 4px 0 #0009); }
+.fx-beam.fxs1-firebeam { background: linear-gradient(90deg, #ff3d0000, #ff6a00 20%, #ffb300 60%, #ff3d00); box-shadow: 0 0 18px #ff6a00; }
+.fx-beam.fxs1-firecore { background: linear-gradient(90deg, #fff3a000, #fff3a0 25%, #fff); }
+.fx.fxs1-fireorb { width: 26px; height: 26px; border-radius: 50%; box-shadow: none !important;
+  background: radial-gradient(circle, #fff 0 14%, #fff3a0 26%, #ffb300 44%, #ff5a00 60%, #ff3d0000 72%) !important; }
+.fx.fxs1-hex { filter: drop-shadow(0 0 8px #7affc0) drop-shadow(0 3px 0 #0008); }
+.fx.fxs1-jadewall { box-sizing: border-box; border-radius: 16px; border: 4px solid #7affc0;
+  background: repeating-linear-gradient(60deg, #7affc033 0 2px, #0000 2px 16px), repeating-linear-gradient(-60deg, #7affc033 0 2px, #0000 2px 16px), #1f7a4a44;
+  box-shadow: 0 0 18px #3fd18a, inset 0 0 16px #7affc0; }
+.fx.fxs1-jadeglow { border-radius: 50%; background: radial-gradient(ellipse, #7affc0aa 0, #3fd18a55 40%, #3fd18a00 70%); }
+
+/* Stamps and plates */
+.fx.fxs1-stamp { z-index: 3; white-space: nowrap; font-family: Impact, 'Arial Black', sans-serif; font-weight: 900; letter-spacing: 1px; -webkit-text-stroke: 2px #000; }
+.fx.fxs1-swamp  { color: #d8ffb0; -webkit-text-stroke-color: #1b220f; text-shadow: 0 4px 0 #1b220f, 0 6px 0 #0a0e04, 0 0 16px #9bd36a; }
+.fx.fxs1-blood  { color: #ffe0e4; -webkit-text-stroke-color: #5a0010; text-shadow: 0 4px 0 #5a0010, 0 6px 0 #1a0004, 0 0 16px #ff3b4a; }
+.fx.fxs1-gold   { color: #fff3a0; -webkit-text-stroke-color: #6a1a00; text-shadow: 0 4px 0 #8a0a14, 0 6px 0 #2a0004, 0 0 18px #ffd23f; }
+.fx.fxs1-plague { color: #d8ffb0; -webkit-text-stroke-color: #3a1a6a; text-shadow: 0 4px 0 #3a1a6a, 0 6px 0 #10041f, 0 0 16px #7ad13a; }
+.fx.fxs1-egg    { color: #fff8e6; -webkit-text-stroke-color: #6a4a2a; text-shadow: 0 3px 0 #6a4a2a, 0 0 12px #e8d8a8; }
+.fx.fxs1-iron   { color: #eef3f8; -webkit-text-stroke-color: #2a3038; text-shadow: 0 4px 0 #2a3038, 0 6px 0 #0a0c10, 0 0 14px #b8c4d0; }
+.fx.fxs1-rust   { color: #ffd8b0; -webkit-text-stroke-color: #4a1a06; text-shadow: 0 4px 0 #4a1a06, 0 6px 0 #1a0802, 0 0 14px #d0703a; }
+.fx.fxs1-fire   { color: #fff3a0; -webkit-text-stroke-color: #7a1a00; text-shadow: 0 4px 0 #7a1a00, 0 6px 0 #2a0800, 0 0 18px #ff6a00; }
+.fx.fxs1-jade   { color: #e0fff0; -webkit-text-stroke-color: #0a3a22; text-shadow: 0 4px 0 #0a3a22, 0 6px 0 #021a0e, 0 0 16px #7affc0; }
+.fx.fxs1-plate { z-index: 2; white-space: nowrap; padding: 5px 10px; border-radius: 7px; border: 2px solid var(--c, #9bd36a); color: #fff; letter-spacing: 1px;
+  font: 900 13px/1 'Arial Black', Impact, sans-serif; background: linear-gradient(var(--bg, #1f2a10), #000c);
+  box-shadow: 0 0 14px var(--c, #9bd36a), 0 3px 0 #000; text-shadow: 0 0 6px var(--c, #9bd36a); }
+
+/* ---- Card faces ---- */
+/* Swarm Sting: a murky green haze full of tiny dark mosquitoes */
+.card-face[data-card="swarm-sting"] { --design: radial-gradient(circle at 30% 40%, #0c1406cc 0 1.6px, transparent 2.4px) 0 0 / 13px 11px,
+  radial-gradient(circle at 70% 70%, #0c1406aa 0 1.2px, transparent 2px) 0 0 / 17px 15px,
+  radial-gradient(ellipse at 50% 40%, #6a7f3a88, transparent 70%), linear-gradient(#34431e, #161d0b); }
+/* Blood Drain: blood dripping from the top onto dark crimson */
+.card-face[data-card="blood-drain"] { --design: radial-gradient(ellipse 7% 16% at 22% 6%, #d0282a 0 90%, transparent), radial-gradient(ellipse 5% 24% at 52% 8%, #b0101c 0 90%, transparent),
+  radial-gradient(ellipse 6% 12% at 80% 4%, #d0282a 0 90%, transparent), linear-gradient(#8a0a14 0 5%, transparent 5%), radial-gradient(circle at 50% 70%, #5a0a14, #1c0306 80%); }
+/* Royal Proboscis: royal crimson with a gold diamond lattice and a crown glow */
+.card-face[data-card="royal-proboscis"] { --design: radial-gradient(circle at 50% 18%, #ffd23f66 0, transparent 30%),
+  repeating-linear-gradient(45deg, #ffd23f2a 0 1.5px, transparent 1.5px 12px), repeating-linear-gradient(-45deg, #ffd23f2a 0 1.5px, transparent 1.5px 12px),
+  linear-gradient(#4a0a1c, #1c0408); }
+/* Plague Swarm: sickly green with germ bubbles */
+.card-face[data-card="plague-swarm"] { --design: radial-gradient(circle at 22% 72%, #7ad13a88 0 6px, transparent 7px), radial-gradient(circle at 78% 58%, #a259ff77 0 5px, transparent 6px),
+  radial-gradient(circle at 60% 28%, #7ad13a66 0 4px, transparent 5px), radial-gradient(circle at 30% 30%, #a259ff55 0 3px, transparent 4px),
+  radial-gradient(ellipse at 50% 100%, #3a6a1a, #0e1a06 75%); }
+/* Brood Wall: a clutch of pale eggs in a dark nest */
+.card-face[data-card="brood-wall"] { --design: radial-gradient(ellipse 9px 11px at 50% 50%, #f5ecd644 0 80%, transparent 90%) 0 0 / 22px 24px,
+  radial-gradient(ellipse at 50% 100%, #6a4a2a, transparent 60%), linear-gradient(#3a2e18, #1a140a); }
+/* Iron Shell Slam: riveted gunmetal plate */
+.card-face[data-card="iron-shell-slam"] { --design: radial-gradient(circle, #cfd8e2aa 0 1.8px, #2a303800 2.6px) 3px 3px / 16px 16px,
+  repeating-linear-gradient(90deg, #ffffff08 0 2px, transparent 2px 5px), linear-gradient(135deg, #5a6470, #2a3038 60%, #1a1e24); }
+/* Rust Snap: rusty iron with a row of teeth along the top */
+.card-face[data-card="rust-snap"] { --design: linear-gradient(135deg, #e8dcc0 25%, transparent 25%) 0 0 / 12px 10px repeat-x, linear-gradient(225deg, #e8dcc0 25%, transparent 25%) 0 0 / 12px 10px repeat-x,
+  radial-gradient(circle at 25% 60%, #b0602a88 0 12%, transparent 22%), radial-gradient(circle at 75% 80%, #d0803a66 0 10%, transparent 20%),
+  linear-gradient(#5a2a0a, #2a1206); }
+/* Dragon Breath: jade scales above a fiery glow */
+.card-face[data-card="dragon-breath"] { --design: radial-gradient(ellipse at 50% 110%, #ff6a00dd 0, #ff3d0066 30%, transparent 55%),
+  radial-gradient(circle at 50% 0, transparent 0 5px, #3fd18a44 5px 6.5px, transparent 7px) 0 0 / 14px 10px, linear-gradient(#0e3a24, #081a10); }
+/* Ancient Carapace: a glowing jade hexagon shell */
+.card-face[data-card="ancient-carapace"] { --design: radial-gradient(circle at 50% 50%, #7affc055, transparent 50%),
+  repeating-linear-gradient(60deg, #7affc040 0 1.5px, transparent 1.5px 14px), repeating-linear-gradient(-60deg, #7affc040 0 1.5px, transparent 1.5px 14px),
+  repeating-linear-gradient(0deg, #7affc030 0 1.5px, transparent 1.5px 14px), linear-gradient(#124a2e, #06190f); }
+.card-face[data-card="swarm-sting"] { color: #e6ffd0; } .card-face[data-card="swarm-sting"] .title { color: #b8f080; }
+.card-face[data-card="blood-drain"] { color: #ffe0e4; } .card-face[data-card="blood-drain"] .title { color: #ff8a94; }
+.card-face[data-card="royal-proboscis"] { color: #fff0d0; } .card-face[data-card="royal-proboscis"] .title { color: #ffd23f; }
+.card-face[data-card="plague-swarm"] { color: #e6ffd0; } .card-face[data-card="plague-swarm"] .title { color: #b4ff8a; }
+.card-face[data-card="brood-wall"] { color: #fff6e0; } .card-face[data-card="brood-wall"] .title { color: #f5e0a8; }
+.card-face[data-card="iron-shell-slam"] { color: #eef3f8; } .card-face[data-card="iron-shell-slam"] .title { color: #cfe0f0; }
+.card-face[data-card="rust-snap"] { color: #ffe8d0; } .card-face[data-card="rust-snap"] .title { color: #ffb070; }
+.card-face[data-card="dragon-breath"] { color: #e0fff0; } .card-face[data-card="dragon-breath"] .title { color: #ffb34a; }
+.card-face[data-card="ancient-carapace"] { color: #e0fff0; } .card-face[data-card="ancient-carapace"] .title { color: #7affc0; }

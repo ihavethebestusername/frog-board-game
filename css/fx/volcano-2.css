@@ -1,0 +1,189 @@
+/* Card effects: Volcano group 2 - Fire Hawk / Inferno Hawk / Cinder Roc and Magma Golem / Obsidian Golem /
+   Volcano Titan (see js/fx/volcano-2.js). Every class and keyframe here is prefixed fxv2-. Only transform and
+   opacity animate; gradients, shadows and filters are static on small spawned elements. */
+
+/* Inline SVG graphics fill their box */
+.fx.fxv2-comet svg, .fx.fxv2-streak svg, .fx.fxv2-cloud svg, .fx.fxv2-talons svg, .fx.fxv2-fist svg, .fx.fxv2-foot svg,
+.fx.fxv2-obclaw svg, .fx.fxv2-wave svg, .fx.fxv2-splash svg, .fxv2-rumble svg, .fxv2-mini-flame svg { display: block; width: 100%; height: 100%; overflow: visible; }
+
+/* Projectiles and big graphics (sized here when spawned without a size) */
+.fx.fxv2-comet   { width: 150px; height: 60px; filter: drop-shadow(0 0 10px #ff6a00); }
+.fx.fxv2-streak  { width: 90px; height: 22px; filter: drop-shadow(0 0 6px #ffb300); }
+.fx.fxv2-cloud   { width: 120px; height: 70px; filter: drop-shadow(0 4px 0 #0006); }
+.fx.fxv2-talons  { width: 100px; height: 72px; filter: drop-shadow(0 0 8px #ff6a00); }
+.fx.fxv2-fist    { width: 110px; height: 80px; filter: drop-shadow(0 5px 0 #0008) drop-shadow(0 0 8px #ff6a0088); }
+.fx.fxv2-foot    { width: 110px; height: 100px; filter: drop-shadow(0 6px 0 #0008) drop-shadow(0 0 8px #ff6a0066); }
+.fx.fxv2-obclaw  { width: 100px; height: 72px; filter: drop-shadow(0 0 8px #b07cff); }
+.fx.fxv2-wave    { width: 130px; height: 80px; filter: drop-shadow(0 0 10px #ff6a00); }
+.fx.fxv2-splash  { filter: drop-shadow(0 0 8px #ff6a00); }
+.fx.fxv2-storm   { filter: drop-shadow(0 0 12px #ff6a0088) drop-shadow(0 4px 0 #0008); }
+.fx.fxv2-bolt    { filter: drop-shadow(0 0 6px #ffd23f) drop-shadow(0 0 14px #ff8a1f); }
+.fx.fxv2-heart   { filter: drop-shadow(0 0 10px #ff5a00); }
+.fx.fxv2-volcano { filter: drop-shadow(0 0 8px #ff5a00); }
+.fxv2-rumble { width: 100%; height: 100%; animation: fxv2-rumble 0.09s linear infinite alternate; }
+.fxv2-mini-flame { display: block; width: 0.8em; height: 1.2em; filter: drop-shadow(0 0 4px #ff6a00); }
+
+/* Fire tornado: stacked flame rings spinning flat (the ring's box is squashed, its inner ring spins) over a funnel */
+.fx.fxv2-tornado { width: 76px; height: 112px; }
+.fxv2-tor-sway { position: absolute; inset: 0; transform-origin: 50% 100%; animation: fxv2-sway 0.36s ease-in-out infinite alternate; }
+.fxv2-funnel { position: absolute; inset: 0; clip-path: polygon(0 6%, 100% 6%, 62% 94%, 38% 94%);
+  background: linear-gradient(#ff3d0066, #ff8a1faa 55%, #fff3a0dd); }
+.fxv2-tw { position: absolute; left: calc(50% + var(--x, 0px)); aspect-ratio: 1 / 1; transform: translate(-50%, -50%) scaleY(0.3); }
+.fxv2-tw i, .fx.fxv2-spinring i { position: absolute; inset: 0; box-sizing: border-box; border-radius: 50%; border: 5px solid;
+  border-color: #fff3a0 #ff6a00 #ffb300 #d02000; box-shadow: 0 0 8px #ff6a00; animation: fxv2-spin var(--d, 0.3s) linear infinite; }
+.fx.fxv2-spinring i { border-width: 6px; }
+
+/* Flaming feathers, molten drops, obsidian wisps */
+.fxv2-feather { display: block; width: 0.36em; height: 1em; border-radius: 50% 50% 50% 50% / 70% 70% 30% 30%;
+  background: linear-gradient(90deg, #ff3d00, #ffb300 42%, #fff3a0 50%, #ffb300 58%, #ff3d00); box-shadow: 0 0 6px #ff6a00; }
+.fxv2-drop { display: block; width: 14px; height: 18px; border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+  background: radial-gradient(circle at 40% 60%, #fff3a0 0 15%, #ff8a1f 45%, #d02000); box-shadow: 0 0 8px #ff6a00; }
+.fxv2-wisp-obs { display: block; width: 18px; height: 18px; border-radius: 50%;
+  background: radial-gradient(circle, #ffd0ff 0 18%, #c050ff 40%, #ff2a5a88 55%, #ff2a5a00 70%); }
+
+/* Beams: the shooting star's glowing path, ember streaks, burn marks, a violet edge glint */
+.fx.fxv2-starbeam { background: linear-gradient(90deg, #ff3d0000, #ff8a1f 50%, #fff3a0); box-shadow: 0 0 10px #ff8a1f; }
+.fx.fxv2-emberstreak { width: 44px; height: 6px; border-radius: 6px; background: linear-gradient(90deg, #ff3d0000, #ff6a00 55%, #ffd23f 85%, #fff);
+  box-shadow: 0 0 8px #ff8a1f; }
+.fx.fxv2-burnline { border-radius: 50%; background: linear-gradient(90deg, #3a080000, #3a0800 20%, #ff6a00 50%, #3a0800 80%, #3a080000); box-shadow: 0 0 8px #ff6a00; }
+.fx.fxv2-purpleglint { background: linear-gradient(90deg, #b07cff00, #fff 50%, #b07cff00); box-shadow: 0 0 10px #b07cff; }
+.fx.fxv2-spark { width: 4px; height: 14px; border-radius: 3px; background: linear-gradient(#fff0, #ffd23f 50%, #fff); box-shadow: 0 0 6px #ffb300; }
+.fx.fxv2-cinder { border-radius: 30%; background: radial-gradient(circle, #ffb300 0 22%, #3a1a10 45%, #140806); box-shadow: 0 0 5px #ff6a00; }
+
+/* Puffs: ash, storm cloud and dust */
+.fx.fxv2-puff { border-radius: 50%; background: radial-gradient(circle, #6a6058ee 0, #4a423caa 40%, #2a242000 70%); }
+.fx.fxv2-puff.fxv2-puff-dark { background: radial-gradient(circle, #2a2430ee 0, #1a1620aa 40%, #0a080c00 70%); }
+.fx.fxv2-puff-fly { width: 46px; height: 46px; }
+.fx.fxv2-dust { border-radius: 50%; background: radial-gradient(circle, #d8c0a0cc 0, #a8916b88 40%, #8a7a6000 70%); }
+.fx.fxv2-cloud-fly { width: 120px; height: 70px; }
+
+/* Blinded: a dark blanket of ash over the victim's box */
+.fx.fxv2-smother { border-radius: 16px;
+  background: radial-gradient(circle at 22% 30%, #8a8078 0 2px, transparent 3px), radial-gradient(circle at 70% 60%, #8a8078 0 2px, transparent 3px),
+    radial-gradient(circle at 45% 78%, #a09890 0 1.5px, transparent 2.5px), radial-gradient(ellipse, #1a1614f2 0 45%, #2a2420cc 65%, #3a322c00 80%); }
+
+/* Heat Mirage: haze over the card, ghost copies of it, mirror images of the HP box, the haze shield */
+.fx.fxv2-haze { border-radius: 8px; overflow: hidden; }
+.fxv2-haze i, .fxv2-hazeshield i { position: absolute; inset: -20% 0; animation: fxv2-shimmer 0.18s ease-in-out infinite alternate;
+  background: repeating-linear-gradient(0deg, #ffe0a000 0 5px, #ffe0a066 5px 7px, #ffe0a000 7px 12px); }
+.fx.fxv2-hazeshield { border-radius: 50%; overflow: hidden; box-sizing: border-box; border: 3px solid #ffe8a0aa;
+  background: radial-gradient(ellipse, #ffd23f00 45%, #ffd23f33 75%, #ff8a1f66 100%); box-shadow: 0 0 18px #ffb30088, inset 0 0 18px #ffe8a066; }
+.fx.fxv2-ghost { filter: sepia(0.4) saturate(1.6) drop-shadow(0 0 8px #ffb300); white-space: normal; }
+.fx.fxv2-ghost .card-face { width: 100%; height: 100%; min-height: 0; box-sizing: border-box; padding: 2px; gap: 1px; margin: 0;
+  border: 2px solid #ffb070; border-radius: 8px; position: relative; }
+.fx.fxv2-ghost .card-face .art { font-size: 18px; }
+.fx.fxv2-ghost .card-face .title { font-size: 9px; }
+.fx.fxv2-ghost .card-face .text, .fx.fxv2-ghost .card-face .rarity-tag { display: none; }
+.fx.fxv2-ghost .card-face::after { font-size: 40px; }
+.fx.fxv2-mirror { filter: sepia(1) saturate(2.5) hue-rotate(-15deg) blur(0.6px) drop-shadow(0 0 6px #ffb300); }
+.fx.fxv2-mirror > * { width: 100%; height: 100%; box-sizing: border-box; margin: 0; }
+.fx.fxv2-hawkghost { font-size: 34px; filter: sepia(0.6) saturate(2) drop-shadow(0 0 8px #ffb300); }
+
+/* Lava pieces: bubbles, the lava coat and cooled crust, drips that harden, the rim of a flood, the glowing ground */
+.fx.fxv2-bubble { border-radius: 50%; background: radial-gradient(circle at 35% 30%, #fff3a0 0 12%, #ffb300 30%, #ff5a00 60%, #a01800);
+  box-shadow: 0 0 8px #ff6a00; }
+.fx.fxv2-lavacoat { border-radius: 8px; background: radial-gradient(circle at 30% 70%, #fff3a0 0 8%, #ffb300 20%, #ff5a00 50%, #a01800);
+  box-shadow: 0 0 16px #ff6a00; }
+.fx.fxv2-crust { box-sizing: border-box; border-radius: 8px; border: 3px solid #2a1a14;
+  background: repeating-linear-gradient(60deg, #0000 0 10px, #ff6a0088 10px 12px), repeating-linear-gradient(-60deg, #0000 0 10px, #1a0e0a99 10px 12px),
+    linear-gradient(#6a5a50, #4a3a34); box-shadow: inset 0 0 10px #ff6a0088, 0 0 10px #ff6a0066; }
+.fx.fxv2-drip { width: 10px; height: 16px; }
+.fxv2-drip i { position: absolute; inset: 0; border-radius: 50% 50% 50% 50% / 35% 35% 65% 65%; }
+.fxv2-drip .fxv2-hot { background: radial-gradient(circle at 40% 70%, #fff3a0 0 15%, #ff8a1f 45%, #c02000); box-shadow: 0 0 6px #ff6a00; }
+.fxv2-drip .fxv2-cold { background: radial-gradient(circle at 40% 60%, #8a7a70 0 20%, #4a3a34 60%, #2a1e1a); opacity: 0;
+  animation: fxv2-harden var(--t, 0.8s) ease-in forwards; }
+.fxv2-drip .fxv2-hot:not(:last-child) { animation: fxv2-cool var(--t, 0.8s) ease-in forwards; } /* only when it hardens */
+.fx.fxv2-lavarim { border-radius: 45% 45% 8px 8px / 100% 100% 8px 8px; box-shadow: 0 0 12px #ff6a00;
+  background: radial-gradient(circle at 20% 45%, #fff3a0 0 8%, transparent 10%), radial-gradient(circle at 70% 55%, #ffd23f 0 6%, transparent 8%),
+    linear-gradient(#ffb300, #ff5a00 50%, #c02000); }
+.fx.fxv2-groundglow { border-radius: 50%; background: radial-gradient(ellipse, #fff3a0cc 0 10%, #ff8a1f99 30%, #ff3d0055 50%, #ff3d0000 70%); }
+.fx.fxv2-heartglow { border-radius: 50%; background: radial-gradient(circle, #ffb300aa 0, #ff5a0066 35%, #ff3d0000 70%); }
+
+/* Custom stamp: electric yellow on storm-purple (Cinder Storm) */
+.fx.fxr-stamp.fxv2-storm { color: #fff6a0; -webkit-text-stroke-color: #1a1030; text-shadow: 0 4px 0 #1a1030, 0 0 14px #ffd23f, 0 0 28px #ff6a00; }
+
+/* Trails dropped behind projectiles */
+.fx.fxv2-trail-comet { width: 30px; height: 30px; border-radius: 50%; background: radial-gradient(circle, #fff3a0 0 15%, #ffb300 35%, #ff3d00aa 55%, #ff3d0000 70%);
+  animation: fxv2-trail 0.42s ease-out forwards; }
+.fx.fxv2-trail-dust { width: 34px; height: 34px; border-radius: 50%; background: radial-gradient(circle, #c9b28acc 0, #8a7a6088 45%, #8a7a6000 70%);
+  animation: fxv2-trail-grow 0.45s ease-out forwards; }
+
+@keyframes fxv2-spin { to { transform: rotate(360deg); } }
+@keyframes fxv2-sway { from { transform: skewX(-9deg); } to { transform: skewX(9deg); } }
+@keyframes fxv2-shimmer { from { transform: translateY(-3px) skewX(-6deg); } to { transform: translateY(3px) skewX(6deg); } }
+@keyframes fxv2-rumble { from { transform: translateX(-1.5px); } to { transform: translateX(1.5px); } }
+@keyframes fxv2-cool { 0%, 55% { opacity: 1; } 90%, 100% { opacity: 0; } }
+@keyframes fxv2-harden { 0%, 55% { opacity: 0; } 90%, 100% { opacity: 1; } }
+@keyframes fxv2-trail { from { transform: translate(-50%, -50%) scale(1); opacity: 0.95; } to { transform: translate(-50%, -50%) scale(0.2); opacity: 0; } }
+@keyframes fxv2-trail-grow { from { transform: translate(-50%, -50%) scale(0.5); opacity: 0.9; } to { transform: translate(-50%, -50%) scale(1.6); opacity: 0; } }
+
+/* ---- Card faces: dark volcanic basalt with each card's own pattern (text stays light and readable) ---- */
+/* Blazing Dive: a shooting star streaking across a red night sky */
+.card-face[data-region="volcano"][data-card="blazing-dive"] { --design:
+  linear-gradient(35deg, transparent 46%, #ff8a1f44 48%, #ffd23fbb 49.5%, #fff3a0 50%, transparent 51.5%),
+  radial-gradient(circle at 80% 22%, #fff3a0 0 2px, #ffb30066 3px, transparent 8px),
+  radial-gradient(circle at 20% 30%, #ffd23f88 0 1.5px, transparent 2.5px), radial-gradient(circle at 60% 12%, #ffd23f66 0 1.5px, transparent 2.5px),
+  linear-gradient(#3a1a12, #140806); }
+/* Fire Tornado: a swirl of flame rays around a hot eye */
+.card-face[data-region="volcano"][data-card="fire-tornado"] { --design:
+  repeating-conic-gradient(from 0deg at 50% 62%, #ff6a0030 0 12deg, transparent 12deg 30deg),
+  radial-gradient(circle at 50% 62%, #ffb30055 0 10%, transparent 45%), linear-gradient(#3a1a10, #160806); }
+/* Ash Cloud: sooty billows with a few glowing cinders */
+.card-face[data-region="volcano"][data-card="ash-cloud"] { --design:
+  radial-gradient(circle at 25% 28%, #8a807855 0 18%, transparent 19%), radial-gradient(circle at 50% 20%, #8a807844 0 22%, transparent 23%),
+  radial-gradient(circle at 76% 30%, #8a807855 0 17%, transparent 18%), radial-gradient(circle at 60% 82%, #ff8a1f88 0 2px, transparent 3px),
+  radial-gradient(circle at 30% 70%, #ffb30066 0 1.5px, transparent 2.5px), linear-gradient(#34302c, #141210); }
+/* Molten Talons: three red-hot claw scratches */
+.card-face[data-region="volcano"][data-card="molten-talons"] { --design:
+  linear-gradient(115deg, transparent 33%, #ff5a00aa 34% 35%, transparent 36% 45%, #ff5a00aa 46% 47%, transparent 48% 57%, #ff5a00aa 58% 59%, transparent 60%),
+  radial-gradient(ellipse at 50% 50%, #7a1a0044, transparent 70%), linear-gradient(#3a140c, #160604); }
+/* Heat Mirage: shimmering heat bands over desert dunes */
+.card-face[data-region="volcano"][data-card="heat-mirage"] { --design:
+  repeating-linear-gradient(0deg, transparent 0 5px, #ffd23f1a 5px 7px),
+  radial-gradient(ellipse 90% 35% at 30% 100%, #7a4018 0 60%, transparent 61%), radial-gradient(ellipse 80% 30% at 85% 100%, #5a2e12 0 60%, transparent 61%),
+  linear-gradient(#4a2a14, #1e0e06); }
+/* Cinder Storm (evolution): a black thundercloud, a lightning streak and falling cinders */
+.card-face[data-region="volcano"][data-card="cinder-storm"] { --design:
+  radial-gradient(ellipse 75% 22% at 50% 6%, #0a080cee 0 70%, transparent 72%),
+  linear-gradient(100deg, transparent 47%, #ffd23fcc 48% 50%, transparent 51%) 50% 100% / 100% 72% no-repeat,
+  radial-gradient(circle at 22% 60%, #ff8a1f 0 1.5px, transparent 2.5px), radial-gradient(circle at 78% 45%, #ffb300 0 1.5px, transparent 2.5px),
+  radial-gradient(ellipse 80% 30% at 50% 100%, #ff5a0033, transparent 70%), linear-gradient(#241c24, #0e080a); }
+/* Ember Rain (evolution): sparkler embers raining down */
+.card-face[data-region="volcano"][data-card="ember-rain"] { --design:
+  radial-gradient(circle at 18% 30%, #ffd23f 0 1.5px, transparent 2.5px), radial-gradient(circle at 42% 58%, #ffb300 0 1.5px, transparent 2.5px),
+  radial-gradient(circle at 70% 24%, #fff3a0 0 1.5px, transparent 2.5px), radial-gradient(circle at 84% 66%, #ffd23f 0 1.5px, transparent 2.5px),
+  radial-gradient(circle at 30% 84%, #ff8a1f 0 1.5px, transparent 2.5px), repeating-linear-gradient(100deg, transparent 0 10px, #ffb3001c 10px 11px),
+  linear-gradient(#2e160c, #120604); }
+/* Boulder Fist: cracked granite chunks */
+.card-face[data-region="volcano"][data-card="boulder-fist"] { --design:
+  linear-gradient(60deg, transparent 48%, #ff8a1f66 49% 50%, transparent 51%),
+  radial-gradient(circle at 25% 75%, #6a5a5077 0 14%, transparent 15%), radial-gradient(circle at 75% 25%, #6a5a5066 0 12%, transparent 13%),
+  radial-gradient(circle at 80% 80%, #5a4a4277 0 9%, transparent 10%), linear-gradient(#3a302a, #1a1210); }
+/* Quake Stomp: rock strata split by a glowing fault line */
+.card-face[data-region="volcano"][data-card="quake-stomp"] { --design:
+  linear-gradient(80deg, transparent 49%, #ff8a1f77 49.5% 50.5%, transparent 51%),
+  repeating-linear-gradient(0deg, #5a4a4230 0 6px, transparent 6px 14px), linear-gradient(#3a2a20, #1a100a); }
+/* Magma Armor: stone plates with glowing seams */
+.card-face[data-region="volcano"][data-card="magma-armor"] { --design:
+  repeating-linear-gradient(60deg, transparent 0 12px, #ff6a0040 12px 13px), repeating-linear-gradient(-60deg, transparent 0 12px, #ff6a0040 12px 13px),
+  repeating-linear-gradient(0deg, transparent 0 12px, #ff6a0030 12px 13px), linear-gradient(#3e302a, #1c120e); }
+/* Obsidian Claw: polished black glass with a violet sheen */
+.card-face[data-region="volcano"][data-card="obsidian-claw"] { --design:
+  linear-gradient(120deg, transparent 30%, #b07cff30 36%, transparent 42%, transparent 58%, #b07cff22 64%, transparent 70%),
+  linear-gradient(60deg, transparent 45%, #e8d0ff22 50%, transparent 55%), linear-gradient(#1e1428, #08040c); }
+/* Molten Heart: a glowing core with radiating cracks */
+.card-face[data-region="volcano"][data-card="molten-heart"] { --design:
+  radial-gradient(circle at 50% 50%, #ff5a0066 0 14%, #ff3d0022 30%, transparent 45%),
+  repeating-conic-gradient(from 10deg at 50% 50%, transparent 0 40deg, #ff6a0030 40deg 43deg), linear-gradient(#361410, #140606); }
+/* Eruption (Volcano Titan): a lava-lit cone under a glowing sky, a lava stream down its face */
+.card-face[data-region="volcano"][data-card="eruption"] { --design:
+  linear-gradient(90deg, transparent 47%, #ff6a00aa 48% 52%, transparent 53%) 50% 100% / 100% 48% no-repeat,
+  linear-gradient(to top left, #140a08 50%, transparent 50%) 0 100% / 50% 50% no-repeat,
+  linear-gradient(to top right, #140a08 50%, transparent 50%) 100% 100% / 50% 50% no-repeat,
+  radial-gradient(ellipse 60% 30% at 50% 50%, #ff6a0066, transparent 70%), linear-gradient(#4a1a0e, #1a0806); }
+/* Lava Flood (Volcano Titan): waves of lava rolling along the bottom */
+.card-face[data-region="volcano"][data-card="lava-flood"] { --design:
+  radial-gradient(circle at 50% 100%, #ff5a00aa 0 55%, transparent 58%) 0 88% / 20px 12px repeat-x,
+  linear-gradient(transparent 88%, #ff5a0099 88%, #c02000cc),
+  radial-gradient(circle at 30% 40%, #ffb30055 0 1.5px, transparent 2.5px), radial-gradient(circle at 72% 30%, #ffd23f55 0 1.5px, transparent 2.5px),
+  linear-gradient(#34160c, #140604); }

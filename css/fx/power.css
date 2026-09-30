@@ -1,0 +1,101 @@
+/* Card effects: power group (Croak Blast, Swamp King, Double Croak, crits, K.O.). See js/fx/power.js.
+   Everything here is a static look; motion is done with transform/opacity animations in the JS. */
+
+/* --- Comic stamps (text that slams onto the screen) --- */
+.fxp-stamp { font-family: 'Arial Black', Impact, 'Helvetica Neue', sans-serif; font-weight: 900; font-style: italic;
+             letter-spacing: 1px; line-height: 0.95; padding: 0 0.15em; }
+.fxp-stamp small { display: block; font-size: 0.4em; letter-spacing: 3px; margin-top: 2px; }
+/* Croak Blast: hot orange comic lettering */
+.fxp-croak { color: #ffe14d; -webkit-text-stroke: 3px #7a1d00; paint-order: stroke fill;
+             text-shadow: 0 5px 0 #3a0010, 0 0 18px #ff7a1f; }
+/* Swamp King: polished gold lettering */
+.fxp-royal { background: linear-gradient(#fffbe0 0%, #ffe066 38%, #e89a00 52%, #ffe98a 72%, #b36b00 100%);
+             -webkit-background-clip: text; background-clip: text; color: transparent; -webkit-text-stroke: 1.5px #4a2200;
+             filter: drop-shadow(0 3px 0 #2a1000) drop-shadow(0 0 10px #ffc400); }
+/* CRITICAL!: white-hot to red gradient */
+.fxp-crit-text { background: linear-gradient(#fff 0%, #fff3a0 30%, #ffd23f 50%, #ff8a1f 75%, #ff3b3b 100%);
+                 -webkit-background-clip: text; background-clip: text; color: transparent; -webkit-text-stroke: 2px #5a0000;
+                 filter: drop-shadow(0 4px 0 #2a0000) drop-shadow(0 0 14px #ff5d1f); }
+/* K.O.: huge fiery letters */
+.fxp-ko { background: linear-gradient(#fff 0%, #ffe066 30%, #ff7a1f 55%, #d11 80%, #6a0000 100%);
+          -webkit-background-clip: text; background-clip: text; color: transparent; -webkit-text-stroke: 4px #1a0000;
+          filter: drop-shadow(0 6px 0 #000) drop-shadow(0 0 20px #ff3b1f); letter-spacing: -2px; }
+/* Double Croak strike counter: a glossy pill that heats up with stacks */
+.fxp-badge { font-style: normal; color: #fff; padding: 0.08em 0.38em 0.14em; border-radius: 999px; border: 3px solid #fff;
+             background: radial-gradient(circle at 35% 30%, #e6ccff, #9a5cf0 45%, #5a2a94);
+             box-shadow: 0 0 16px #b07cff, 0 4px 0 #2a0a50; text-shadow: 0 2px 0 #2a0a50; }
+.fxp-badge.fxp-hot { background: radial-gradient(circle at 35% 30%, #ffd1f1, #ff5dc8 45%, #a0126e);
+                     box-shadow: 0 0 20px #ff5dc8, 0 4px 0 #4a0030; }
+.fxp-badge.fxp-max { color: #5a2d00; text-shadow: 0 1px 0 #fff7c2;
+                     background: radial-gradient(circle at 35% 30%, #fffbe0, #ffd23f 45%, #d08a00);
+                     box-shadow: 0 0 26px #ffd23f, 0 0 50px #ff9a1f, 0 4px 0 #6a3a00; }
+.fxp-badge.fxp-ghost { box-shadow: none; }
+.fxp-encore { color: #ffd1f1; -webkit-text-stroke: 3px #6a0a50; paint-order: stroke fill;
+              text-shadow: 0 4px 0 #2a0020, 0 0 16px #ff5dc8; }
+
+/* --- Croak Blast --- */
+.fxp-mega { filter: drop-shadow(0 0 10px #ffb03b); }
+/* One sonic arc: the right edge of an ellipse, i.e. a ")" facing the way it travels */
+.fxp-arc { width: 44px; height: 104px; border-radius: 50%; border: 7px solid transparent; border-right-color: #ffb03b;
+           box-sizing: border-box; }
+/* Striped cone of sound from the croaker to the foe */
+.fx.fx-beam.fxp-cone { border-radius: 0; background: repeating-linear-gradient(90deg, #ffe14dd9 0 5px, #ff9a1f40 5px 15px);
+                       -webkit-clip-path: polygon(0 40%, 100% 0, 100% 100%, 0 60%); clip-path: polygon(0 40%, 100% 0, 100% 100%, 0 60%); }
+/* Soft thick pressure wave */
+.fxp-glow.fxp-sonic-wave { background: radial-gradient(circle, #fff0 34%, #ffe14d99 46%, #ff7a1fcc 54%, #fff0 66%); }
+/* Equalizer bars flung out by the boom */
+.fx-particle.fxp-bar { width: 6px !important; border-radius: 3px; }
+
+/* --- Shared shapes --- */
+.fxp-line { width: 70px; height: 3px; border-radius: 3px; background: linear-gradient(90deg, #fff0, #fff 70%, #fff); }
+.fxp-line.fxp-line-gold { height: 4px; background: linear-gradient(90deg, #ffd23f00, #ffd23f 60%, #fffbe0); }
+.fxp-line.fxp-line-croak { height: 4px; background: linear-gradient(90deg, #ff9a1f00, #ffb03b 60%, #fff); }
+.fxp-glow { border-radius: 50%; }
+.fxp-glow.fxp-glow-gold { background: radial-gradient(circle, #fff 0, #fff7c2 16%, #ffd23fcc 32%, #ff9a1f44 50%, #ff9a1f00 68%); }
+.fxp-glow.fxp-glow-fire { background: radial-gradient(circle, #fff 0, #fff3a0 14%, #ffb31f 30%, #ff4b1fcc 46%, #8a100066 60%, #8a100000 72%); }
+/* Sunburst rays, faded at the centre and the rim */
+.fxp-rays { border-radius: 50%;
+            -webkit-mask-image: radial-gradient(circle, #0000 14%, #000 26%, #000 40%, #0000 70%);
+                    mask-image: radial-gradient(circle, #0000 14%, #000 26%, #000 40%, #0000 70%); }
+.fxp-rays.fxp-rays-gold { background: repeating-conic-gradient(#ffd23f 0 7deg, #0000 7deg 18deg, #fff7c2 18deg 22deg, #0000 22deg 36deg); }
+.fxp-rays.fxp-rays-crit { background: repeating-conic-gradient(#fff 0 4deg, #0000 4deg 14deg, #ffd23f 14deg 19deg, #0000 19deg 30deg,
+                                                               #ff3b3b 30deg 33deg, #0000 33deg 45deg); }
+.fxp-rays.fxp-rays-fire { background: repeating-conic-gradient(#ffe066 0 6deg, #0000 6deg 16deg, #ff5d1f 16deg 24deg, #0000 24deg 34deg); }
+
+/* --- Swamp King --- */
+.fxp-crown { filter: drop-shadow(0 0 10px #ffd23f) drop-shadow(0 3px 0 #6a3a00); }
+.fxp-crown.fxp-crown-fly { font-size: 40px; }
+.fxp-gem { text-shadow: 0 0 8px #ffd23f, 0 2px 0 #6a3a00; }
+.fxp-coin svg { display: block; }
+/* Pillar of gold light rising from the King at the start of the super move */
+.fxp-pillar { width: 64px; height: 240px;
+              background: linear-gradient(90deg, #fff0, #ffe06699 25%, #fffbe0 50%, #ffe06699 75%, #fff0);
+              -webkit-mask-image: linear-gradient(#0000, #000 35%, #000 80%, #0000);
+                      mask-image: linear-gradient(#0000, #000 35%, #000 80%, #0000); }
+/* Sparkle trail left by the flying crown (dropped by fxFly, which doesn't animate it itself) */
+.fxp-trail-gold { width: 16px; height: 16px; border-radius: 50%; background: radial-gradient(circle, #fff 0, #ffe066 35%, #ffd23f00 70%);
+                  animation: fxp-trail 0.4s ease-out forwards; }
+.fxp-trail-gold::after { content: '✦'; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+                         color: #fff7c2; font-size: 12px; }
+@keyframes fxp-trail { from { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
+                       to { transform: translate(-50%, -50%) scale(0.2) rotate(90deg); opacity: 0; } }
+
+/* --- Double Croak --- */
+.fxp-note { font-weight: 900; text-shadow: 0 0 8px currentColor, 0 2px 0 #2a0050; }
+.fxp-note.fxp-note-fly { font-size: 30px; color: #e0c3ff; }
+.fxp-note-pop { filter: drop-shadow(0 0 10px #b07cff); }
+.fxp-echo { text-shadow: 0 0 12px #ff7ad9; }
+/* A strip of sheet music: five staff lines over a purple band, with notes on it */
+.fxp-staff { display: flex; align-items: center; justify-content: space-around; box-sizing: border-box; border-radius: 6px;
+             background: repeating-linear-gradient(#0000 0 7px, #e0c3ffd9 7px 9px) 0 1px / 100% 45px no-repeat,
+                         linear-gradient(90deg, #7b3fbf00, #7b3fbfaa 20%, #7b3fbfaa 80%, #7b3fbf00);
+             font: 900 26px sans-serif; color: #fff; text-shadow: 0 0 8px #ff7ad9, 0 2px 0 #3a1470; }
+
+/* --- Crits and K.O. --- */
+.fxp-slash { width: 300px; height: 10px; border-radius: 50%;
+             background: linear-gradient(90deg, #fff0, #fff 22%, #fffbe0 50%, #fff 78%, #fff0);
+             box-shadow: 0 0 12px 2px #ffd23f, 0 0 26px 6px #ff5d1f88; }
+.fx-particle.fxp-shard { border-radius: 0; -webkit-clip-path: polygon(50% 0, 100% 42%, 60% 100%, 0 58%);
+                         clip-path: polygon(50% 0, 100% 42%, 60% 100%, 0 58%); }
+.fx-particle.fxp-debris { border-radius: 2px; box-shadow: none !important; }
+.fxp-smoke { border-radius: 50%; background: radial-gradient(circle, #6a6a6acc 0, #4a4a4a88 40%, #3a3a3a00 70%); }

@@ -26,15 +26,18 @@ async function fuseEvent() {
   // Let the player tap one card from a list; resolves with its hand index, or -1 if they cancel
   const pickFrom = (indexes, prompt) => new Promise(resolve => {
     msg.textContent = prompt;
-    body.innerHTML = '<div class="hand-grid">' + indexes.map(i => cardFace(p.hand[i], 0, p.attack)).join('') + '</div>';
-    body.querySelectorAll('.card-face').forEach((el, k) => el.onclick = () => { sfx('card_pick'); resolve(indexes[k]); });
+    // Copies of the same card show as one stacked face (x2, x3...); picking it uses the first copy
+    const groups = [...indexes.reduce((m, i) => m.set(p.hand[i], [...(m.get(p.hand[i]) || []), i]), new Map()).values()];
+    body.innerHTML = '<div class="hand-grid">' + groups.map(g => cardFace(p.hand[g[0]], g.length > 1 ? g.length : 0, p.attack)).join('') + '</div>';
+    addCardTabs(body.querySelector('.hand-grid'));
+    body.querySelectorAll('.card-face').forEach((el, k) => el.onclick = () => { sfx('card_pick'); resolve(groups[k][0]); });
     go.hidden = true;
     cancel.onclick = () => resolve(-1);
   });
 
   title.textContent = '⚗️ Fusion';
   // Donors: gimmick cards that haven't been fused themselves
-  const donors = p.hand.map((c, i) => i).filter(i => p.hand[i].gimmick && p.hand[i].gimmick !== 'grow' && !p.hand[i].extra); // growing cards can't be donated
+  const donors = p.hand.map((c, i) => i).filter(i => p.hand[i].gimmick && !['grow', 'mirror'].includes(p.hand[i].gimmick) && !p.hand[i].extra); // growing and mirror cards can't be donated
   if (!donors.length || p.hand.length < 2) {
     msg.textContent = 'You need a gimmick card and at least one other card to fuse.';
     body.innerHTML = '';
@@ -46,7 +49,7 @@ async function fuseEvent() {
   if (d < 0) return done();
   const donor = p.hand[d];
   // Targets: any other card with no fused gimmick yet that doesn't already have this gimmick
-  const targets = p.hand.map((c, i) => i).filter(i => i !== d && !p.hand[i].extra && p.hand[i].gimmick !== donor.gimmick);
+  const targets = p.hand.map((c, i) => i).filter(i => i !== d && !p.hand[i].extra && !p.hand[i].curse && p.hand[i].gimmick !== donor.gimmick);
   if (!targets.length) {
     msg.textContent = `No card can take ${donor.name}'s gimmick (each card can only hold one extra gimmick).`;
     body.innerHTML = '';
@@ -67,6 +70,7 @@ async function fuseEvent() {
     // Remove both originals (higher index first so the other index stays valid), add the fused card
     [d, t].sort((a, b) => b - a).forEach(i => p.hand.splice(i, 1));
     p.hand.push(fused);
+    questEvent(p, 'forge'); gainXp(p, 6);
     sfx('card_land_gimmick', 0.8);
     burst(body.querySelector('.card-face'), ['#b07cff', '#fff', '#ffd23f', '#e0c3ff'], 40, 1.3);
     flash('#b07cff', 0.35);

@@ -1,0 +1,181 @@
+/* Card effects kit: Ice Lake (frost) and Volcano (fire) enemy cards (see js/fx/region-kit.js).
+   Every class and keyframe here is prefixed fxr-. Only transform/opacity animate; shadows, gradients and
+   filters below are static on small spawned elements. */
+
+/* Inline SVG graphics fill their box */
+.fx.fxr-svg svg, .fx.fxr-flake svg, .fxr-flake svg, .fx.fxr-icicle svg, .fx.fxr-flame svg, .fx.fxr-plate-fly svg { display: block; width: 100%; height: 100%; overflow: visible; }
+.fxr-flake { display: block; width: 1em; height: 1em; filter: drop-shadow(0 0 3px #7ae0ff); }
+.fx.fxr-flake { filter: drop-shadow(0 0 3px #7ae0ff); }
+.fx.fxr-bloom { filter: drop-shadow(0 0 10px #7ae0ff); }
+.fx.fxr-bigflake { filter: drop-shadow(0 0 12px #7ae0ff) drop-shadow(0 3px 0 #0d3b7a); }
+.fx.fxr-tick { filter: drop-shadow(0 2px 0 #0006); }
+.fx.fxr-icicle { width: 70px; height: 24px; filter: drop-shadow(0 0 6px #7ae0ff); }
+.fx.fxr-flame { filter: drop-shadow(0 0 8px #ff6a00); }
+.fx.fxr-plate-fly { width: 30px; height: 40px; filter: drop-shadow(0 2px 0 #0006); }
+.fx.fxr-crystal { filter: drop-shadow(0 0 10px #7ae0ff); }
+.fx.fxr-rockplate { filter: drop-shadow(0 0 8px #ff6a00) drop-shadow(0 3px 0 #000a); }
+.fx.fxr-reticle { filter: drop-shadow(0 0 6px var(--c, #7ae0ff)); }
+.fx.fxr-orbit { filter: drop-shadow(0 2px 0 #0006); }
+
+/* Big card art that leaps out of the wheel (drawn big and scaled down so it stays crisp) */
+.fx.fxr-art { font-size: 120px; filter: drop-shadow(0 0 10px var(--c, #7ae0ff)); }
+
+/* Stamped words. Frost: frost, snow, aurora, moon, deep. Fire: fire, lava, ash, sun, stone, obsidian, gold */
+.fx.fxr-stamp { z-index: 3; font-family: Impact, 'Arial Black', 'Avenir Next Condensed', Futura, sans-serif; font-weight: 900;
+  letter-spacing: 1px; -webkit-text-stroke: 2px #000; }
+.fx.fxr-frost    { color: #eef8ff; -webkit-text-stroke-color: #0d3b7a; text-shadow: 0 4px 0 #0d3b7a, 0 6px 0 #041a3a, 0 0 18px #6aa8ff; }
+.fx.fxr-snow     { color: #ffffff; -webkit-text-stroke-color: #2a6ad1; text-shadow: 0 4px 0 #2a6ad1, 0 0 16px #bfe6ff; }
+.fx.fxr-aurora   { color: #d8fff0; -webkit-text-stroke-color: #4a1a8a; text-shadow: 0 4px 0 #4a1a8a, 0 0 14px #5fffb0, 0 0 26px #b07cff; }
+.fx.fxr-moon     { color: #fff6c8; -webkit-text-stroke-color: #2a2a6a; text-shadow: 0 4px 0 #2a2a6a, 0 0 18px #fff6c8; }
+.fx.fxr-deep     { color: #7ae0ff; -webkit-text-stroke-color: #020a1a; text-shadow: 0 4px 0 #020a1a, 0 0 16px #2a6ad1, 0 0 30px #2a6ad1; }
+.fx.fxr-fire     { color: #ffe066; -webkit-text-stroke-color: #7a1500; text-shadow: 0 4px 0 #7a1500, 0 0 16px #ff6d00, 0 0 30px #ff3d00; }
+.fx.fxr-lava     { color: #ff8a1f; -webkit-text-stroke-color: #2a0800; text-shadow: 0 4px 0 #2a0800, 0 0 14px #ff3d00, 0 0 28px #ff6a00; }
+.fx.fxr-ash      { color: #e0d8d0; -webkit-text-stroke-color: #2a2420; text-shadow: 0 4px 0 #2a2420, 0 0 14px #8a7a70; }
+.fx.fxr-sun      { color: #fff6a0; -webkit-text-stroke-color: #8a4a00; text-shadow: 0 4px 0 #8a4a00, 0 0 18px #ffd23f, 0 0 30px #ffb300; }
+.fx.fxr-stone    { color: #d8c8b8; -webkit-text-stroke-color: #2a1a10; text-shadow: 0 4px 0 #2a1a10, 0 0 12px #ff8a1f; }
+.fx.fxr-obsidian { color: #e8d0ff; -webkit-text-stroke-color: #12081a; text-shadow: 0 4px 0 #12081a, 0 0 16px #b07cff, 0 0 26px #ff4b1f; }
+.fx.fxr-gold     { color: #ffd23f; -webkit-text-stroke-color: #6a4000; text-shadow: 0 4px 0 #6a4000, 0 6px 0 #2a1a00, 0 0 22px #ffd23f; }
+
+/* Gacha-style name plate over the wheel that landed */
+.fx.fxr-plate { z-index: 2; padding: 5px 10px; border-radius: 7px; border: 2px solid var(--c, #7ae0ff); color: #fff; letter-spacing: 1px;
+  font: 900 13px/1 'Arial Black', Impact, 'Avenir Next Condensed', sans-serif;
+  box-shadow: 0 0 14px var(--c, #7ae0ff), 0 3px 0 #000; text-shadow: 0 0 6px var(--c, #7ae0ff); }
+.fx.fxr-plate-frost { background: linear-gradient(#0d3b7a, #041a3a); }
+.fx.fxr-plate-fire  { background: linear-gradient(#3a0a00, #140400); }
+
+/* Glowing frame flaring around a wheel window, and a shine sweeping across a card */
+.fx.fxr-frame { box-sizing: border-box; border-radius: 10px; border: 4px solid var(--c, #7ae0ff);
+  box-shadow: 0 0 22px var(--c, #7ae0ff), inset 0 0 22px var(--c, #7ae0ff); }
+.fx.fxr-glint { border-radius: 8px; background: linear-gradient(90deg, #fff0, #fffffff2, #fff0); }
+
+/* Speed lines and slashes (drawn with fxBeam) */
+.fx.fxr-line { background: linear-gradient(90deg, #fff0, #fff); }
+.fx.fxr-line-ice { background: linear-gradient(90deg, #7ae0ff00, #7ae0ff 60%, #fff); }
+.fx.fxr-line-fire { background: linear-gradient(90deg, #ff3d0000, #ff6a00 60%, #fff3a0); }
+.fx.fxr-slash-ice  { border-radius: 50%; background: linear-gradient(90deg, #fff0, #fff 22%, #dff4ff 50%, #2a6ad1 82%, #2a6ad100); box-shadow: 0 0 14px #7ae0ff, 0 0 4px #fff; }
+.fx.fxr-slash-fire { border-radius: 50%; background: linear-gradient(90deg, #fff0, #fff3a0 22%, #ffb300 50%, #ff3d00 82%, #ff3d0000); box-shadow: 0 0 14px #ff6a00, 0 0 4px #fff; }
+.fx.fxr-slash-dark { border-radius: 50%; background: linear-gradient(90deg, #fff0, #e8d0ff 22%, #7a3fd1 50%, #12081a 82%, #12081a00); box-shadow: 0 0 14px #b07cff, 0 0 4px #fff; }
+.fx.fxr-slash-moon { border-radius: 50%; background: linear-gradient(90deg, #fff0, #fff 22%, #fff6c8 50%, #c9a53a 82%, #c9a53a00); box-shadow: 0 0 14px #fff6c8, 0 0 4px #fff; }
+/* Beams: an ice spike / a lava crack racing at the victim, and a lava column */
+.fx.fxr-icebeam { background: linear-gradient(90deg, #dff4ff00, #dff4ff 30%, #7ae0ff); box-shadow: 0 0 12px #7ae0ff; }
+.fx.fxr-lavabeam { background: linear-gradient(90deg, #ffb30000, #ffe066 30%, #ff3d00); box-shadow: 0 0 12px #ff6a00; }
+.fx.fxr-jet { background: linear-gradient(90deg, #ff3d00, #ff8a1f 40%, #fff3a0 70%, #ffb30000); box-shadow: 0 0 18px #ff6a00; }
+
+/* Impact cores */
+.fx.fxr-core { border-radius: 50%; }
+.fx.fxr-core-frost  { background: radial-gradient(circle, #fff 0 18%, #dff4ff 32%, #7ae0ff99 52%, #2a6ad100 70%); }
+.fx.fxr-core-white  { background: radial-gradient(circle, #fff 0 25%, #ffffffaa 45%, #fff0 70%); }
+.fx.fxr-core-aurora { background: radial-gradient(circle, #fff 0 16%, #b4ffe0 30%, #b07cff99 52%, #7a3fd100 70%); }
+.fx.fxr-core-moon   { background: radial-gradient(circle, #fff 0 18%, #fff6c8 34%, #c9a53a88 52%, #c9a53a00 70%); }
+.fx.fxr-core-deep   { background: radial-gradient(circle, #fff 0 10%, #7ae0ff 24%, #0d3b7aaa 50%, #041a3a00 70%); }
+.fx.fxr-core-fire   { background: radial-gradient(circle, #fff 0 12%, #fff3a0 24%, #ffb300 40%, #ff6d00 55%, #d50000aa 66%, #d5000000 72%); }
+.fx.fxr-core-sun    { background: radial-gradient(circle, #fff 0 20%, #fff6a0 36%, #ffd23f 50%, #ffb30088 60%, #ffb30000 72%); }
+.fx.fxr-core-lava   { background: radial-gradient(circle, #fff3a0 0 12%, #ff8a1f 30%, #d02000 50%, #3a0800aa 62%, #3a080000 72%); }
+.fx.fxr-core-ash    { background: radial-gradient(circle, #fff 0 10%, #d8c8b8 24%, #6a5a50aa 48%, #2a242000 70%); }
+.fx.fxr-core-dark   { background: radial-gradient(circle, #fff 0 10%, #e8d0ff 22%, #7a3fd1aa 44%, #12081a88 58%, #12081a00 72%); }
+
+/* A shadow on the ground where something crashes down */
+.fx.fxr-shadow { border-radius: 50%; background: radial-gradient(ellipse, #000c, #0000 70%); }
+
+/* Frost: ice shards, mist, the freeze block, the ice wall, aurora curtains, glows and wisps */
+.fx.fxr-shard { border-radius: 0 !important; clip-path: polygon(50% 0, 100% 78%, 18% 100%); box-shadow: none !important; }
+.fx.fxr-mist { border-radius: 50%; background: radial-gradient(circle, #ffffffdd 0, #dff4ff88 40%, #bfe6ff00 70%); }
+.fx.fxr-iceblock { box-sizing: border-box; border-radius: 12px; border: 3px solid #e6f6ff;
+  background: linear-gradient(135deg, #ffffffcc 0 10%, #bfe6ff66 18%, #7ab8ff55 50%, #bfe6ff77 80%, #ffffffaa 100%);
+  box-shadow: 0 0 18px #7ae0ffaa, inset 0 0 16px #ffffffaa, inset 6px 6px 0 #ffffff66; }
+.fx.fxr-iceblock::before { content: ''; position: absolute; left: 12%; top: 12%; width: 30%; height: 10%; border-radius: 6px; background: #ffffffcc; transform: rotate(-12deg); }
+.fx.fxr-iceblock::after { content: ''; position: absolute; right: 10%; bottom: 14%; width: 18%; height: 7%; border-radius: 6px; background: #ffffff99; transform: rotate(-12deg); }
+.fx.fxr-icewall { box-sizing: border-box; border-radius: 18px; border: 6px solid #dff4ff;
+  background: radial-gradient(ellipse, #bfe6ff00 50%, #bfe6ff55 80%, #7ab8ffaa 100%);
+  box-shadow: 0 0 0 3px #2a6ad1, 0 0 18px #7ae0ff, inset 0 3px 0 #ffffffaa; }
+.fx.fxr-aurora { border-radius: 50%; filter: blur(0.5px); }
+.fx.fxr-aurora-0 { background: linear-gradient(90deg, #5fffb000, #5fffb0aa 30%, #7ae0ffaa 60%, #5fffb000); }
+.fx.fxr-aurora-1 { background: linear-gradient(90deg, #b07cff00, #b07cffaa 35%, #ff7ad988 65%, #b07cff00); }
+.fx.fxr-aurora-2 { background: linear-gradient(90deg, #7ae0ff00, #7ae0ff99 40%, #5fffb099 70%, #7ae0ff00); }
+.fx.fxr-glow-frost  { border-radius: 50%; background: radial-gradient(ellipse, #bfffea88 0, #7ae0ff55 40%, #7ae0ff00 70%); }
+.fx.fxr-glow-aurora { border-radius: 50%; background: radial-gradient(ellipse, #eafff4aa 0, #5fffb066 30%, #b07cff55 50%, #b07cff00 70%); }
+.fx.fxr-glow-fire   { border-radius: 50%; background: radial-gradient(ellipse, #ffe066aa 0, #ff8a1f66 35%, #ff3d0000 70%); }
+.fx.fxr-glow-sun    { border-radius: 50%; background: radial-gradient(ellipse, #fff6c8cc 0, #ffd23f88 30%, #ffb30000 70%); }
+.fxr-wisp { display: block; width: 18px; height: 18px; border-radius: 50%; }
+.fxr-wisp-frost { background: radial-gradient(circle, #fff 0 20%, #7ae0ff 45%, #7ae0ff00 70%); }
+.fxr-wisp-fire  { background: radial-gradient(circle, #fff3a0 0 20%, #ff8a1f 45%, #ff3d0000 70%); }
+
+/* Fire: smoke, steam, lava blobs, rocks, ash, scorch marks, heat haze, red-hot shields, magma wall */
+.fx.fxr-smoke { border-radius: 50%; background: radial-gradient(circle, #5a5048dd 0, #3a322caa 40%, #2a242000 70%); }
+.fx.fxr-steam { border-radius: 50%; background: radial-gradient(circle, #ffffffcc 0, #ffffff66 40%, #fff0 70%); }
+.fx.fxr-lava { border-radius: 50% 50% 46% 54% / 60% 55% 45% 40% !important;
+  background: radial-gradient(circle at 35% 30%, #fff3a0 0 14%, #ffb300 30%, #ff5a00 55%, #a01800) !important; box-shadow: 0 0 8px #ff6a00 !important; }
+.fx.fxr-rock { border-radius: 30% 45% 25% 50% !important; background: linear-gradient(135deg, #8a7a70, #4a3a34 50%, #2a1e1a) !important; box-shadow: none !important; }
+.fx.fxr-obsid { border-radius: 0 !important; clip-path: polygon(40% 0, 100% 35%, 80% 100%, 0 70%);
+  background: linear-gradient(135deg, #b07cff, #2a1a3a 45%, #0a0610) !important; box-shadow: none !important; }
+.fx.fxr-ash { border-radius: 40%; background: #8a8078; }
+.fx.fxr-scorch { border-radius: 50%; background: radial-gradient(ellipse, #1a0e0acc 0 40%, #3a1a0a99 55%, #ff6a0066 64%, #ff6a0000 72%); }
+.fx.fxr-haze { border-radius: 50%; background: radial-gradient(circle, #ffb30000 30%, #ffb30055 55%, #ff6a0033 62%, #ff6a0000 70%); }
+.fx.fxr-hotshield { box-sizing: border-box; border-radius: 50%; border: 3px solid #ffd23f;
+  background: radial-gradient(ellipse at 35% 30%, #fff3a0b0 0 7%, #ff8a1f33 28%, #ff5a0066 70%, #ff3d00aa 100%); box-shadow: 0 0 16px #ff6a00; }
+.fx.fxr-magmawall { box-sizing: border-box; border-radius: 18px; border: 7px solid #4a3a34;
+  background: radial-gradient(ellipse, #ff6a0000 50%, #ff6a0044 80%, #a01800aa 100%);
+  box-shadow: 0 0 0 3px #1a0e0a, 0 0 16px #ff6a00, inset 0 3px 0 #8a7a7088; }
+
+/* Trails dropped behind projectiles: they shrink and fade on their own */
+.fx.fxr-trail-frost { width: 18px; height: 18px; border-radius: 50%; background: radial-gradient(circle, #fff 0 22%, #7ae0ff99 48%, #7ae0ff00 70%); animation: fxr-fade 0.4s ease-out forwards; }
+.fx.fxr-trail-snow { width: 14px; height: 14px; border-radius: 50%; background: radial-gradient(circle, #fff 0 40%, #fff0 70%); animation: fxr-fall 0.45s ease-in forwards; }
+.fx.fxr-trail-aurora { width: 20px; height: 20px; border-radius: 50%; background: radial-gradient(circle, #eafff4 0 20%, #5fffb099 40%, #b07cff66 55%, #b07cff00 70%); animation: fxr-fade 0.45s ease-out forwards; }
+.fx.fxr-trail-moon { width: 18px; height: 18px; border-radius: 50%; background: radial-gradient(circle, #fff 0 22%, #fff6c899 48%, #fff6c800 70%); animation: fxr-fade 0.45s ease-out forwards; }
+.fx.fxr-trail-dark { width: 22px; height: 22px; border-radius: 50%; background: radial-gradient(circle, #e8d0ff 0 15%, #7a3fd199 40%, #12081a66 55%, #12081a00 70%); animation: fxr-fade 0.45s ease-out forwards; }
+.fx.fxr-trail-fire { width: 24px; height: 24px; border-radius: 50%; background: radial-gradient(circle, #fff3a0 0 15%, #ffb300 32%, #ff3d00aa 52%, #ff3d0000 70%); animation: fxr-rise 0.4s ease-out forwards; }
+.fx.fxr-trail-lava { width: 20px; height: 20px; border-radius: 50%; background: radial-gradient(circle, #ffe066 0 18%, #ff5a00 40%, #a0180088 55%, #a0180000 70%); animation: fxr-fall 0.45s ease-in forwards; }
+.fx.fxr-trail-smoke { width: 30px; height: 30px; border-radius: 50%; background: radial-gradient(circle, #5a5048aa 0, #3a322c66 40%, #2a242000 70%); animation: fxr-rise 0.6s ease-out forwards; }
+.fx.fxr-trail-sun { width: 22px; height: 22px; border-radius: 50%; background: radial-gradient(circle, #fff 0 18%, #ffd23f 40%, #ffb30066 55%, #ffb30000 70%); animation: fxr-fade 0.4s ease-out forwards; }
+@keyframes fxr-fade { from { transform: translate(-50%, -50%) scale(1); opacity: 0.9; } to { transform: translate(-50%, -50%) scale(0.2); opacity: 0; } }
+@keyframes fxr-rise { from { transform: translate(-50%, -50%) scale(1); opacity: 0.95; } to { transform: translate(-50%, -50%) translateY(-24px) scale(0.3); opacity: 0; } }
+@keyframes fxr-fall { from { transform: translate(-50%, -50%) scale(1); opacity: 0.95; } to { transform: translate(-50%, -50%) translateY(22px) scale(0.3); opacity: 0; } }
+
+/* ---- Card faces: Ice Lake cards are frosty glass, Volcano cards are dark basalt with glowing seams.
+   Each card's own pattern (--design) is set in its ice-*.css / volcano-*.css file. ---- */
+.card-face[data-region="ice"] { --design: linear-gradient(#f2fbff, #cbe9ff); color: #0d3b7a; }
+.card-face[data-region="ice"] .title, .card-face.gimmick[data-region="ice"] .title { color: #0d3b7a; }
+.card-face[data-region="ice"] .text { color: #123a6a; opacity: 0.9; }
+.card-face[data-region="ice"] .art { filter: drop-shadow(0 0 4px #7ae0ff); }
+.card-face[data-region="ice"]::after { text-shadow: 0 0 0 #2a6ad124; }
+.card-face[data-region="volcano"] { --design: linear-gradient(#3a2620, #1a0e0a); color: #ffe0c0; }
+.card-face[data-region="volcano"] .title, .card-face.gimmick[data-region="volcano"] .title { color: #ffb070; text-shadow: 0 0 6px #ff3d0088; }
+.card-face[data-region="volcano"] .text { color: #ffe8d0; opacity: 0.95; }
+.card-face[data-region="volcano"] .art { filter: drop-shadow(0 0 5px #ff6a00); }
+.card-face[data-region="volcano"]::after { text-shadow: 0 0 0 #ff6a0030; }
+.card-face[data-region="volcano"] .qty { background: #7a1a00; }
+/* The wheel's "landed" highlight keeps each look (instead of the plain yellow card) */
+.wheel-slot.lit .card-face[data-region="ice"] { background: #e6f7ff; outline-color: #7ae0ff; }
+.wheel-slot.lit .card-face[data-region="volcano"] { background: #4a1a0a; outline-color: #ff8a1f; }
+
+/* Emoji hits: the card's art slams onto the victim on impact */
+.fx.fxr-emoji { z-index: 2; filter: drop-shadow(0 0 10px var(--c, #7ae0ff)) drop-shadow(0 4px 0 #0008); }
+
+/* Super moves (like the Orbital Laser): rune seals, targeting lines, a sunburst and the giant card art */
+.fx.fxr-runes { filter: drop-shadow(0 0 10px var(--c, #7ae0ff)); }
+.fx.fxr-target { background: linear-gradient(90deg, #fff0, #fff 40%, #ff2b2b); box-shadow: 0 0 10px #ff2b2b; }
+.fx.fxr-rays { border-radius: 50%; background: repeating-conic-gradient(from 0deg, var(--c, #ffd23f) 0 7deg, #0000 7deg 20deg);
+  -webkit-mask: radial-gradient(circle, #000 20%, #0000 70%); mask: radial-gradient(circle, #000 20%, #0000 70%); }
+.fx.fxr-superart { z-index: 3; font-size: 150px; filter: drop-shadow(0 0 16px var(--c, #7ae0ff)) drop-shadow(0 0 34px var(--c, #7ae0ff)) drop-shadow(0 6px 0 #000a); }
+
+/* The SUPER MOVE tag on those cards */
+.card-face .super-tag { background: linear-gradient(90deg, #ff2bd6, #7a5cff, #2bd6ff); }
+
+/* Super-move scenes (SUPER_SCENES in js/fx/region-kit.js) */
+.fx.fxr-star { filter: drop-shadow(0 0 4px currentColor); }
+.fx.fxr-prop { filter: drop-shadow(0 6px 0 #0008); }
+.fx.fxr-moonglow { filter: drop-shadow(0 0 24px #fff6c8) drop-shadow(0 0 50px #fff6c8aa); }
+.fx.fxr-sunglow { filter: drop-shadow(0 0 30px #ffd23f) drop-shadow(0 0 60px #ff8a1f); }
+.fx.fxr-berg { filter: drop-shadow(0 0 18px #7ae0ff) drop-shadow(0 8px 0 #0008); }
+.fx.fxr-silhouette { font-size: 44px; filter: brightness(0) drop-shadow(0 0 6px #fff6c888); }
+.fx.fxr-howler { font-size: 90px; filter: brightness(0) drop-shadow(0 0 10px #ff5d8a); }
+.fx.fxr-marcher { font-size: 46px; filter: drop-shadow(0 3px 0 #0006); }
+.fx.fxr-marcher span { position: absolute; left: 50%; top: -22px; transform: translateX(-50%); font-size: 26px; }
+.fx.fxr-dragonhead { font-size: 150px; filter: drop-shadow(0 0 20px #ff3d00) drop-shadow(0 8px 0 #000a); }
+.fx.fxr-moonbeam { background: linear-gradient(90deg, #fff6c800, #fff6c8cc 30%, #ffffff); box-shadow: 0 0 40px #fff6c8; }
+.fx.fxr-eclipse { border-radius: 50%; background: radial-gradient(circle, #050008 0 60%, #1a0010 70%); }
+.fx.fxr-corona { border-radius: 50%; background: radial-gradient(circle, #0000 38%, #ff5d8a 42%, #ffd23f 46%, #ff5d8a55 56%, #0000 70%); }
+.fx.fxr-flare { border-radius: 50%; background: radial-gradient(circle, #fff6c8aa 0, #ffd23f55 40%, #ffd23f00 70%); border: 2px solid #fff6c866; }
+.fx.fxr-bolt { filter: drop-shadow(0 0 10px #fff6a0) drop-shadow(0 0 20px #ff8a1f); }
+.fx.fxr-galaxy { border-radius: 50%; background: conic-gradient(from 0deg, #b07cffcc, #ffd23f88, #ff2bd6cc, #2bd6ff88, #fff6a0aa, #b07cffcc);
+  -webkit-mask: radial-gradient(circle, #000 0 8%, #0008 30%, #0000 70%); mask: radial-gradient(circle, #000 0 10%, #000b 35%, #0000 72%); }

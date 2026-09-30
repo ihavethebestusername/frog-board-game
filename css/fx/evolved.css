@@ -1,0 +1,32 @@
+/* Card effects: evolved enemy attacks (see js/fx/evolved.js). Prefix fxe- */
+.fx.fxe-proj { font-size: 40px; filter: drop-shadow(0 3px 0 #0006); }
+.fx.fxe-small { font-size: 24px; }
+.fx.fxe-trail { width: 8px; height: 8px; border-radius: 50%; background: #fff; box-shadow: 0 0 8px #ff9a3b; animation: fxeFade 0.4s ease-out forwards; }
+@keyframes fxeFade { to { opacity: 0; transform: translate(-50%, -50%) scale(0.2); } }
+.fx-beam.fxe-beam { background: linear-gradient(90deg, #fff0, #ff9a3b 25%, #fff 55%, #ffd23f); box-shadow: 0 0 16px #ff9a3b; }
+.fx-pop.fxe-stamp { font: italic 900 30px/1 Impact, 'Arial Black', sans-serif; color: #fff; text-shadow: 0 3px 0 #3a0a0a, 0 0 14px #ff5d5d; }
+/* Evolved attacks get a dark, dangerous card look */
+[data-card="swarm-sting"] { --design: radial-gradient(circle at 50% 40%, #3a1a1a, #1a0808 80%); }
+[data-card="blood-drain"] { --design: radial-gradient(circle at 50% 40%, #3a1a1a, #1a0808 80%); }
+[data-card="royal-proboscis"] { --design: radial-gradient(circle at 50% 40%, #3a1a1a, #1a0808 80%); }
+[data-card="plague-swarm"] { --design: radial-gradient(circle at 50% 40%, #3a1a1a, #1a0808 80%); }
+[data-card="brood-wall"] { --design: radial-gradient(circle at 50% 40%, #3a1a1a, #1a0808 80%); }
+[data-card="iron-shell-slam"] { --design: radial-gradient(circle at 50% 40%, #3a1a1a, #1a0808 80%); }
+[data-card="rust-snap"] { --design: radial-gradient(circle at 50% 40%, #3a1a1a, #1a0808 80%); }
+[data-card="dragon-breath"] { --design: radial-gradient(circle at 50% 40%, #3a1a1a, #1a0808 80%); }
+[data-card="ancient-carapace"] { --design: radial-gradient(circle at 50% 40%, #3a1a1a, #1a0808 80%); }
+[data-card="lightning-beak"] { --design: radial-gradient(circle at 50% 40%, #3a1a1a, #1a0808 80%); }
+[data-card="gale-dive"] { --design: radial-gradient(circle at 50% 40%, #3a1a1a, #1a0808 80%); }
+[data-card="phoenix-flame"] { --design: radial-gradient(circle at 50% 40%, #3a1a1a, #1a0808 80%); }
+[data-card="rebirth-feather"] { --design: radial-gradient(circle at 50% 40%, #3a1a1a, #1a0808 80%); }
+[data-card="three-headed-bite"] { --design: radial-gradient(circle at 50% 40%, #3a1a1a, #1a0808 80%); }
+[data-card="hydra-venom"] { --design: radial-gradient(circle at 50% 40%, #3a1a1a, #1a0808 80%); }
+[data-card="toxic-spit"] { --design: radial-gradient(circle at 50% 40%, #3a1a1a, #1a0808 80%); }
+[data-card="tidal-crush"] { --design: radial-gradient(circle at 50% 40%, #3a1a1a, #1a0808 80%); }
+[data-card="abyssal-maw"] { --design: radial-gradient(circle at 50% 40%, #3a1a1a, #1a0808 80%); }
+[data-card="meat-hook"] { --design: radial-gradient(circle at 50% 40%, #3a1a1a, #1a0808 80%); }
+[data-card="iron-cleaver"] { --design: radial-gradient(circle at 50% 40%, #3a1a1a, #1a0808 80%); }
+[data-card="royal-slam"] { --design: radial-gradient(circle at 50% 40%, #3a1a1a, #1a0808 80%); }
+[data-card="tusk-frenzy"] { --design: radial-gradient(circle at 50% 40%, #3a1a1a, #1a0808 80%); }
+[data-card="royal-feast"] { --design: radial-gradient(circle at 50% 40%, #3a1a1a, #1a0808 80%); }
+.card-face[data-card="swarm-sting"], .card-face[data-card="blood-drain"], .card-face[data-card="royal-proboscis"], .card-face[data-card="plague-swarm"], .card-face[data-card="brood-wall"], .card-face[data-card="iron-shell-slam"], .card-face[data-card="rust-snap"], .card-face[data-card="dragon-breath"], .card-face[data-card="ancient-carapace"], .card-face[data-card="lightning-beak"], .card-face[data-card="gale-dive"], .card-face[data-card="phoenix-flame"], .card-face[data-card="rebirth-feather"], .card-face[data-card="three-headed-bite"], .card-face[data-card="hydra-venom"], .card-face[data-card="toxic-spit"], .card-face[data-card="tidal-crush"], .card-face[data-card="abyssal-maw"], .card-face[data-card="meat-hook"], .card-face[data-card="iron-cleaver"], .card-face[data-card="royal-slam"], .card-face[data-card="tusk-frenzy"], .card-face[data-card="royal-feast"] { color: #ffd0d0; }
