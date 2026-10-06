@@ -13,8 +13,8 @@ const rainCtx = rainCanvas.getContext('2d');
 const RAIN_DPR = 1;
 function sizeRain() {
   const dpr = RAIN_DPR;
-  rainCanvas.width = view.clientWidth * dpr;
-  rainCanvas.height = view.clientHeight * dpr;
+  rainCanvas.width = viewW * dpr;
+  rainCanvas.height = viewH * dpr;
 }
 sizeRain();
 addEventListener('resize', sizeRain);
@@ -23,7 +23,7 @@ addEventListener('resize', sizeRain);
 function visibleArea(m) {
   const inv = m.inverse();
   const a = inv.transformPoint(new DOMPoint(0, 0));
-  const b = inv.transformPoint(new DOMPoint(view.clientWidth, view.clientHeight));
+  const b = inv.transformPoint(new DOMPoint(viewW, viewH));
   return { x: Math.min(a.x, b.x), y: Math.min(a.y, b.y), w: Math.abs(b.x - a.x), h: Math.abs(b.y - a.y) };
 }
 
@@ -42,14 +42,36 @@ function setWeather(w) { WEATHER = w; drops = null; splashes.length = 0; }
 const splashes = [];
 
 let lastRain = performance.now(), rainFrame = 0, rainCovered = false;
-// Reading the camera's live transform forces a style recalculation, so only do it while the camera is
-// actually moving (a CSS transition) or its target changed; otherwise reuse the last matrix.
-let camMoving = false, camMatrix = null, camStyle = '';
-world.addEventListener('transitionrun', e => { if (e.target === world) camMoving = true; });
-world.addEventListener('transitionend', e => { if (e.target === world) { camMoving = false; camMatrix = null; } });
-world.addEventListener('transitioncancel', e => { if (e.target === world) { camMoving = false; camMatrix = null; } });
+// The camera's live position, worked out here instead of read from the page: reading the live transform
+// (getComputedStyle) forced a full style + layout every frame while the frog hopped. The camera is always
+// `translate(x, y) scale(z)` (board.js render) with a CSS transition, so we follow that transition ourselves:
+// when the target changes, glide from where we are now to the new target with the same duration and easing.
+let camStyle = null, camFrom = null, camTo = null, camStart = 0, camDur = 500, camNow = null, camSeen = -1e9;
+const parseCam = s => { const n = (s.match(/-?[\d.]+(e-?\d+)?/g) || [0, 0, 1]).map(Number); return { x: n[0] || 0, y: n[1] || 0, z: n[2] || 1 }; };
+// CSS 'ease' = cubic-bezier(0.25, 0.1, 0.25, 1): solve for the curve's x, return its y
+function cssEase(t) {
+  const bx = u => 3 * u * (1 - u) * (1 - u) * 0.25 + 3 * u * u * (1 - u) * 0.25 + u * u * u;
+  const by = u => 3 * u * (1 - u) * (1 - u) * 0.1 + 3 * u * u * (1 - u) + u * u * u;
+  let lo = 0, hi = 1, u = t;
+  for (let i = 0; i < 12; i++) { u = (lo + hi) / 2; if (bx(u) < t) lo = u; else hi = u; }
+  return by(u);
+}
+function cameraMatrix(t) {
+  const style = world.style.transform;
+  const watching = t - camSeen < 1000; // false after the weather was paused under a menu: the glide is long over
+  camSeen = t;
+  if (style !== camStyle) {
+    const to = parseCam(style);
+    camFrom = watching && camNow || to; camTo = to; camStart = t; camStyle = style;
+    const d = parseFloat(world.style.transitionDuration);
+    camDur = Number.isFinite(d) ? (/ms$/.test(world.style.transitionDuration) ? d : d * 1000) : 500; // .world: transform 0.5s ease
+  }
+  const k = camDur > 0 ? cssEase(Math.min(1, (t - camStart) / camDur)) : 1;
+  camNow = { x: camFrom.x + (camTo.x - camFrom.x) * k, y: camFrom.y + (camTo.y - camFrom.y) * k, z: camFrom.z + (camTo.z - camFrom.z) * k };
+  return new DOMMatrix([camNow.z, 0, 0, camNow.z, camNow.x, camNow.y]);
+}
 // Full-screen menus hide the board, so the rain can rest while one is open
-const RAIN_COVERS = '#check:not([hidden]), #shop:not([hidden]), #battle:not([hidden]), #hand:not([hidden]), #flies:not([hidden]), #cups:not([hidden]), #fuse:not([hidden]), #events:not([hidden])';
+const RAIN_COVERS = '#menu:not([hidden]), #check:not([hidden]), #shop:not([hidden]), #battle:not([hidden]), #hand:not([hidden]), #flies:not([hidden]), #cups:not([hidden]), #fuse:not([hidden]), #events:not([hidden])';
 (function drawRain(t) {
   const dt = Math.min(50, t - lastRain);
   lastRain = t;
@@ -59,12 +81,7 @@ const RAIN_COVERS = '#check:not([hidden]), #shop:not([hidden]), #battle:not([hid
   }
   if (rainCovered || document.hidden) { requestAnimationFrame(drawRain); return; }
   const dpr = RAIN_DPR;
-  // The camera's live transform (includes its pan/zoom animations)
-  if (camMoving || !camMatrix || camStyle !== world.style.transform) {
-    camMatrix = new DOMMatrix(getComputedStyle(world).transform);
-    camStyle = world.style.transform;
-  }
-  const m = camMatrix;
+  const m = cameraMatrix(t); // the camera's live transform (includes its pan/zoom glides)
   const area = visibleArea(m);
   drops ||= Array.from({ length: RAIN_DROPS }, () => newDrop(area, true));
 
@@ -74,6 +91,7 @@ const RAIN_COVERS = '#check:not([hidden]), #shop:not([hidden]), #battle:not([hid
   rainCtx.lineWidth = 1 / m.a; // keep streaks 1px thin at any zoom
   rainCtx.lineCap = 'round';
 
+  drawFireflies(rainCtx, t, area); // fireflies.js (only the Swamp has any)
   if (WEATHER !== 'rain') { drawFlakes(t, dt, area, m); requestAnimationFrame(drawRain); return; }
   const batches = new Map(); // alpha -> drops to stroke in one path
   for (const d of drops) {

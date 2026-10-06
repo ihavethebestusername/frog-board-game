@@ -1,6 +1,6 @@
 // Regions: the adventure goes Swamp → Ice Lake → Volcano. Each region has its own board layout, look,
-// weather, hazard tiles, enemies and boss. Collect enough crowns in a region to unlock its boss (see
-// CROWNS_PER_REGION in progression.js); beat the boss and everyone travels to the next region.
+// weather, hazard tiles, enemies and boss. Complete enough laps of a region to unlock its boss (see
+// LAPS_TO_UNLOCK in progression.js); beat the boss and everyone travels to the next region.
 // Beating the Volcano's boss wins the game.
 
 // ---------- Enemy-only attacks for the new regions ----------
@@ -344,10 +344,10 @@ function loadRegion(i) {
   setWeather(r.weather);
 }
 // Boss gate: a region's boss only fights you once you've collected enough crowns in that region
-const bossUnlocked = p => (p.regionCrowns || 0) >= CROWNS_PER_REGION;
+const bossUnlocked = p => (p.regionLaps || 0) >= LAPS_TO_UNLOCK;
 function sealedBoss(p) {
-  const need = CROWNS_PER_REGION - (p.regionCrowns || 0);
-  banner(`🔒 The ${BOSS_TIER.name} is sealed! Collect ${need} more 👑 in the ${REGION().name}`, 'lose');
+  const need = LAPS_TO_UNLOCK - (p.regionLaps || 0);
+  banner(`🔒 The ${BOSS_TIER.name} is sealed! Complete ${need} more lap${need === 1 ? '' : 's'} of the ${REGION().name}`, 'lose');
   sfx('blocked', 0.7);
 }
 
@@ -379,7 +379,7 @@ async function advanceRegion(p) {
   regionRollStart = rollsTotal; threatBonus = 0; evolveBonus = 0; // threat and evolution restart for the new region
   players.forEach((q, i) => {
     q.pos = i === 0 ? 0 : at(...REGION().p2Start);
-    q.regionCrowns = 0; q.lapsSinceBoss = 0; q.bossHunting = false;
+    q.regionLaps = 0; q.lapsSinceBoss = 0; q.bossHunting = false;
     faceNext(q);
   });
   if (REGION().key !== 'swamp') stopRainSound();
@@ -396,7 +396,7 @@ async function advanceRegion(p) {
   el2.appendChild(card2);
   document.body.appendChild(el2);
   shellyHop(card2);
-  typeText(card2.querySelector('.tut-text'), to.intro + ` Collect <b>${CROWNS_PER_REGION} 👑</b> here to unlock the boss.`);
+  typeText(card2.querySelector('.tut-text'), to.intro + ` Complete <b>${LAPS_TO_UNLOCK} laps</b> here to unlock the boss, and beat it for a <b>grand crown 👑</b>.`);
   await tutButtons(card2, [{ label: 'Let\'s go! 🐸', value: 1, primary: true }]);
   el2.remove();
 }

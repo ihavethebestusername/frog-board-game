@@ -103,7 +103,7 @@ async function flyEvent() {
   const setOp = () => {
     curOp = FLY_OPS.filter(o => o !== curOp)[Math.floor(Math.random() * (FLY_OPS.length - 1))];
     opEl.textContent = curOp.sym;
-    opEl.classList.remove('pop'); void opEl.offsetWidth; opEl.classList.add('pop');
+    restartAnim(opEl, 'pop');
   };
   setOp();
   const frog = flyArena.querySelector('.fly-frog'), tongue = flyArena.querySelector('.fly-tongue');

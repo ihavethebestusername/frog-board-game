@@ -122,7 +122,7 @@ function sfx(name, pitch = 1, loud = 1) {
 // Spray particles (dots and stars) plus a shockwave ring out from the center of an element
 function burst(target, colors, count = 14, power = 1) {
   if (!target) return;
-  const r = target.getBoundingClientRect();
+  const r = cachedRect(target);
   let cx = r.left + r.width / 2, cy = r.top + r.height / 2;
   // When the screen is flipped for Player 2, on-screen positions are mirrored inside the rotated page
   if (document.documentElement.classList.contains('flipped')) { cx = innerWidth - cx; cy = innerHeight - cy; }
@@ -170,9 +170,9 @@ function dust(p, count) {
     const d = document.createElement('div');
     d.className = 'dust';
     const side = i % 2 ? 1 : -1;
-    const size = 7 + Math.random() * 9;
+    const size = (7 + Math.random() * 9) * 1.4; // a bit bigger: the soft gradient edge fades sooner than the old blur did
     Object.assign(d.style, { left: cx + 'px', top: cy + 'px', width: size + 'px', height: size + 'px',
-                             background: colors[i % colors.length], animationDelay: Math.random() * 0.08 + 's' });
+                             color: colors[i % colors.length], animationDelay: Math.random() * 0.08 + 's' });
     d.style.setProperty('--dx', side * (10 + Math.random() * 28) + 'px');
     d.style.setProperty('--dy', -(3 + Math.random() * 14) + 'px');
     world.appendChild(d);
@@ -180,8 +180,26 @@ function dust(p, count) {
   }
 }
 
-function restartAnim(el, cls) {
+// Restart a CSS animation class. The old trick (remove it, read el.offsetWidth, add it back) forced the browser to
+// lay out the whole page right then, several times per hit in battle, which was a big part of the battle lag.
+// Now: if the class isn't on, just add it; if it is, take it off and put it back two frames later (once a frame
+// has been drawn without it). `others` are classes to drop first (e.g. the other size of shake).
+function restartAnim(el, cls, others = []) {
+  if (!el) return;
+  others.forEach(c => c !== cls && el.classList.remove(c));
+  if (!el.classList.contains(cls)) { el.classList.add(cls); return; }
   el.classList.remove(cls);
-  void el.offsetWidth;
-  el.classList.add(cls);
+  requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add(cls)));
+}
+
+// An element's screen box, remembered for a moment. Effects ask for the same few boxes many times per hit (HP
+// boxes, wheels), and every fresh read right after a DOM change forces a layout. Battle boxes don't move, so a
+// reading up to 400ms old is fine.
+const rectCache = new WeakMap();
+function cachedRect(el) {
+  const now = performance.now(), c = rectCache.get(el);
+  if (c && now - c.t < 400) return c.r;
+  const r = el.getBoundingClientRect();
+  rectCache.set(el, { t: now, r });
+  return r;
 }

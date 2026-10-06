@@ -1,6 +1,10 @@
 // Board rendering: squares, center deck, frog tokens, camera and HUD updates.
 
 const view = document.getElementById('view');
+// The view's size, kept up to date on resize. Reading view.clientWidth right after the page changed forces a
+// layout, and the camera and weather used to do that every frame.
+let viewW = view.clientWidth, viewH = view.clientHeight;
+addEventListener('resize', () => { viewW = view.clientWidth; viewH = view.clientHeight; });
 const world = document.getElementById('world');
 const label = document.getElementById('label');
 const rollBtn = document.getElementById('roll');
@@ -115,7 +119,7 @@ function buildBoard() {
     world.appendChild(p.el);
     if (p.petEl) world.appendChild(p.petEl);
   });
-  if (typeof spawnFireflies === 'function' && REGION().fireflies) spawnFireflies(); // (at load, fireflies.js spawns them itself)
+  if (typeof spawnFireflies === 'function') { if (REGION().fireflies) spawnFireflies(); else fireflies = []; } // (at load, fireflies.js spawns them itself)
 }
 buildBoard();
 
@@ -157,7 +161,7 @@ function faceNext(p, to = nextOf[p.pos][0]) {
 
 // Zoom so a comfortable chunk of the board is visible on any screen size
 function zoom() {
-  return Math.max(1, Math.min(2.2, Math.min(view.clientWidth, view.clientHeight) / 260));
+  return Math.max(1, Math.min(2.2, Math.min(viewW, viewH) / 260));
 }
 
 // Flip the whole screen upside down for Player 2, so each player reads it the right way up from
@@ -200,8 +204,8 @@ function render() {
   // Camera: keep the current player in the middle of the screen
   const z = zoom();
   const [fx, fy] = center(players[turn]);
-  const tx = view.clientWidth / 2 - fx * z;
-  const ty = view.clientHeight / 2 - fy * z;
+  const tx = viewW / 2 - fx * z;
+  const ty = viewH / 2 - fy * z;
   world.style.transform = `translate(${tx}px, ${ty}px) scale(${z})`;
   label.textContent = SOLO ? `Turn ${turnCount}` : players[turn].name + "'s turn";
   updateWallet();

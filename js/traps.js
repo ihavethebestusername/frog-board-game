@@ -18,19 +18,16 @@ const rivalOf = p => SOLO ? p : players[1 - players.indexOf(p)];
 
 // ---------- Shop tab ----------
 function renderTrapShop(page, p, buy) {
-  shopSubhead(page, 'Traps (set them on the board with the 🪤 button)');
-  TRAP_TYPES.forEach(t => {
-    const price = Math.round(t.price * shopDiscount(p)), have = (p.traps && p.traps[t.key]) || 0;
-    page.appendChild(shopRow({ name: `${t.icon} ${t.name}${have ? ` <span class="lvl">x${have}</span>` : ''}`, desc: t.desc,
-      button: COIN + ' ' + price, disabled: p.coins < price },
-      row => buy(price, () => { p.traps = p.traps || {}; p.traps[t.key] = have + 1; renderTrapButton(); }, row, ['#8a6a3a', '#fff'])));
+  const traps = TRAP_TYPES.map(t => {
+    const have = (p.traps && p.traps[t.key]) || 0;
+    return { icon: t.icon, name: t.name, desc: t.desc, price: Math.round(t.price * shopDiscount(p)), color: '#c8a060', chip: 'Trap', owned: have,
+      buy: () => { p.traps = p.traps || {}; p.traps[t.key] = have + 1; renderTrapButton(); }, colors: ['#8a6a3a', '#fff'] };
   });
-  shopSubhead(page, SOLO ? 'Curses (solo: they hit you, for testing)' : 'Curses (sent to your rival right away)');
-  CURSES.forEach(c => {
-    const price = Math.round(c.price * shopDiscount(p));
-    page.appendChild(shopRow({ name: `${c.icon} ${c.name}`, desc: c.desc, button: COIN + ' ' + price, disabled: p.coins < price },
-      row => buy(price, () => castCurse(p, c.key), row, ['#7a0aa8', '#fff'])));
-  });
+  const curses = CURSES.map(c => ({ icon: c.icon, name: c.name, desc: c.desc, price: Math.round(c.price * shopDiscount(p)), color: '#b04cff', chip: 'Curse',
+    glow: 'epic', buy: () => castCurse(p, c.key), colors: ['#7a0aa8', '#fff'] }));
+  shelfStore(page, p, buy, { id: 'traps', sign: '🪤 Traps & Curses', sub: 'set traps on the board with the 🪤 button',
+    shelves: [{ label: 'Traps', items: traps },
+      { label: SOLO ? 'Curses (solo: they hit you, for testing)' : 'Curses (sent to your rival right away)', items: curses }] });
 }
 function castCurse(p, key) {
   const target = rivalOf(p);

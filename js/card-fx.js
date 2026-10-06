@@ -63,7 +63,7 @@ const fxRand = (a, b) => a + Math.random() * (b - a);
 // Player 2's screen is rotated 180°, so on-screen positions are mirrored into the rotated page.
 function fxPoint(el, ox = 0.5, oy = 0.5) {
   if (!el) return [innerWidth / 2, innerHeight / 2];
-  const r = el.getBoundingClientRect();
+  const r = cachedRect(el);
   let x = r.left + r.width * ox, y = r.top + r.height * oy;
   if (fxFlipped()) { x = innerWidth - x; y = innerHeight - y; }
   return [x, y];

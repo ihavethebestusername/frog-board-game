@@ -11,12 +11,7 @@
 <div id="menu">
   <div class="shop-panel menu-panel">
     <h1>🐸 Frog Board Game</h1>
-    <div class="menu-length" id="menuLength">
-      <button data-crowns="1">⚡ Quick<small>1 crown per region</small></button>
-      <button data-crowns="2" class="on">🐸 Normal<small>2 crowns per region</small></button>
-      <button data-crowns="3">🏔️ Epic<small>3 crowns per region</small></button>
-    </div>
-    <div class="menu-route">🐸 Swamp ➜ 🧊 Ice Lake ➜ 🌋 Volcano<small>Collect crowns to unlock each region's boss. Beat the Volcano boss to win!</small></div>
+    <div class="menu-route">🐸 Swamp ➜ 🧊 Ice Lake ➜ 🌋 Volcano<small>Do 3 laps to unlock each region's boss. Beat all 3 bosses for 3 grand crowns 👑 and win!</small></div>
     <button class="battle-go" id="menuSolo">1 Player</button>
     <small>Just your frog. Battle squares become enemy fights.</small>
     <button class="battle-go" id="menuDuo">2 Players</button>
@@ -106,7 +101,7 @@
 </div>
 <!-- Loaded in order (they share one global scope), each with the same fresh ?v= stamp -->
 <script>
-['config', 'charms', 'board', 'effects', 'juice', 'progression', 'awards', 'regions', 'card-fx', 'card-sounds', 'fx/basic', 'fx/power', 'fx/toxic', 'fx/nature', 'fx/saw', 'fx/boss', 'fx/playstyle', 'fx/evolved', 'fx/region-kit', 'fx/leviathan', 'fx/swamp-evolved-1', 'fx/swamp-evolved-2', 'turn', 'skill-checks', 'shop', 'battle', 'hand', 'fusion', 'forge', 'cups', 'flies', 'pets', 'traps', 'mystery', 'memory', 'lilyhop', 'tutorial', 'enemies', 'fireflies', 'rain', 'balloon', 'fps', 'main', 'polish/world', 'polish/ui', 'polish/rewards', 'polish/battle', 'polish/minigames', 'viewer']
+['config', 'charms', 'board', 'effects', 'juice', 'progression', 'awards', 'regions', 'card-fx', 'card-sounds', 'fx/basic', 'fx/power', 'fx/toxic', 'fx/nature', 'fx/saw', 'fx/boss', 'fx/playstyle', 'fx/evolved', 'fx/region-kit', 'fx/leviathan', 'fx/swamp-evolved-1', 'fx/swamp-evolved-2', 'turn', 'skill-checks', 'shop', 'battle', 'hand', 'fusion', 'forge', 'items', 'cups', 'flies', 'pets', 'traps', 'mystery', 'memory', 'lilyhop', 'tutorial', 'enemies', 'fireflies', 'rain', 'balloon', 'fps', 'main', 'polish/world', 'polish/ui', 'polish/rewards', 'polish/battle', 'polish/minigames', 'viewer']
   .forEach(f => document.write('<script src="js/' + f + '.js?v=' + V + '"><\/script>'));
 </script>
 </body>

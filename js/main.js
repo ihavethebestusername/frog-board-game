@@ -33,7 +33,8 @@ const EVENTS = [
   { name: 'Monsters grow stronger', desc: 'Raise the threat level by 1 now', run: async () => forceThreat() },
   { name: 'Enemies evolve', desc: 'Evolve every enemy to its next form now', run: async () => forceEvolve() },
   { name: 'Travel to next region', desc: 'Testing: jump to the Ice Lake / Volcano now', run: async () => { if (!isFinalRegion()) await advanceRegion(players[turn]); } },
-  { name: 'Get a crown', desc: 'Testing: +1 crown (try the match point and the recap screen)', run: async () => gainCrowns(players[turn], 1, 'Testing!') },
+  { name: 'Get a lap', desc: 'Testing: +1 lap toward unlocking the boss', run: async () => addLap(players[turn], 'Testing!') },
+  { name: 'Get a grand crown', desc: 'Testing: +1 grand crown', run: async () => gainCrowns(players[turn], 1, 'Testing!') },
   { name: 'Boss hunts me', desc: 'Your next landing becomes a boss fight', run: async () => { players[turn].bossHunting = true; renderProgress(); } },
   { name: 'New boss tile', desc: 'Turn a coin or card square into a boss square now', run: async () => addBossTile() },
   { name: 'Get traps', desc: 'Testing: +1 of every trap', run: async () => { const p = players[turn]; p.traps = p.traps || {}; TRAP_TYPES.forEach(t => p.traps[t.key] = (p.traps[t.key] || 0) + 1); renderTrapButton(); } },
@@ -59,6 +60,26 @@ EVENTS.forEach(ev => {
   document.getElementById('eventList').appendChild(b);
 });
 eventsBtn.addEventListener('click', () => { if (!busy) eventsEl.hidden = false; });
+// Debug tools (the Events menu) are hidden. To unlock them, do something nobody does by accident:
+// tap the die (the number box next to Roll, not the Roll button) 7 times within 3 seconds, or type "frogdebug" on a keyboard. Doing it again hides them.
+eventsBtn.hidden = true;
+function toggleDebug() {
+  eventsBtn.hidden = !eventsBtn.hidden;
+  banner(eventsBtn.hidden ? '🔒 Debug tools hidden' : '🛠️ Debug tools unlocked!', eventsBtn.hidden ? 'lose' : 'legendary');
+  sfx(eventsBtn.hidden ? 'card_pick' : 'level_up', eventsBtn.hidden ? 0.7 : 1.3);
+}
+let dieTaps = [];
+dieEl.addEventListener('click', () => {
+  const now = performance.now();
+  dieTaps = [...dieTaps.filter(t => now - t < 3000), now];
+  if (dieTaps.length >= 7) { dieTaps = []; toggleDebug(); }
+});
+let typed = '';
+addEventListener('keydown', e => {
+  if (e.key.length !== 1) return;
+  typed = (typed + e.key.toLowerCase()).slice(-9);
+  if (typed === 'frogdebug') { typed = ''; toggleDebug(); }
+});
 document.getElementById('eventsClose').addEventListener('click', () => eventsEl.hidden = true);
 eventsEl.addEventListener('click', e => { if (e.target === eventsEl) eventsEl.hidden = true; });
 
@@ -79,14 +100,8 @@ render();
 
 // --- Start menu: 1 player (solo) or 2 players ---
 const menuEl = document.getElementById('menu');
-// Game length picker on the start menu (sets how many crowns win)
-document.querySelectorAll('#menuLength button').forEach(b => b.onclick = () => {
-  document.querySelectorAll('#menuLength button').forEach(x => x.classList.toggle('on', x === b));
-  sfx('card_pick');
-});
 function startGame(solo) {
   SOLO = solo;
-  CROWNS_PER_REGION = +(document.querySelector('#menuLength .on')?.dataset.crowns || 2);
   if (SOLO) {
     players[1].el.hidden = true; // only your frog on the board
     EVENTS.splice(EVENTS.findIndex(e => e.name === 'Battle'), 1);

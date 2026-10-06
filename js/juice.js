@@ -117,7 +117,7 @@ const haptic = ms => { try { navigator.vibrate && navigator.vibrate(ms); } catch
 
 // Screen position of an element's centre, mirrored when the screen is flipped for Player 2
 function screenCenter(el) {
-  const r = el.getBoundingClientRect();
+  const r = cachedRect(el);
   let x = r.left + r.width / 2, y = r.top + r.height / 2;
   if (document.documentElement.classList.contains('flipped')) { x = innerWidth - x; y = innerHeight - y; }
   return [x, y];
@@ -140,12 +140,47 @@ function confetti(n = 70) {
 }
 
 // Big text that slams onto the middle of the screen for a moment
+// Banners never overlap: each one takes the free spot closest to its usual place (a bit above the middle of the
+// screen), stacking above or below the ones still showing. A new one also waits until the others have finished
+// their big slam-in, and if the screen is full it waits for a spot to free up.
+const BANNER_MS = 1500, BANNER_SLAM_MS = 220, BANNER_GAP = 6;
+const activeBanners = []; // { top, h, pad, born }
+const bannerQueue = [];
+let bannerRetry = 0;
 function banner(text, cls = '') {
-  const b = document.createElement('div');
-  b.className = 'juice-banner ' + cls;
-  b.textContent = text;
-  document.body.appendChild(b);
-  setTimeout(() => b.remove(), 1500);
+  bannerQueue.push([text, cls]);
+  pumpBanners();
+}
+function pumpBanners() {
+  clearTimeout(bannerRetry);
+  while (bannerQueue.length) {
+    const now = performance.now();
+    const slamming = activeBanners.find(a => now - a.born < BANNER_SLAM_MS);
+    if (slamming) { bannerRetry = setTimeout(pumpBanners, BANNER_SLAM_MS - (now - slamming.born) + 5); return; }
+    const [text, cls] = bannerQueue[0];
+    const stacked = activeBanners.length > 0;
+    const b = document.createElement('div');
+    b.className = 'juice-banner ' + cls + (stacked ? ' stacked' : '');
+    b.textContent = text;
+    b.style.visibility = 'hidden';
+    document.body.appendChild(b);
+    const h = b.offsetHeight; // one measurement per banner
+    // Room it needs around its box: it drifts up 30% of its height as it fades, and slams in slightly bigger
+    const pad = h * 0.3 + BANNER_GAP, below = h * 0.15 + BANNER_GAP;
+    const fits = t => t - pad >= 4 && t + h + below <= innerHeight - 4 &&
+      activeBanners.every(a => t + h + below <= a.top - a.pad || t - pad >= a.top + a.h + a.below);
+    const base = innerHeight * 0.38 - h / 2;
+    const spots = [base, ...activeBanners.flatMap(a => [a.top + a.h + a.below + pad, a.top - a.pad - below - h])]
+      .sort((x, y) => Math.abs(x - base) - Math.abs(y - base));
+    const top = spots.find(fits);
+    if (top === undefined) { b.remove(); return; } // full: try again when one goes away
+    bannerQueue.shift();
+    const slot = { top, h, pad, below, born: now };
+    activeBanners.push(slot);
+    b.style.top = top + h / 2 + 'px'; // the animation centres it on this point
+    b.style.visibility = '';
+    setTimeout(() => { b.remove(); activeBanners.splice(activeBanners.indexOf(slot), 1); pumpBanners(); }, BANNER_MS);
+  }
 }
 
 // Coins fly from a point on screen into the wallet, each landing with a rising "ting"

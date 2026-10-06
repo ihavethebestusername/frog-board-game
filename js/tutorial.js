@@ -53,7 +53,7 @@ function tutButtons(card, list) {
 const tutDots = (card, n, i) => card.querySelector('.tut-dots').innerHTML = Array.from({ length: n }, (_, k) => `<span class="${k === i ? 'on' : k < i ? 'done' : ''}"></span>`).join('');
 function shellyHop(card) {
   const t = card.querySelector('.tut-shelly');
-  t.classList.remove('talk'); void t.offsetWidth; t.classList.add('talk');
+  restartAnim(t, 'talk');
 }
 
 // ---------- Interactive demos (each resolves when the player has done it) ----------
@@ -292,7 +292,7 @@ async function duelPrompt(p) {
   shellyHop(card);
   sfx('card_land_attack', 0.8);
   typeText(card.querySelector('.tut-text'), `Ooh, you caught up with <b>${r.name}</b>! Challenge them to a duel? The winner takes coins` +
-    (hasBounty(r) ? ` and, since they're way ahead, <b>steals a crown 👑</b>!` : '!'));
+    (hasBounty(r) ? ` and, since they're way ahead, <b>steals a lap</b>!` : '!'));
   const v = await tutButtons(card, [{ label: 'Keep hopping', value: false }, { label: '⚔️ Duel!', value: true, primary: true }]);
   el.remove();
   return v;
@@ -303,7 +303,7 @@ async function duelPrompt(p) {
 // tour carries on inside whatever menu opened); `demo` plays a mini game; `when` skips steps that don't apply.
 const TOUR = [
   { text: 'Hi there! I\'m <b>Shelly</b>, the swamp shopkeeper. 🐢 Let me show you around. You\'ll tap the real buttons as we go!' },
-  { text: 'Your adventure: 🐸 Swamp → 🧊 Ice Lake → 🌋 Volcano. Collect <b>👑 crowns</b> (one per lap past 🏁 START) to unlock each region\'s boss, beat it to travel on, and beat the <b>Inferno Dragon</b> in the Volcano to win!', target: '.prog-crowns' },
+  { text: 'Your adventure: 🐸 Swamp → 🧊 Ice Lake → 🌋 Volcano. Do <b>3 laps</b> of a region (past 🏁 START) to unlock its boss, then beat it for a <b>grand crown 👑</b>. Collect all <b>3 grand crowns</b> to win!', target: '.prog-crowns' },
   { text: 'Tap <b>Roll</b> to roll the die and hop 1–6 squares. At a fork, you choose the way!', target: '.hud' },
   { text: 'Almost every square does something! Here\'s the swamp guide:', legend: true },
   { text: 'Math is your superpower. Most squares ask a quick question: faster answers = bigger rewards. Try one!', demo: 'quiz' },
@@ -325,7 +325,7 @@ const TOUR = [
   { text: 'Once you own a trap, a <b>🪤 Set trap</b> button appears at the top right. Tap it, pick a trap, then tap any tile. Traps are <b>hidden</b> on your rival\'s turn... but careful: your own traps catch you 25% of the time!', when: () => !SOLO },
     { text: 'Okay, <b>tap Close</b> to leave the shop.', target: '#shopClose', tap: true },
   // HUD + bounties
-  { text: 'Here\'s your ⭐ <b>level</b> and XP (every level-up gives you a perk), your 👑 crowns and the ☠️ threat.', target: '.prog-hud' },
+  { text: 'Here\'s your ⭐ <b>level</b> and XP (every level-up gives you a perk, and higher levels <b>unlock the monsters&#39; own attacks</b> for your deck: the boss cards at level 15!), your 👑 crowns and the ☠️ threat.', target: '.prog-hud' },
   { text: 'These timers count down to <b>swamp events</b>, <b>stronger monsters</b>, <b>new boss tiles</b> and <b>evolutions</b>. Plan ahead!', target: '.prog-countdown' },
   { text: '<b>Tap Bounties!</b>', target: '.prog-quest-btn', tap: true },
   { text: 'Bounties are little goals. Finish one for coins and XP, and a new one appears.', target: '#questBoard .quest' },
@@ -333,7 +333,7 @@ const TOUR = [
   { text: '<b>Tap Close</b>.', target: '#questBoard .shop-close', tap: true },
   // Battles and rivalry
   { text: 'Battles spin 3 wheels of your cards. Matching cards make combos. Spin these!', demo: 'wheels' },
-  { text: 'Two players? Whoever\'s behind is the 🐢 <b>underdog</b> (+1 to rolls, extra card choices, +25% coins). Get 2 crowns ahead and you wear a 🎯 <b>bounty</b>: lose a duel and your rival steals a crown! Hop onto your rival to challenge them.', when: () => !SOLO },
+  { text: 'Two players? Whoever\'s behind is the 🐢 <b>underdog</b> (+1 to rolls, extra card choices, +25% coins). Get 2 laps ahead and you wear a 🎯 <b>bounty</b>: lose a duel and your rival steals a lap! Hop onto your rival to challenge them.', when: () => !SOLO },
   { text: 'Lose a monster fight and you\'ll want <b>😤 revenge</b>: +30% damage in your next battle. Never give up!', when: () => SOLO },
   { text: 'That\'s everything! <b>Tap Roll</b> to begin. Good luck, little frog! 🐸', target: '#roll', tap: true, final: true },
 ];

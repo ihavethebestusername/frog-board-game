@@ -95,15 +95,15 @@ function addBossTile() {
 }
 
 // ---------- Laps and crowns: the win goal ----------
-let CROWNS_PER_REGION = 2; // crowns needed in each region to unlock its boss (set by the game-length picker)
-const LAP_CROWNS = 1, BOSS_CROWNS = 2;
+// Win by collecting 3 GRAND CROWNS: one for beating each region's boss. A boss unlocks after LAPS_TO_UNLOCK laps of its region.
+const GRAND_CROWNS = 3, LAPS_TO_UNLOCK = 3, BOSS_CROWNS = 1;
 const BOSS_HUNT_LAPS = 2; // laps without a boss fight before the boss hunts you down
 const START_TILE = 0; // the START square (top-left corner); every lap of the board passes it
 // Called after every hop: passing START completes a lap
 function progressHop(p) {
   if (p.pos !== START_TILE) return;
   p.laps = (p.laps || 0) + 1;
-  gainCrowns(p, LAP_CROWNS, `Lap ${p.laps} complete!`);
+  addLap(p, '🏁 Lap complete!');
   // Boss hunt: go BOSS_HUNT_LAPS laps without fighting the boss and it comes for you
   if (bossUnlocked(p)) p.lapsSinceBoss = (p.lapsSinceBoss || 0) + 1;
   if (p.lapsSinceBoss >= BOSS_HUNT_LAPS && !p.bossHunting) {
@@ -112,17 +112,24 @@ function progressHop(p) {
   }
   gainXp(p, 10);
 }
-function gainCrowns(p, n, why) {
-  p.crowns = (p.crowns || 0) + n;
-  const before = p.regionCrowns || 0;
-  p.regionCrowns = before + n; // crowns earned in this region unlock its boss
-  banner(`👑 +${n} ${why}`, 'legendary');
-  sfx('level_up');
-  confetti(40);
-  if (before < CROWNS_PER_REGION && p.regionCrowns >= CROWNS_PER_REGION) setTimeout(() => { // the region's boss is open
-    banner(`🔓 ${p.name} unlocked the ${isFinalRegion() ? 'FINAL BOSS' : BOSS_TIER.name}! Find a 🐷 boss square!`, 'fire');
+// A lap of this region counts toward unlocking its boss
+function addLap(p, why) {
+  const before = p.regionLaps || 0;
+  p.regionLaps = before + 1;
+  banner(`${why} ${Math.min(p.regionLaps, LAPS_TO_UNLOCK)}/${LAPS_TO_UNLOCK} laps`, 'legendary');
+  sfx('level_up'); confetti(30);
+  if (before < LAPS_TO_UNLOCK && p.regionLaps >= LAPS_TO_UNLOCK) setTimeout(() => { // the region's boss is open
+    banner(`🔓 ${p.name} unlocked the ${isFinalRegion() ? 'FINAL BOSS' : BOSS_TIER.name}! Find a boss square!`, 'fire');
     sfx('jackpot', 0.8, 0.8); flash('#ffd23f', 0.4);
   }, 1500);
+  renderProgress();
+}
+// Grand crowns: one for each region boss beaten. Collect all 3 to win.
+function gainCrowns(p, n, why) {
+  p.crowns = (p.crowns || 0) + n;
+  banner(`👑 GRAND CROWN! ${why} (${p.crowns}/${GRAND_CROWNS})`, 'legendary');
+  sfx('level_up'); sfx('jackpot', 1, 0.7);
+  confetti(80);
   renderProgress();
 }
 
@@ -131,12 +138,15 @@ const rivalPlayer = p => players[1 - players.indexOf(p)];
 // The player behind (fewer crowns, or level on a tie) is the underdog: +1 to rolls, +1 card choice, +25% coins
 function isUnderdog(p) {
   if (SOLO || !p || p.enemy) return false;
-  const r = rivalPlayer(p), a = p.crowns || 0, b = r.crowns || 0;
+  const r = rivalPlayer(p), a = progressScore(p), b = progressScore(r);
   return a < b || (a === b && (p.level || 1) < (r.level || 1));
 }
 // Leading by 2+ crowns puts a bounty on your head: lose a duel and the rival steals a crown
-const hasBounty = p => !SOLO && p && !p.enemy && (p.crowns || 0) - (rivalPlayer(p).crowns || 0) >= 2;
-const bountyCoins = p => 5 + 5 * ((p.crowns || 0) - (rivalPlayer(p).crowns || 0));
+// How far along a player is: grand crowns count most, then laps in this region
+const progressScore = p => (p.crowns || 0) * 10 + (p.regionLaps || 0);
+// Leading by 2+ laps (or a grand crown) puts a bounty on you: lose a duel and the rival steals a lap
+const hasBounty = p => !SOLO && p && !p.enemy && progressScore(p) - progressScore(rivalPlayer(p)) >= 2;
+const bountyCoins = p => 5 + 5 * Math.min(4, progressScore(p) - progressScore(rivalPlayer(p)));
 
 // ---------- XP and levels ----------
 const xpToNext = lvl => 20 + (lvl - 1) * 12; // XP needed to go from this level to the next
@@ -147,9 +157,39 @@ function gainXp(p, n) {
     p.xp -= xpToNext(p.level || 1);
     p.level = (p.level || 1) + 1;
     p.pendingPerks = (p.pendingPerks || 0) + 1;
+    unlockCards(p.level); // monster cards join the deck at higher levels
   }
   renderProgress();
 }
+
+// ---------- Level-locked monster cards ----------
+// Reaching higher levels lets frogs find the monsters' own attacks: at each card's level it's shuffled into the
+// deck. The level comes from how strong the card is (ultimate / super-move cards never unlock).
+// Boss attacks: level 15. Ice Lake cards are 2 levels later than a Swamp card of the same power, Volcano 4.
+const GIMMICK_POWER = { frenzy: m => m * 2, cleave: () => 2, lifesteal: m => m * 0.6, poison: () => 2, stun: () => 2,
+  venomfang: m => m * 0.5, bash: () => 5, armor: () => 3, wallow: () => 4, heal: () => 3, shield: () => 2, focus: () => 3, double: () => 4 };
+function cardUnlockLevel(c, region) {
+  if (region === 'boss') return 15;
+  const p = (c.mult || 0) + (GIMMICK_POWER[c.gimmick]?.(c.mult || 0) || 0);
+  return Math.max(4, Math.min(20, Math.round(3 + p * 1.1 + (region === 'ice' ? 2 : region === 'volcano' ? 4 : 0))));
+}
+let cardUnlocks = null; // [{ card, level }], built once every card list exists
+const cardUnlockList = () => cardUnlocks ||= [
+  ...EVOLVED_CARDS.map(c => ({ card: c, level: cardUnlockLevel(c, 'swamp') })),
+  ...BOSS_CARDS.map(c => ({ card: c, level: cardUnlockLevel(c, 'boss') })),
+  ...REGION_CARDS.map(c => ({ card: c, level: cardUnlockLevel(c, c.region) })),
+].filter(u => !u.card.ultimate && !u.card.superMove).sort((a, b) => a.level - b.level);
+const unlockedCards = new Set();
+function unlockCards(level) {
+  const fresh = cardUnlockList().filter(u => u.level <= level && !unlockedCards.has(u.card));
+  if (!fresh.length) return;
+  fresh.forEach(u => { unlockedCards.add(u.card); deck.splice(Math.floor(Math.random() * (deck.length + 1)), 0, u.card); });
+  setTimeout(() => {
+    banner(`🔓 Level ${level}: ${fresh.length} monster card${fresh.length === 1 ? '' : 's'} added to the deck! ${fresh.slice(0, 4).map(u => u.card.art).join('')}`, 'legendary');
+    sfx('celebrate', 1.1, 0.7);
+  }, 1800);
+}
+const nextUnlockLevel = p => cardUnlockList().find(u => !unlockedCards.has(u.card) && u.level > (p.level || 1))?.level;
 
 // ---------- Perks: pick 1 of 3 at every level-up ----------
 const PERKS = [
@@ -319,9 +359,10 @@ function renderProgress() {
   const lvl = p.level || 1, need = xpToNext(lvl), pct = Math.round((p.xp || 0) / need * 100);
   progEl.innerHTML = `<div class="prog-lvl">⭐ Lv ${lvl}<div class="prog-xp"><div style="width:${pct}%"></div></div></div>
     <div class="prog-region">${REGION().icon} ${REGION().name} <small>${regionIndex + 1}/${REGIONS.length}</small></div>
-    <div class="prog-crowns${bossUnlocked(p) ? ' match' : ''}">👑 ${Math.min(p.regionCrowns || 0, CROWNS_PER_REGION)}/${CROWNS_PER_REGION}${bossUnlocked(p) ? ' 🔓 BOSS OPEN' : ' to unlock boss'}</div>
+    <div class="prog-crowns">👑 ${p.crowns || 0}/${GRAND_CROWNS} grand crowns</div>
+    <div class="prog-laps${bossUnlocked(p) ? ' match' : ''}">🏁 ${Math.min(p.regionLaps || 0, LAPS_TO_UNLOCK)}/${LAPS_TO_UNLOCK} laps${bossUnlocked(p) ? ' 🔓 BOSS OPEN' : ' to unlock the boss'}</div>
     ${isUnderdog(p) ? '<div class="prog-underdog">🐢 Underdog: +1 roll, +1 card choice, +25% coins</div>' : ''}
-    ${hasBounty(p) ? `<div class="prog-bounty">🎯 Bounty on you! Lose a duel = lose a crown</div>` : ''}
+    ${hasBounty(p) ? `<div class="prog-bounty">🎯 Bounty on you! Lose a duel = lose a lap</div>` : ''}
     <div class="prog-threat" title="Monsters get stronger every ${THREAT_EVERY()} rolls">☠️ ${threatLevel()}</div>
     ${typeof swampLine === 'function' && swampLine() ? `<div class="prog-swamp">${swampLine()}</div>` : ''}
     <button class="prog-quest-btn">📜 Bounties</button>`;
@@ -335,8 +376,8 @@ function openQuests() {
     ${p.quests.map(q => `<div class="quest"><div><b>${QUEST_TYPES.find(t => t.type === q.type).text(q.goal)}</b>
       <div class="quest-bar"><div style="width:${Math.min(100, q.progress / q.goal * 100)}%"></div></div>
       <small>${Math.min(q.progress, q.goal)} / ${q.goal}</small></div><div class="quest-reward">${COIN} ${q.coins}<br><small>+${q.xp} XP</small></div></div>`).join('')}
-    <div class="battle-msg prog-goal">🏆 Goal: beat the <b>Inferno Dragon</b> in the Volcano. Collect ${CROWNS_PER_REGION} 👑 in each region (+${LAP_CROWNS} per lap past START) to unlock its boss; beat the boss to travel on (🐸 Swamp → 🧊 Ice Lake → 🌋 Volcano).<br>
-      ☠️ Monsters grow stronger every ${THREAT_EVERY()} rolls (now threat ${threatLevel()}).<br>⭐ Level ${p.level || 1}: ${p.xp || 0}/${xpToNext(p.level || 1)} XP · Hand limit ${p.noHandLimit ? "off (testing)" : handLimit(p)}</div>
+    <div class="battle-msg prog-goal">🏆 Goal: collect <b>${GRAND_CROWNS} grand crowns 👑</b>, one for beating each region's boss (🐸 Swamp → 🧊 Ice Lake → 🌋 Volcano). A boss unlocks after <b>${LAPS_TO_UNLOCK} laps</b> of its region (past 🏁 START).<br>
+      ☠️ Monsters grow stronger every ${THREAT_EVERY()} rolls (now threat ${threatLevel()}).<br>⭐ Level ${p.level || 1}: ${p.xp || 0}/${xpToNext(p.level || 1)} XP${nextUnlockLevel(p) ? ` · 🔓 more monster cards at Lv ${nextUnlockLevel(p)}` : ''} · Hand limit ${p.noHandLimit ? "off (testing)" : handLimit(p)}</div>
     <button class="shop-close">Close</button></div>`;
   questEl.hidden = false;
   questEl.querySelector('.shop-close').onclick = () => questEl.hidden = true;

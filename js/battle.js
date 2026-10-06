@@ -128,6 +128,8 @@ async function battleEvent(enemy = null) {
     const fang = artifactCount(fg.p, 'nightmare');           // Serpent Fang
     if (fang) { fighters[1 - i].poison = 3; fighters[1 - i].poisonDmg += fg.p.attack * fang; }
   });
+  // Battle items (items.js): each player picks which ones to bring; they're used up by this battle
+  fighters.forEach(fg => fg.it = {}); // battle items in use (items.js); you use them from the tray before each spin
 
   // Battle screen: HP bars + the current attacker's spinner reel
   // Segmented health bar: each segment is maxHp / HP_SEGMENTS HP; a segment stays lit while any of its HP is left
@@ -155,9 +157,7 @@ async function battleEvent(enemy = null) {
         const full = freshSegs[k].classList.contains('full');
         if (seg.classList.contains('full') !== full) {
           seg.classList.toggle('full', full);
-          seg.classList.remove('lost', 'gained');
-          void seg.offsetWidth;
-          seg.classList.add(full ? 'gained' : 'lost');
+          restartAnim(seg, full ? 'gained' : 'lost', ['lost', 'gained']);
         }
       });
       el.querySelector('.hp-num').innerHTML = fresh.querySelector('.hp-num').innerHTML;
@@ -170,7 +170,7 @@ async function battleEvent(enemy = null) {
     setTimeout(() => {
       const box = body.querySelectorAll('.hp-row .hp')[i];
       if (!box) return;
-      const pr = panel.getBoundingClientRect(), br = box.getBoundingClientRect();
+      const pr = cachedRect(panel), br = cachedRect(box); // (cached: no forced layout per pop-up)
       const t = document.createElement('div');
       t.className = 'fx-float ' + kind;
       t.textContent = text;
@@ -188,9 +188,7 @@ async function battleEvent(enemy = null) {
   function pulse(i, cls) {
     const box = body.querySelectorAll('.hp-row .hp')[i];
     if (!box) return;
-    box.classList.remove(cls);
-    void box.offsetWidth; // restart the animation
-    box.classList.add(cls);
+    restartAnim(box, cls);
   }
   const hpBox = i => body.querySelectorAll('.hp-row .hp')[i];
   // Context handed to the card effects (js/card-fx.js): who's attacking whom, and where they are on screen
@@ -207,21 +205,19 @@ async function battleEvent(enemy = null) {
   }
   // Shake the panel; `k` scales how hard (bigger hits shake harder)
   function shake(big = false, k = 1) {
-    panel.classList.remove('shake', 'shake-big');
     panel.style.setProperty('--shk', Math.max(0.6, Math.min(3, k)));
-    void panel.offsetWidth;
-    panel.classList.add(big ? 'shake-big' : 'shake');
+    restartAnim(panel, big ? 'shake-big' : 'shake', ['shake', 'shake-big']);
   }
   // Re-spin marker: a gold circle of two chasing arrows spins over the wheel, then fades out
   const RESPIN_SVG = '<svg viewBox="0 0 100 100"><g fill="none" stroke="#ffd23f" stroke-width="9" stroke-linecap="round">' +
     '<path d="M50 12 A38 38 0 0 1 86 60"/><path d="M50 88 A38 38 0 0 1 14 40"/></g>' +
     '<g fill="#ffd23f"><path d="M74 58 L96 56 L84 76 Z"/><path d="M26 42 L4 44 L16 24 Z"/></g></svg>';
-  // Shown big, just outside the right edge of the battle box, level with the wheel that's re-spinning
+  // Shown big, just right of the wheels, level with the wheel that's re-spinning
   function respinFx(wi) {
     const win = body.querySelectorAll('.wheel-window')[wi];
     if (!win) return;
     const SIZE = 150;
-    const pr = panel.getBoundingClientRect(), wr = win.getBoundingClientRect();
+    const pr = body.querySelector('.wheels').getBoundingClientRect(), wr = win.getBoundingClientRect();
     // Visual centre on screen: right of the box, or squeezed against the screen edge if there's no room
     let x = Math.min(pr.right + 16 + SIZE / 2, innerWidth - SIZE / 2 - 4), y = wr.top + wr.height / 2;
     // Player 2's screen is rotated 180°, so convert to the rotated page's coordinates
@@ -277,9 +273,7 @@ async function battleEvent(enemy = null) {
     const c = body.querySelector('.dmg-counter');
     if (!c) return;
     c.innerHTML = `<div class="dmg-num" style="font-size:${Math.min(96, 40 + d * 0.8)}px">${d}</div><div class="dmg-formula">${formula}${note ? ` <b>${note}</b>` : ''}</div>`;
-    c.classList.remove('pop');
-    void c.offsetWidth;
-    c.classList.add('pop');
+    restartAnim(c, 'pop');
   }
 
   // Each wheel repeats the loadout around its rim so there are always at least 8 faces
@@ -338,9 +332,7 @@ async function battleEvent(enemy = null) {
     const landed = f.loadout[k % n];
     win.querySelectorAll('.wheel-slot')[k].classList.add('lit');
     cardLandFx(landed, fxCtx(fighters.indexOf(f), { win, slot: win.querySelectorAll('.wheel-slot')[k] }));
-    win.classList.remove('landed');
-    void win.offsetWidth;
-    win.classList.add('landed');
+    restartAnim(win, 'landed');
     // Burst colored by card type: purple for gimmicks, gold for attacks
     const big = landed.mult >= 5;
     if (landed.gimmick) sfx('card_land_gimmick');
@@ -348,24 +340,38 @@ async function battleEvent(enemy = null) {
     burst(win, landed.gimmick ? ['#b07cff', '#fff', '#7b3fbf', '#e0c3ff'] : ['#ffd23f', '#fff', '#f90', '#ff5d5d'],
           16 + landed.mult * 4, 0.9 + landed.mult * 0.15);
     if (big) {
-      win.classList.remove('big-land'); void win.offsetWidth; win.classList.add('big-land');
+      restartAnim(win, 'big-land');
       flash('#ffd23f', 0.35);
     }
     return k % n;
   }
 
 
+  // Battle items reacting to taking damage: Glass Fang breaks, Rebound Shell reflects 30%
+  function itemsOnHurt(target, dealt, hitter) {
+    if (!target.it || dealt <= 0) return;
+    const ti = fighters.indexOf(target);
+    if ('glass' in target.it) { delete target.it.glass; setTimeout(() => statusFx(ti, '⚔️ Glass Fang shattered!', 'poison', 'fail', ['#fff', '#aaa']), 200); }
+    if ('rebound' in target.it && hitter && hitter.hp > 0) {
+      const back = Math.min(hitter.hp, Math.max(1, Math.round(dealt * 0.3)));
+      hitter.hp -= back;
+      setTimeout(() => { hurtFx(1 - ti, `🔄 -${back}`); updateHp(); }, 250);
+    }
+  }
   // Deal damage to a fighter; each stacked shield soaks up one whole hit. Returns damage actually dealt.
   let blocked = 0;
   let dodged = 0;
   function hit(target, dmg) {
     if (dmg <= 0) return 0;
     if (target.shield) { target.shield--; blocked++; return 0; }
-    if (Math.random() < mothDodge(artifactCount(target.p, 'moth'))) { dodged++; return 0; } // Frost Moth Wings
+    const hitter = fighters.find(x => x !== target);
+    const sure = hitter?.it?.bullseyeNow; if (sure) hitter.it.bullseyeNow = false; // Bullseye Bug: can't be dodged
+    if (!sure && Math.random() < mothDodge(artifactCount(target.p, 'moth'))) { dodged++; return 0; } // Frost Moth Wings
     dmg = Math.max(1, Math.round(dmg * (1 - golemGuard(artifactCount(target.p, 'golem'))))); // Golem Core
     const dealt = Math.min(dmg, target.hp);
     target.hp -= dealt;
     lastStand(target);
+    itemsOnHurt(target, dealt, hitter);
     return dealt;
   }
   // Lizard Tail: once per battle, a knocked-out fighter bounces back with some HP
@@ -416,6 +422,11 @@ async function battleEvent(enemy = null) {
       setTimeout(() => healFx(cur, `🩹 +${f.hp - before}`), 200);
     }
     // Start-of-turn effects: poison ticks, stun skips the turn
+    // Rotten Egg item (the other fighter's): this fighter's poison grows every tick, unless they healed since the last one
+    if (f.poison && foe.it && 'egg' in foe.it) {
+      if (f.eggHp !== undefined && f.hp > f.eggHp) { f.poison = 0; f.poisonDmg = 0; statusFx(cur, '☠️ healing washed the poison away', 'heal', 'heal', ['#b4ff8a', '#fff']); }
+      else { f.poisonDmg += Math.max(1, Math.round(foe.p.attack * 0.5)); }
+    }
     if (f.poison) {
       const tick = Math.max(1, Math.round(f.poisonDmg * dotResist(f))); // Wool Scarf / Ice Pack charms
       f.hp = Math.max(0, f.hp - tick);
@@ -426,6 +437,7 @@ async function battleEvent(enemy = null) {
       hurtFx(cur, `${dotIcon(f)} -${tick}`);
       battleFx('poisonTick', fxCtx(1 - cur, { dmg: tick })); // the poisoned fighter is the target
       if (!f.poison) f.poisonDmg = 0;
+      f.eggHp = f.hp;
       updateHp();
       if (f.hp <= 0) break;
       await waitGo('Continue');
@@ -445,7 +457,16 @@ async function battleEvent(enemy = null) {
     msg.textContent = f.p.enemy ? `${f.p.name} is spinning...` : 'Spin to see which cards attack! Match cards on the wheels for combos!';
     body.innerHTML = hpRow() + reel(f) + '<div class="dmg-counter"></div>';
     if (f.p.enemy) { go.disabled = true; go.textContent = 'Enemy turn'; await sleep(700); } // the computer spins by itself
-    else await waitGo('Spin');
+    else {
+      // Battle items (items.js): use items from your bag before you spin
+      const tray = itemTray(f, (k, lines) => {
+        statusFx(cur, `${itemDef(k).icon} ${itemDef(k).name}!`, 'buff', 'buff', [RARITY_COLORS[itemDef(k).rarity], '#fff']);
+        if (lines.length) { msg.textContent = lines.join(' · '); body.querySelector('.wheels').outerHTML = reel(f); } // the loadout changed
+      });
+      if (tray) body.appendChild(tray);
+      await waitGo('Spin');
+      tray?.remove();
+    }
     msg.textContent = '';
     go.disabled = true;
     spinsThisTurn = 0;
@@ -460,6 +481,24 @@ async function battleEvent(enemy = null) {
     let lastHit = 0;           // damage the current card's attack dealt (Lotus Bloom heals it back)
     let orbitalCharges = 0;    // Orbital Laser landings this turn
     const leeches = []; // wheels that landed on Leech, resolved after all wheels
+    // Battle items reacting to skill checks: Golden Fly (misses), Smart Berry (speed), Hot Streak (right in a row)
+    async function itemsOnSkillCheck(right, speed) {
+      const it = f.it || {};
+      if ('smart' in it && right) it.smart = 1 + Math.max(0, Math.min(1, speed));
+      if ('hot' in it) { it.hot = right ? it.hot + 1 : 0; if (!right) statusFx(fi, '🔥 streak lost', 'poison', 'fail', ['#aaa']); }
+      if ('goldfly' in it && !right && it.goldfly >= 0) {
+        it.goldfly++;
+        statusFx(fi, `🪰 Golden Fly ${it.goldfly}/3`, 'buff', 'buff', ['#ffd23f', '#fff']);
+        if (it.goldfly >= 3 && foe.hp > 0) {
+          it.goldfly = -1;
+          await sleep(300);
+          const extra = hit(foe, f.p.attack * 8);
+          banner('🪰 THE GOLDEN FLY STRIKES!', 'legendary');
+          if (extra) { hurtFx(foeI, `🪰 -${extra}`, 60); turnTotal += extra; }
+          updateHp();
+        }
+      }
+    }
     // A physical attack. With Double Croak stacked, it really attacks several times in a row:
     // each strike lands separately with its own damage number, sound, shake and shield check.
     async function attack(dmg, parts, card = null) {
@@ -472,14 +511,23 @@ async function battleEvent(enemy = null) {
         if (h > 0) await sleep(Math.max(180, 380 - h * 60)); // quick follow-up strikes
         blocked = 0; dodged = 0;
         // Crit chance: your stat + Heron Feather + Adrenaline (first 3 turns); Eagle Eye makes matched cards always crit
-        const critChance = f.p.critChance + artifactCount(f.p, 'hard') * 0.1 + (f.turns <= 3 ? charmCount(f.p, 'adren') * 0.25 : 0) + (f.focus || 0);
-        const crit = card?.alwaysCrit || (charmCount(f.p, 'eagle') && curMatch > 1) || Math.random() < critChance; // rolled separately for every strike
-        // The card's windup (a projectile, a lunge...) plays out before the strike lands
-        const critMult = f.p.critMult + charmCount(f.p, 'claws') * 0.5 + artifactCount(f.p, 'owl') * 0.25; // Sharpened Claws, Owl Monocle
+        let critChance = f.p.critChance + artifactCount(f.p, 'hard') * 0.1 + (f.turns <= 3 ? charmCount(f.p, 'adren') * 0.25 : 0) + (f.focus || 0);
+        if (f.it && 'dice' in f.it) critChance = 0.01;                                   // Loaded Dice
+        if (f.it && 'stand' in f.it && f.hp < f.maxHp * 0.1) critChance = 1;             // Last Stand
+        const item = itemDamage(f, foe, card, h === 0);                                   // battle items (items.js)
+        let crit = card?.alwaysCrit || (charmCount(f.p, 'eagle') && curMatch > 1) || Math.random() < critChance; // rolled separately for every strike
+        if (item.noCrit) crit = false;                                                     // Snail Shell, Bullseye Bug
+        const critMult = (f.it && 'dice' in f.it ? 5 : 0) + f.p.critMult + charmCount(f.p, 'claws') * 0.5 + artifactCount(f.p, 'owl') * 0.25; // Sharpened Claws, Owl Monocle
         // Venom Strike (vs poisoned foes) and Momentum (per re-spin this turn) boost the hit
         const boost = (foe.poison ? 1 + charmCount(f.p, 'venom') * 0.3 : 1) * (1 + charmCount(f.p, 'moment') * 0.1 * respinsThisTurn) * (f.revenge ? 1.3 : 1) * (foe.p.tier?.evolved ? 1 + charmCount(f.p, 'hunter') * 0.15 : 1) // charms, revenge, Monster Hunter
           * (f.hp < f.maxHp / 2 ? 1 + artifactCount(f.p, 'wolf') * 0.15 : 1) * (f.openerDone ? 1 : 1 + artifactCount(f.p, 'penguin') * 0.5); // Wolf Pelt, Penguin Belly
-        const raw = Math.round((crit ? dmg * critMult : dmg) * boost);
+        let raw = Math.round((crit ? dmg * critMult : dmg) * boost * item.mult);
+        // Ghost Fly: a finishing blow leaves the foe at 1 HP and pays a big coin bonus instead
+        if (f.it?.ghost === 0 && raw >= foe.hp + (foe.shield ? 1e9 : 0) && foe.hp > 1) {
+          raw = foe.hp - 1; f.it.ghost = -1;
+          if (!f.p.enemy) { const c = gainCoins(f.p, 25 + regionIndex * 15); setTimeout(() => statusFx(fi, `👻 Ghost Fly! +${c} coins`, 'buff', 'coin', ['#e0e0ff', '#fff', '#ffd23f']), 300); }
+        }
+        // The card's windup (a projectile, a lunge...) plays out before the strike lands
         await cardWindupFx(card, fxCtx(fi, { card, crit, dmg: raw, big: raw >= f.p.attack * 5, strike: h, strikes: hits }));
         const d = hit(foe, raw);
         if (d > 0) { stat(f.p, 'damage', d); statMax(f.p, 'bigHit', d); if (crit) stat(f.p, 'crits'); f.openerDone = true; }
@@ -503,6 +551,7 @@ async function battleEvent(enemy = null) {
         const mods = [...parts];
         if (hits > 1) mods.push(`strike ${h + 1}/${hits}`);
         if (crit) mods.push(`${critMult} CRIT!`);
+        mods.push(...item.notes);
         if (boost > 1) mods.push(`charms x${+boost.toFixed(2)}`);
         showDamage(d, mods.join(' × '), blocked ? '🪷 blocked' : '');
         // Mosquito Proboscis: heal part of the damage dealt
@@ -627,7 +676,10 @@ async function battleEvent(enemy = null) {
           statusFx(fi, `${icon('🌳')} +2 shields`, 'shield', 'shield', ['#8a6a3a', '#fff', '#5fd13a']);
           break;
         case 'lifesteal':
-          if (lastHit > 0) {
+          if (lastHit > 0 && f.it && 'bloodfly' in f.it) { // Bloodfly: the drained life hurts the foe instead
+            const extra = hit(foe, lastHit);
+            if (extra) { hurtFx(foeI, `🩸 Bloodfly -${extra}`); turnTotal += extra; updateHp(); }
+          } else if (lastHit > 0) {
             const before = f.hp;
             f.hp = Math.min(f.maxHp, f.hp + lastHit);
             if (f.hp > before) setTimeout(() => healFx(fi, `${icon('🌸')} +${f.hp - before}`), 200);
@@ -684,7 +736,11 @@ async function battleEvent(enemy = null) {
       // Magnet charm: a chance to pull this wheel onto a card already showing on another wheel
       const showing = landedThisTurn.filter((c, i) => c && i !== wi).map(fxSlug);
       const pull = showing.length && Math.random() < charmCount(f.p, 'magnet') * 0.2;
-      let card = f.loadout[await spin(f, wi, pull ? c => showing.includes(fxSlug(c)) : undefined)];
+      // Magnet Fly item: the next spins are pulled onto your highest-damage card
+      const magnetItem = f.it?.magnet > 0, bestMult = Math.max(...f.loadout.map(c => c.mult || 0));
+      if (magnetItem) f.it.magnet--;
+      let card = f.loadout[await spin(f, wi, magnetItem ? c => (c.mult || 0) === bestMult : pull ? c => showing.includes(fxSlug(c)) : undefined)];
+      if (magnetItem) setTimeout(() => statusFx(fi, `🧲 Magnet Fly (${f.it.magnet} left)`, 'buff', 'buff', ['#ff5d8a', '#fff']), 100);
       // Super moves (regions.js) get their Orbital-Laser-style cinematic before they strike
       if (card.superMove && typeof superMoveFx === 'function') await superMoveFx(card, fxCtx(fi, { card, win: body.querySelectorAll('.wheel-window')[wi] }));
       lastHit = 0;
@@ -692,9 +748,21 @@ async function battleEvent(enemy = null) {
       // (the last card this fighter played: earlier this turn, or from their previous turn)
       const mirrorOf = card.gimmick === 'mirror' ? ([...landedThisTurn.slice(0, wi)].reverse().find(Boolean) || f.lastCard) : null;
       if (mirrorOf) { card = mirrorOf; setTimeout(() => statusFx(fi, `🪞 copies ${mirrorOf.name}!`, 'buff', 'buff', ['#c0e8ff', '#fff', '#7ae0ff']), 100); }
+      // Copycat Card / Mirror Pond items: this card turns into the previous card / the enemy's last card
+      if (f.it?.copycat === 0 && wi > 0 && landedThisTurn[wi - 1]) { card = landedThisTurn[wi - 1]; f.it.copycat = -1; setTimeout(() => statusFx(fi, `🃏 Copycat: ${card.name}!`, 'buff', 'buff', ['#c0e8ff', '#fff']), 100); }
+      else if (f.it?.pond === 0 && foe.lastCard) { card = foe.lastCard; f.it.pond = -1; setTimeout(() => statusFx(fi, `🪞 Mirror Pond: ${card.name}!`, 'buff', 'buff', ['#7ae0ff', '#fff']), 100); }
+      // Overcharge item: the first card of a turn hits x3, the other wheels are skipped
+      let overcharged = false;
+      if (f.it?.overcharge === 0 && wi === 0 && card.mult > 0) { f.it.overcharge = -1; f.it.overchargeNow = true; overcharged = true; statusFx(fi, '⚡ OVERCHARGE x3!', 'buff', 'buff', ['#ffea00', '#fff']); }
+      // Volcano Seed: elemental cards in a row stack up; anything else resets
+      if (f.it && 'seed' in f.it) f.it.seed = (card.region || card.element) ? f.it.seed + 1 : 0;
+      // Frog Legs: attack cards may strike twice (less likely after each success)
+      if (f.it?.legs > 0 && card.mult > 0) { f.it.legs--; if (Math.random() < f.it.legsChance) { f.doubleNext++; f.it.legsChance = Math.max(0, f.it.legsChance - 0.2); setTimeout(() => statusFx(fi, '🐸 Frog Legs: double hit!', 'buff', 'buff', ['#5fd13a', '#fff']), 120); } }
       if (pull && showing.includes(fxSlug(card))) setTimeout(() => statusFx(fi, '🧲 Magnet!', 'buff', 'buff', ['#ff5d8a', '#fff']), 100);
       // Saw chain: saws landing back to back hit harder each time; any other card breaks the chain
+      const chainBefore = sawChain;
       sawChain = card.gimmick === 'saw' || card.extra === 'saw' ? sawChain + 1 : 0;
+      if (f.it && 'sawdust' in f.it && chainBefore >= 1 && sawChain === 0) { f.it.sawdust++; statusFx(fi, `🪚 Sawdust x${f.it.sawdust}`, 'buff', 'saw', ['#c0c8d0', '#fff']); } // a chain broke
       const sawMult = 1 + (SAW_CHAIN_BONUS + charmCount(f.p, 'grease') * 0.5) * Math.max(0, sawChain - 1); // Grease charm
       if (sawChain > 1) sawChainFx(sawChain, sawMult, wi);
       // Match combo: how many wheels this turn show this same card (a saw re-spin replaces its wheel's card)
@@ -702,7 +770,11 @@ async function battleEvent(enemy = null) {
       statCard(f.p, card); // favourite card (awards)
       const matchWheels = landedThisTurn.map((c, i) => c && fxSlug(c) === fxSlug(card) ? i : -1).filter(i => i >= 0);
       const match = matchWheels.length, lucky = charmCount(f.p, 'lucky');
-      const matchMult = match === 3 ? MATCH_MULT[3] + lucky : match === 2 ? MATCH_MULT[2] + lucky * 0.5 : 1; // Lucky Coin
+      // Jackpot Ticket item: the next pair counts as a jackpot (if the other wheel's card is a different rarity)
+      const other = landedThisTurn.find((c, i) => c && !matchWheels.includes(i));
+      const ticket = match === 2 && f.it?.ticket === 0 && (!other || (other.rarity || 'common') !== (card.rarity || 'common'));
+      if (ticket) { f.it.ticket = -1; setTimeout(() => banner('🎰 Jackpot Ticket: PAIR → JACKPOT!', 'legendary'), 200); }
+      const matchMult = match === 3 || ticket ? MATCH_MULT[3] + lucky : match === 2 ? MATCH_MULT[2] + lucky * 0.5 : 1; // Lucky Coin
       curMatch = match;
       if (match > 1) { matchFx(match, matchWheels, wi, matchMult); questEvent(f.p, 'jackpot'); stat(f.p, 'combos'); }
       const matchPart = match > 1 ? [`🎰 ${match === 3 ? 'JACKPOT' : 'pair'} x${matchMult}`] : [];
@@ -747,7 +819,9 @@ async function battleEvent(enemy = null) {
       }
       if (card.mult > 0 && card.quiz && !f.p.enemy) {
         // Skill check card: answer fast for more damage; a wrong or slow answer heals the foe instead
-        const res = await battleCheck(f.p, card, Math.round(dmgOf(card) * sawMult * matchMult * (isVenom(card) && foe.poison ? 2 : 1)));
+        const base = Math.round(dmgOf(card) * sawMult * matchMult * (isVenom(card) && foe.poison ? 2 : 1));
+        const res = await battleCheck(f.p, card, base);
+        await itemsOnSkillCheck(res > 0, res / Math.max(1, base * 2));
         if (res > 0) lastHit = await attack(res, [`🧠 ${card.name} ${res}`], card);
         else {
           const before = foe.hp;
@@ -766,6 +840,8 @@ async function battleEvent(enemy = null) {
       if (card.extra && !preDouble) applyEffect(card.extra, wi, card);
       if (myth?.post) { myth.post(mythCtx); updateHp(); }
       if (card.gimmick !== 'mirror') f.lastCard = card; // Mirror Frog copies this later, even next turn
+      const step = RARITY_STEP[card.rarity || 'common'] || 0;
+      if (f.it && 'curse' in f.it && step && f.hp > 1) { const self = Math.min(f.hp - 1, Math.round(f.maxHp * [0, 0.02, 0.04, 0.06, 0.1][step])); f.hp -= self; hurtFx(fi, `💎 curse -${self}`); updateHp(); }
       updateHp();
       const isSaw = card.gimmick === 'saw' || card.extra === 'saw';
       if (isSaw) { sfx('saw', 1 + bonus * 0.15); sawsThisTurn++; }
@@ -780,6 +856,14 @@ async function battleEvent(enemy = null) {
       }
       bonus = 0; // next wheel gets its own spin count
       await sleep(450);
+      if (overcharged) break; // Overcharge: the other wheels sit this turn out
+    }
+    // Three's Company item: all 3 wheels on different cards = a bonus hit
+    if (f.it && 'threes' in f.it && foe.hp > 0 && landedThisTurn.filter(Boolean).length === 3 && new Set(landedThisTurn.map(fxSlug)).size === 3) {
+      const extra = hit(foe, f.p.attack * 4);
+      statusFx(fi, "🃏 Three's Company!", 'buff', 'buff', ['#ffd23f', '#fff']);
+      if (extra) { hurtFx(foeI, `🃏 -${extra}`); turnTotal += extra; }
+      updateHp(); await sleep(400);
     }
     // Dragonfly pet: a quick strike of its own after your wheels
     if (f.p.pet === 'dragonfly' && foe.hp > 0) {
@@ -803,7 +887,7 @@ async function battleEvent(enemy = null) {
       if (foe.hp <= 0 || f.hp <= 0) break;
       // Point at the Leech's wheel so it's clear which card is acting
       const win = body.querySelectorAll('.wheel-window')[wi];
-      win.classList.remove('landed'); void win.offsetWidth; win.classList.add('landed');
+      restartAnim(win, 'landed');
       if (hadAttacks) {
         blocked = 0;
         const dealt = hit(foe, cardDamage);
@@ -846,7 +930,8 @@ async function battleEvent(enemy = null) {
     if (!won) {
       stat(p, 'losses');
       p.revenge = true; // comeback: +30% damage in your next battle
-      const lost = Math.min(p.coins, tier.loss);
+      const greedy = fighters[0].it && 'greedy' in fighters[0].it ? Math.round(p.coins * 0.25) : 0; // Greedy Frog item
+      const lost = Math.min(p.coins, tier.loss + greedy);
       p.coins -= lost;
       title.textContent = `${enemy.name} wins...`;
       sfx('fail');
@@ -915,8 +1000,8 @@ async function battleEvent(enemy = null) {
   gainXp(winF.p, 15);
   if (bounty) { // collect the bounty: coins and a stolen crown
     gainCoins(winF.p, bountyPay);
-    loseF.p.crowns = Math.max(0, (loseF.p.crowns || 0) - 1);
-    setTimeout(() => gainCrowns(winF.p, 1, `Bounty claimed! Stole a crown from ${loseF.p.name}`), 400);
+    loseF.p.regionLaps = Math.max(0, (loseF.p.regionLaps || 0) - 1); // the bounty steals a lap
+    setTimeout(() => addLap(winF.p, `🎯 Bounty claimed! Stole a lap from ${loseF.p.name}!`), 400);
   }
   await waitGo('See result');
   title.textContent = `${winF.p.name} wins!`;
@@ -924,7 +1009,7 @@ async function battleEvent(enemy = null) {
   flash('#ffd23f', 0.5);
   burst(title, ['#ffd23f', '#fff', '#ff5d5d', '#6aa8ff', '#3cdc3c'], 60, 2);
   msg.textContent = `${winF.p.name} takes ${prize} coin${prize === 1 ? '' : 's'} from ${loseF.p.name}` + (won > prize ? ` (+${won - prize} Money bonus).` : '.') +
-    (bounty ? ` 🎯 Bounty claimed: +${bountyPay} coins and a crown!` : '');
+    (bounty ? ` 🎯 Bounty claimed: +${bountyPay} coins and a lap!` : '');
   body.innerHTML = hpRow();
   render();
   await waitGo('Done');

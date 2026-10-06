@@ -22,7 +22,7 @@ const MYSTERY_OUTCOMES = [
   { w: 10, icon: '💥', name: 'Booby trap!', bad: true, run: async p => { const n = Math.min(p.coins, 3 + threatLevel()); p.coins -= n; return `Ouch! -${n} coins`; } },
   { w: 8, icon: '👾', name: 'AMBUSH!', bad: true, run: async () => 'A monster jumps out of the chest!',
     after: async () => battleEvent(makeEnemy(ENEMY_TIERS[Math.random() < 0.6 ? 0 : 1])) },
-  { w: 2, icon: '👑', name: 'A CROWN!', run: async p => { gainCrowns(p, 1, 'Found in a mystery chest!'); return 'Incredibly rare!'; } },
+  { w: 3, icon: '🗺️', name: 'A SECRET MAP!', run: async p => { addLap(p, '🗺️ Shortcut found!'); return 'Counts as a lap toward the boss!'; } },
 ];
 async function mysteryEvent() {
   const p = players[turn];

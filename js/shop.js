@@ -7,6 +7,7 @@ const SHOP_TABS = [
   { key: 'charms',   icon: '🔮', name: 'Charms' },
   { key: 'items',    icon: '🎒', name: 'Items' },
   { key: 'traps',    icon: '🪤', name: 'Traps' },
+  { key: 'gear',     icon: '🧪', name: 'Battle Items' },
   { key: 'sell',     icon: '💰', name: 'Sell' },
 ];
 const KEEPER_LINES = {
@@ -14,6 +15,7 @@ const KEEPER_LINES = {
   upgrades: ['Train up that frog! Everything grows from the tree.', "Stronger legs, sharper crits... what'll it be?"],
   charms:   ['Charms! Pick a style and go all in, dear.', 'Crits, poison, saws... a charm for every kind of frog.'],
   items:    ['Handy little gadgets. Very handy.', 'Tools of the trade! Some are sneaky...'],
+  gear:     ['One-use battle tricks! Use them wisely, dear.', 'Gimmicks galore. Each one breaks after a single fight.'],
   traps:    ['Heh heh... planning something nasty?', 'Snares, mud, curses... all perfectly legal. Mostly.'],
   sell:     ["Selling? Let's see what you've got.", "I'll give you a fair price. Mostly fair."],
   bought:   ['Pleasure doing business!', 'Ooh, excellent choice!', "You won't regret that one.", 'Ka-ching! Thank you kindly.'],
@@ -26,7 +28,7 @@ const keeperLine = kind => KEEPER_LINES[kind][Math.floor(Math.random() * KEEPER_
 function keeperSays(kind) {
   shopSay = keeperLine(kind);
   const k = document.querySelector('.keeper-avatar');
-  if (k) { k.classList.remove('talk'); void k.offsetWidth; k.classList.add('talk'); }
+  if (k) restartAnim(k, 'talk');
   const bubble = document.querySelector('.keeper-bubble');
   if (bubble) bubble.textContent = shopSay;
 }
@@ -39,6 +41,57 @@ function shopRow({ name, desc, button, disabled = false, cls = '', color = '' },
   row.querySelector('button').addEventListener('click', () => onClick(row));
   return row;
 }
+// A shop tab drawn as a wooden shelf unit: items sit on shelves with hanging price tags; tap one to look at it
+// in the info card under the shelves, and buy it from there.
+//   opts.id      remembers which item is being looked at, per tab
+//   opts.shelves [{ label (html), items: [{ icon, name, desc, price, color, chip, owned, out, gone, glow, buy, colors }] }]
+//                out: why it can't be bought (e.g. 'MAX'); gone: sold, shows a SOLD sign; glow: extra aura class
+//   opts.bag     optional bottom shelf: { label, items: [{ icon, n, color, title }] }
+//   opts.drop    items drop onto the shelf (right after a restock)
+const shelfPicks = {};
+function shelfStore(page, p, buy, { id, sign, sub = '', shelves, bag, drop = false }) {
+  const all = shelves.flatMap(s => s.items);
+  let pick = shelfPicks[id] ?? 0;
+  if (!all[pick] || all[pick].gone) pick = Math.max(0, all.findIndex(it => !it.gone));
+  shelfPicks[id] = pick;
+  let k = 0;
+  const itemHtml = it => {
+    const i = k++;
+    if (it.gone) return `<div class="shelf-item sold"><div class="sold-sign">SOLD</div></div>`;
+    return `<button class="shelf-item${it.glow ? ' r-' + it.glow : ''}${i === pick ? ' picked' : ''}${drop ? ' drop' : ''}${it.out ? ' out' : ''}" data-i="${i}" style="--rc:${it.color}; --d:${i * 90}ms">
+      <span class="shelf-aura"></span><span class="shelf-icon">${it.icon}</span>${it.owned ? `<span class="shelf-owned">x${it.owned}</span>` : ''}
+      <span class="price-tag">${it.out || `${COIN} ${it.price}`}</span></button>`;
+  };
+  const wrap = document.createElement('div');
+  wrap.className = 'item-store';
+  wrap.innerHTML = `<div class="shelf-unit">
+      <div class="shelf-sign">${sign}${sub ? `<small>${sub}</small>` : ''}</div>
+      ${shelves.map(s => `${s.label ? `<div class="shelf-label">${s.label}</div>` : ''}<div class="shelf-row">${s.items.map(itemHtml).join('')}</div><div class="shelf-board"></div>`).join('')}
+      ${bag ? `<div class="shelf-label">${bag.label}</div><div class="shelf-row bag-row">${bag.items.length
+        ? bag.items.map(b => `<div class="bag-item" title="${b.title}" style="--rc:${b.color}">${b.icon}<b>x${b.n}</b></div>`).join('')
+        : '<div class="bag-empty">Empty</div>'}</div><div class="shelf-board"></div>` : ''}
+    </div>
+    <div class="shelf-info"></div>`;
+  page.appendChild(wrap);
+
+  const info = wrap.querySelector('.shelf-info'), it = all[pick];
+  if (it && !it.gone) {
+    info.style.setProperty('--rc', it.color);
+    info.innerHTML = `<div class="info-icon">${it.icon}</div><div class="info-text">
+        <div class="info-name">${it.name}${it.chip ? ` <span class="item-rarity" style="background:${it.color}">${it.chip}</span>` : ''}${it.owned ? ` <span class="lvl">x${it.owned} owned</span>` : ''}</div>
+        <div class="info-desc">${it.desc}</div></div>
+      <button class="info-buy" ${it.out || p.coins < it.price ? 'disabled' : ''}>${it.out || `${COIN} ${it.price}`}</button>`;
+    info.querySelector('.info-buy').onclick = () =>
+      buy(it.price, it.buy, wrap.querySelector(`.shelf-item[data-i="${pick}"]`) || info, it.colors || [it.color, '#fff']);
+  } else info.innerHTML = '<div class="info-desc">Sold out!</div>';
+  wrap.querySelectorAll('.shelf-item[data-i]').forEach(b => b.onclick = () => {
+    shelfPicks[id] = +b.dataset.i;
+    sfx('card_pick', 1.1);
+    renderShop();
+  });
+  return wrap;
+}
+const chunk = (arr, n) => arr.reduce((out, x, i) => (i % n ? out[out.length - 1].push(x) : out.push([x]), out), []);
 function shopSubhead(list, text, color) {
   const h = document.createElement('div');
   h.className = 'shop-subhead';
@@ -91,17 +144,15 @@ function renderShop() {
   }
 
   if (shopTab === 'charms') {
-    // Charms: passive battle items, grouped by playstyle
-    [...new Set(CHARMS.map(c => c.style))].forEach(style => {
-      shopSubhead(page, style, CHARM_STYLE_COLORS[style]);
-      CHARMS.filter(c => c.style === style).forEach(c => {
-        const n = charmCount(p, c.key), maxed = n >= c.max, price = charmPrice(p, c);
-        page.appendChild(shopRow({
-          name: `${c.icon} ${c.name}${n ? ` <span class="lvl">x${n}</span>` : ''}`, desc: c.desc(maxed ? n : n + 1),
-          button: maxed ? 'MAX' : COIN + ' ' + price, disabled: maxed || p.coins < price, cls: 'charm-row', color: CHARM_STYLE_COLORS[style],
-        }, row => buy(price, () => { p.charms[c.key] = n + 1; }, row, [CHARM_STYLE_COLORS[style], '#fff'])));
-      });
+    // Charms: passive battle items, on shelves in playstyle order (the glow and tag show the playstyle)
+    const items = CHARMS.map(c => {
+      const n = charmCount(p, c.key), maxed = n >= c.max, color = CHARM_STYLE_COLORS[c.style];
+      return { style: c.style, icon: c.icon, name: c.name, desc: c.desc(maxed ? n : n + 1), price: charmPrice(p, c), color, chip: c.style,
+        owned: n, out: maxed ? 'MAX' : '', buy: () => { p.charms[c.key] = n + 1; } };
     });
+    shelfStore(page, p, buy, { id: 'charms', sign: '🔮 Charms', sub: 'passive boosts for every battle, grouped by playstyle',
+      shelves: chunk(items, 5).map(row => ({ items: row,
+        label: [...new Set(row.map(x => x.style))].map(s => `<span style="color:${CHARM_STYLE_COLORS[s]}">${s}</span>`).join(' · ') })) });
   }
 
   if (shopTab === 'items') {
@@ -124,6 +175,7 @@ function renderShop() {
   }
 
   if (shopTab === 'traps') renderTrapShop(page, p, buy);
+  if (shopTab === 'gear') renderItemShop(page, p, buy); // items.js
 
   if (shopTab === 'sell') {
     // Sell cards from your hand for coins

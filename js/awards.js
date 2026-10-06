@@ -32,7 +32,7 @@ const AWARDS = [
   { key: 'minigames', icon: '🎮', title: 'Game Master',   desc: v => `${v} minigames played` },
   { key: 'pet',      icon: '🐾', title: 'Pet MVP',        desc: v => `Pet helped ${v} times` },
 ];
-const STAT_ROWS = [['👑 Crowns', p => p.crowns || 0], ['⭐ Level', p => p.level || 1], ['🏁 Laps', p => p.laps || 0],
+const STAT_ROWS = [['👑 Grand crowns', p => p.crowns || 0], ['⭐ Level', p => p.level || 1], ['🏁 Laps', p => p.laps || 0],
   ['💥 Biggest hit', p => statOf(p, 'bigHit')], ['⚔️ Total damage', p => statOf(p, 'damage')], ['🏆 Battles won', p => statOf(p, 'wins')],
   ['💀 Battles lost', p => statOf(p, 'losses')], ['🧠 Right answers', p => statOf(p, 'right')], ['🔥 Best streak', p => statOf(p, 'streak')],
   ['💰 Coins earned', p => statOf(p, 'coins')], ['🃏 Cards collected', p => statOf(p, 'cards')], ['🎰 Match combos', p => statOf(p, 'combos')]];

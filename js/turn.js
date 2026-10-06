@@ -97,8 +97,7 @@ async function rollDice() {
   showDieFace(roll);
   if (isUnderdog(players[turn])) { roll++; setTimeout(() => banner(`🐢 Underdog bonus: +1 → ${roll}`, 'legendary'), 300); } // comeback
   sfx('dice_land', 1.15 - roll * 0.05); // bigger rolls land a little deeper
-  void dieEl.offsetWidth;
-  dieEl.classList.add('rolled');
+  restartAnim(dieEl, 'rolled');
   burst(dieEl, ['#ffd23f', '#fff', '#f90', '#ff5d5d'], 14 + roll * 4, 0.8 + roll * 0.12);
   flash(roll === 6 ? '#ffd23f' : '#fff', roll === 6 ? 0.55 : 0.2);
   await sleep(450);
@@ -144,6 +143,7 @@ async function rollDice() {
     restartAnim(p.el, 'hopping');
     render();
     await sleep(hopMs);
+    p.el.classList.remove('hopping'); // done, so the next hop can start right away (restartAnim)
     // Final landing: kick up a cloud of dust and thump the square
     if (s === roll - 1 || trapped === 'stop') {
       restartAnim(squareEls[p.pos], 'land-big');

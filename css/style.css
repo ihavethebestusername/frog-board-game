@@ -245,7 +245,8 @@ html, body { margin: 0; height: 100%; background: #1e3a28; overflow: hidden; tou
                  85% { scale: 0.9; } 100% { scale: 1; filter: var(--frog-tint, ) drop-shadow(0 0 0 #0000); } }
 .square.land { animation: squareLand 0.35s ease-out; }
 .square.land-big { animation: squareLandBig 0.45s ease-out; }
-.dust { position: absolute; border-radius: 50%; pointer-events: none; z-index: 5; opacity: 0; filter: blur(2px);
+.dust { position: absolute; border-radius: 50%; pointer-events: none; z-index: 5; opacity: 0; /* soft edge from the gradient, not a blur filter (cheaper) */
+        background: radial-gradient(circle, currentColor 30%, transparent 70%);
         transform: translate(-50%, -50%); animation: dust 0.85s ease-out forwards; }
 @keyframes dust { 0% { opacity: 0.85; transform: translate(-50%, -50%) scale(0.4); }
                   100% { opacity: 0; transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(2.2); } }
@@ -420,15 +421,6 @@ html.flipped { transform: rotate(180deg); }
 .shop-item .lvl { font-size: 11px; font-weight: bold; color: #fff; background: #5a3e1b; border-radius: 4px; padding: 0 5px; margin-left: 4px; }
 .shop-item .desc b { color: #1e7a1e; }
 
-/* Ambient fireflies: tiny glowing dots that always stay visible and just float around.
-   .firefly-sway moves left/right, the .firefly inside bobs up/down (GPU-run CSS animations). */
-.firefly-sway { position: absolute; width: 0; height: 0; z-index: 4; pointer-events: none;
-                animation: fireflySway 10s ease-in-out infinite alternate; }
-.firefly { position: absolute; left: -9px; top: -9px; width: 18px; height: 18px; border-radius: 50%;
-           background: radial-gradient(circle, #fffbb0 0 2px, #e8ff6acc 3px, #c8ff3a44 6px, transparent 9px); opacity: 0.9;
-           animation: fireflyBob 8s ease-in-out infinite alternate; }
-@keyframes fireflySway { from { transform: translateX(calc(var(--rx) * -1)); } to { transform: translateX(var(--rx)); } }
-@keyframes fireflyBob { from { transform: translateY(calc(var(--ry) * -1)); } to { transform: translateY(var(--ry)); } }
 
 /* Drizzle overlay: above the board, under the HUD buttons and labels */
 .rain { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1; }
@@ -732,13 +724,18 @@ body.cheats.fly-solving #quizCheat { display: block; }
 .confetti { position: fixed; top: -12px; width: 8px; height: 12px; z-index: 60; pointer-events: none; border-radius: 2px;
   animation: confettiFall linear forwards; }
 @keyframes confettiFall { to { transform: translate(var(--drift), 105vh) rotate(var(--spin)); } }
-.juice-banner { position: fixed; left: 50%; top: 38%; z-index: 61; pointer-events: none; white-space: nowrap;
+.juice-banner { position: fixed; left: 50%; top: 38%; z-index: 61; pointer-events: none;
+  width: max-content; max-width: 92vw; text-align: center; line-height: 1.1; /* long banners wrap instead of running off screen */
   font: 900 clamp(28px, 7vw, 56px) sans-serif; color: #fff; text-shadow: 0 4px 0 #000, 0 0 24px #ff9a3b;
   animation: bannerSlam 1.5s ease-out forwards; }
 .juice-banner.fire { color: #ffd23f; text-shadow: 0 4px 0 #000, 0 0 30px #ff4b1f; }
 .juice-banner.legendary { color: #ffd23f; text-shadow: 0 4px 0 #6a4000, 0 0 34px #ffd23f; }
 .juice-banner.lose { color: #ff6b6b; font-size: clamp(20px, 5vw, 36px); text-shadow: 0 3px 0 #000; }
 @keyframes bannerSlam { 0% { transform: translate(-50%, -50%) scale(2.6); opacity: 0; } 12% { transform: translate(-50%, -50%) scale(0.92); opacity: 1; }
+  20% { transform: translate(-50%, -50%) scale(1); } 80% { opacity: 1; } 100% { transform: translate(-50%, -80%) scale(1); opacity: 0; } }
+/* A banner that appears while others are showing slams in smaller, so it never covers its neighbours */
+.juice-banner.stacked { animation-name: bannerSlamSmall; }
+@keyframes bannerSlamSmall { 0% { transform: translate(-50%, -50%) scale(1.3); opacity: 0; } 12% { transform: translate(-50%, -50%) scale(0.96); opacity: 1; }
   20% { transform: translate(-50%, -50%) scale(1); } 80% { opacity: 1; } 100% { transform: translate(-50%, -80%) scale(1); opacity: 0; } }
 /* Coins flying to the wallet, and the wallet counting up */
 .fly-coin { position: fixed; z-index: 62; width: 22px; height: 22px; pointer-events: none; transform: translate(-50%, -50%);
@@ -924,7 +921,7 @@ body.cheats.fly-solving #quizCheat { display: block; }
 .hand-grid.multi-row { flex-wrap: wrap !important; max-width: calc(15 * 114px); margin-left: auto; margin-right: auto; row-gap: 16px; }
 
 /* While a menu covers the board, pause the board's idle animations (they can't be seen anyway) */
-body.board-covered .firefly-sway, body.board-covered .firefly, body.board-covered .square.boss::before { animation-play-state: paused; }
+body.board-covered .square.boss::before, body.board-covered .pet-follow { animation-play-state: paused; }
 
 /* Card rows that pan get their own GPU layer, so panning just slides it instead of repainting every card */
 #handCards .hand-grid, .pick-grid, #fuseBody .hand-grid { will-change: translate; }
@@ -1309,3 +1306,111 @@ body.region-volcano .vignette { background: radial-gradient(ellipse at center, t
   .shop-tab, .card-tabs button, .tut-btn, .menu-length button { min-height: 40px; }
   .pick-minus { width: 32px; height: 32px; }
 }
+.events-btn[hidden] { display: none; }
+.prog-laps { border-color: #ffffff55 !important; font-size: 12px; }
+.prog-laps.match { border-color: #ffd23f !important; color: #ffd23f; animation: tutPulse 0.6s ease-in-out infinite alternate; }
+
+/* Battle item shop stock */
+.item-row { border-left: 4px solid var(--sc); }
+.item-epic { box-shadow: inset 0 0 18px #a855f733; }
+.item-legendary { box-shadow: inset 0 0 22px #f59e0b55, 0 0 10px #f59e0b55; }
+.item-sold { opacity: 0.45; }
+.item-rarity { font: bold 9px sans-serif; letter-spacing: 1px; text-transform: uppercase; color: #000; padding: 2px 5px; border-radius: 4px; vertical-align: middle; }
+.item-reroll { border: 2px dashed #ffd23f88; }
+
+/* Battle item store: wooden shelves */
+.item-store { display: flex; flex-direction: column; gap: 10px; }
+.shelf-unit { position: relative; padding: 10px 12px 6px; border-radius: 10px; border: 6px solid #5a3214;
+  background: repeating-linear-gradient(90deg, #00000010 0 2px, transparent 2px 46px), linear-gradient(#3b2010, #2a160a); box-shadow: inset 0 0 30px #000a, 0 6px 14px #0008; }
+.shelf-sign { margin: 0 auto 6px; width: fit-content; padding: 4px 14px; border-radius: 6px; background: #f3d9a4; color: #5a3214; border: 2px solid #8a5a2b;
+  font: bold 16px sans-serif; text-align: center; box-shadow: 0 3px 0 #0006; transform: rotate(-1.5deg); }
+.shelf-sign small { display: block; font-size: 10px; opacity: 0.75; }
+.shelf-label { margin: 8px 0 2px; font: bold 11px sans-serif; color: #f3d9a4; text-align: center; text-shadow: 0 1px 0 #000; }
+.shelf-row { display: flex; justify-content: space-around; align-items: flex-end; gap: 6px; min-height: 104px; padding: 0 4px; }
+.bag-row { min-height: 56px; flex-wrap: wrap; justify-content: center; }
+.shelf-board { height: 14px; margin: 0 -12px; border-radius: 3px; background: linear-gradient(#b07a45, #8a5a2b 60%, #5a3214); box-shadow: 0 6px 8px #000a; position: relative; z-index: 1; }
+.shelf-item { position: relative; flex: 0 1 96px; height: 104px; display: flex; flex-direction: column; align-items: center; justify-content: flex-end;
+  background: none; border: none; padding: 0; cursor: pointer; transition: transform 0.15s; }
+.shelf-item:hover, .shelf-item.picked { transform: translateY(-6px); }
+.shelf-icon { font-size: 46px; line-height: 1; filter: drop-shadow(0 6px 3px #000a); position: relative; z-index: 1; margin-bottom: 18px; }
+.shelf-aura { position: absolute; left: 50%; bottom: 22px; width: 70px; height: 70px; margin-left: -35px; border-radius: 50%;
+  background: radial-gradient(circle, var(--rc) 0%, transparent 70%); opacity: 0.35; }
+.r-epic .shelf-aura { opacity: 0.6; }
+.r-legendary .shelf-aura { opacity: 0.85; animation: auraPulse 1.4s ease-in-out infinite; }
+@keyframes auraPulse { 50% { transform: scale(1.25); opacity: 0.5; } }
+.shelf-item.picked .shelf-icon { animation: shelfBob 0.9s ease-in-out infinite; }
+@keyframes shelfBob { 50% { transform: translateY(-4px) rotate(-4deg); } }
+.price-tag { position: absolute; bottom: -12px; z-index: 2; display: flex; align-items: center; gap: 3px; padding: 2px 7px; border-radius: 4px;
+  background: #fff6dc; color: #5a3214; border: 2px solid var(--rc); font: bold 13px sans-serif; box-shadow: 0 2px 0 #0006; transform: rotate(-3deg); }
+.price-tag::before { content: ''; position: absolute; top: -8px; left: 50%; width: 1px; height: 8px; background: #f3d9a4; }
+.price-tag .coin { width: 14px; height: 14px; }
+.shelf-item.picked .price-tag { box-shadow: 0 0 10px var(--rc), 0 2px 0 #0006; }
+.shelf-item.sold { cursor: default; }
+.sold-sign { margin-bottom: 16px; padding: 4px 8px; border: 3px solid #c0392b; color: #c0392b; background: #fff6dc; font: bold 14px sans-serif; border-radius: 4px; transform: rotate(-12deg); opacity: 0.85; }
+.shelf-item.drop .shelf-icon { animation: shelfDrop 0.5s cubic-bezier(.3, 1.6, .5, 1) backwards; animation-delay: var(--d); }
+@keyframes shelfDrop { 0% { transform: translateY(-90px) scale(0.6); opacity: 0; } 100% { transform: none; opacity: 1; } }
+.bag-item { position: relative; font-size: 28px; line-height: 1; padding: 2px 4px 4px; filter: drop-shadow(0 4px 2px #000a); }
+.bag-item b { position: absolute; right: -4px; bottom: -2px; font: bold 11px sans-serif; color: #fff; background: var(--rc); border-radius: 6px; padding: 0 4px; }
+.bag-empty { align-self: center; font: italic 12px sans-serif; color: #f3d9a499; }
+.shelf-info { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 10px; background: #fff6dc; color: #3a2410;
+  border: 3px solid var(--rc, #8a5a2b); box-shadow: 0 0 14px var(--rc, transparent); min-height: 60px; }
+.info-icon { font-size: 40px; }
+.info-text { flex: 1; min-width: 0; }
+.info-name { font: bold 16px sans-serif; }
+.info-desc { font-size: 13px; opacity: 0.85; margin-top: 2px; }
+.info-buy, .restock-btn { font: bold 16px sans-serif; border: none; border-radius: 8px; padding: 10px 14px; cursor: pointer; background: #ffd23f; color: #7a5700;
+  display: flex; align-items: center; gap: 4px; white-space: nowrap; box-shadow: 0 3px 0 #b07f00; }
+.info-buy:disabled, .restock-btn:disabled { opacity: 0.4; cursor: default; }
+.restock-btn { align-self: center; flex-direction: column; gap: 0; background: #b07cff; color: #fff; box-shadow: 0 3px 0 #6b3fb8; }
+.restock-btn small { font-size: 10px; opacity: 0.85; font-weight: normal; }
+@media (max-width: 480px) {
+  .shelf-icon { font-size: 36px; }
+  .shelf-item { height: 92px; }
+  .shelf-row { min-height: 92px; }
+  .shelf-info { flex-wrap: wrap; }
+}
+
+.shelf-owned { position: absolute; top: 4px; right: 8px; z-index: 2; font: bold 11px sans-serif; color: #fff; background: var(--rc); border-radius: 6px; padding: 0 5px; box-shadow: 0 1px 0 #0008; }
+.shelf-item.out .shelf-icon { filter: drop-shadow(0 6px 3px #000a) saturate(0.6); }
+.shelf-item.out .price-tag { background: #ffd23f; color: #7a5700; }
+.shelf-item { min-width: 54px; }
+.shelf-label span { font-weight: bold; }
+
+/* The battle box fills the whole screen; its contents sit in a centred column */
+#battle { padding: 0; }
+#battle .shop-panel, #battle .shop-panel:has(.pick-grid) { width: 100vw; max-width: none; min-width: 0; height: 100dvh; max-height: none; box-sizing: border-box;
+  display: flex; flex-direction: column; overflow-y: auto; padding: 12px max(12px, calc((100vw - 960px) / 2)); }
+#battle .shop-panel > * { flex-shrink: 0; }
+/* The card rows clip here, not at the scrolling panel: a panning row inside a scroll container changed its
+   scrollable area every frame (layout + repaint each frame = laggy card selection). Clip doesn't scroll. */
+#battleBody { margin-block: auto; overflow-x: clip; }
+#battle .shop-panel:has(.pick-grid) { padding-inline: 12px; } /* card picking uses the full width */
+#battle .battle-go { max-width: 520px; align-self: center; }
+#battle .wheels { max-width: 760px; margin-inline: auto; width: 100%; box-sizing: border-box; }
+/* Performance (full-screen box): the panel gets its own GPU layer so shakes and hit-stops just move it instead of
+   repainting the whole screen; the spinning wheels keep their normal height (taller = more 3D cards to draw); and
+   the spin glow is a steady glow instead of an animated shadow that repainted every wheel window every frame */
+#battle .shop-panel { will-change: transform; }
+#battle .wheel-window.active { animation: none; box-shadow: 0 0 14px #fc0; }
+#battle .hp-row { max-width: 960px; margin-inline: auto; }
+
+/* Battle item tray (before each spin) */
+.item-tray { max-width: 760px; margin: 8px auto 0; padding: 6px 8px; border-radius: 6px; background: #0d0004cc; border: 2px solid #000; box-shadow: inset 0 0 0 2px #b07cff55; }
+.tray-head { font: bold 12px sans-serif; color: #d9c2ff; margin-bottom: 4px; }
+.tray-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; }
+.tray-item { position: relative; width: 46px; height: 46px; border-radius: 8px; border: 2px solid var(--rc); background: #2a160a; cursor: pointer; padding: 0;
+  transition: transform 0.12s; }
+.tray-item:hover, .tray-item.picked { transform: translateY(-3px); }
+.tray-item.picked { box-shadow: 0 0 14px var(--rc); background: #3b2010; }
+.tray-item.active::after { content: '✓'; position: absolute; top: -6px; left: -6px; width: 16px; height: 16px; border-radius: 50%; background: #5fd13a; color: #fff; font: bold 11px/16px sans-serif; }
+.tray-icon { font-size: 26px; line-height: 42px; }
+.tray-item b { position: absolute; right: -5px; bottom: -5px; font: bold 10px sans-serif; color: #fff; background: var(--rc); border-radius: 6px; padding: 0 4px; text-shadow: none; }
+.tray-empty { font: italic 12px sans-serif; opacity: 0.7; }
+.tray-info { display: flex; align-items: center; gap: 10px; margin-top: 8px; padding: 6px 8px; border-radius: 6px; background: #fff6dc; color: #3a2410; text-shadow: none;
+  border: 2px solid var(--rc); text-align: left; }
+.tray-info div { flex: 1; min-width: 0; }
+.tray-info small { display: block; font-size: 12px; opacity: 0.85; }
+.tray-use { font: bold 15px sans-serif; border: none; border-radius: 8px; padding: 8px 12px; cursor: pointer; background: #b07cff; color: #fff; box-shadow: 0 3px 0 #6b3fb8; white-space: nowrap; }
+.tray-use:disabled { background: #5fd13a; box-shadow: 0 3px 0 #2e7a1a; cursor: default; }
+.tray-active { margin-top: 6px; font: bold 12px sans-serif; color: #9dff7a; }
+.tray-active span { font-size: 18px; }
