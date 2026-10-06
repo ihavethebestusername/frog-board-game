@@ -1414,3 +1414,80 @@ body.region-volcano .vignette { background: radial-gradient(ellipse at center, t
 .tray-use:disabled { background: #5fd13a; box-shadow: 0 3px 0 #2e7a1a; cursor: default; }
 .tray-active { margin-top: 6px; font: bold 12px sans-serif; color: #9dff7a; }
 .tray-active span { font-size: 18px; }
+
+/* ===== Story intro (intro.js): a storybook page over a dark, starry backdrop ===== */
+.intro-overlay { position: fixed; inset: 0; z-index: 55; display: flex; justify-content: center; align-items: center; padding: 16px; box-sizing: border-box;
+  background: radial-gradient(ellipse at 50% 30%, #2a1a4a, #0a0612 70%); transition: opacity 0.25s; }
+.intro-overlay.out { opacity: 0; }
+.intro-skip { position: absolute; top: calc(env(safe-area-inset-top, 0px) + 12px); right: 12px; font: bold 14px sans-serif; color: #f3d9a4;
+  background: #0006; border: 2px solid #f3d9a466; border-radius: 10px; padding: 8px 14px; cursor: pointer; }
+.intro-skip:hover { background: #000a; border-color: #f3d9a4; }
+.intro-book { width: min(600px, 94vw); max-height: calc(100dvh - 90px); overflow-y: auto; box-sizing: border-box; padding: 18px 22px 14px; border-radius: 14px;
+  background: linear-gradient(#fff6dc, #f3dfb0); color: #3a2410; border: 4px solid #8a5a2b; box-shadow: 0 10px 40px #000c, inset 0 0 30px #b07f0033; }
+.intro-book.turn { animation: introTurn 0.4s ease-out; }
+@keyframes introTurn { from { opacity: 0; transform: translateY(10px) rotate(-1deg) scale(0.97); } to { opacity: 1; transform: none; } }
+.intro-title { font: 900 24px Georgia, serif; text-align: center; color: #8a5a2b; margin-bottom: 4px; }
+.intro-text { font: 17px/1.45 Georgia, serif; min-height: 5.8em; cursor: pointer; }
+.intro-text b { color: #a0291a; }
+.intro-foot { display: flex; align-items: center; gap: 10px; margin-top: 10px; }
+.intro-dots { display: flex; gap: 5px; }
+.intro-dots span { width: 8px; height: 8px; border-radius: 50%; background: #c8a86088; }
+.intro-dots span.done { background: #8a5a2b; }
+.intro-dots span.on { background: #e0a800; box-shadow: 0 0 6px #e0a800; }
+.intro-next { margin-left: auto; font: bold 16px sans-serif; border: 2px solid #b07f00; border-radius: 10px; padding: 9px 18px; cursor: pointer;
+  background: linear-gradient(#ffd23f, #e0a800); color: #3a2a0a; }
+
+/* The little scene at the top of each page */
+.intro-scene { position: relative; height: 130px; margin: 4px 0 10px; border-radius: 10px; overflow: hidden; display: flex; justify-content: center; align-items: center;
+  background: radial-gradient(ellipse at 50% 60%, #3a2a5a, #140c24); font-size: 52px; line-height: 1; }
+.is-row { display: flex; gap: 14px; align-items: center; }
+/* Crown shatters: it shakes, fades, and a wave of light spreads out */
+.is-crown { animation: isShatter 1.4s ease-in forwards; filter: drop-shadow(0 0 12px #ffd23f); }
+@keyframes isShatter { 0% { transform: scale(1); } 40% { transform: scale(1.15) rotate(-6deg); } 50% { transform: scale(1.15) rotate(6deg); }
+  60% { transform: scale(1.2); opacity: 1; } 100% { transform: scale(0.4); opacity: 0; } }
+.is-wave { position: absolute; left: 50%; top: 50%; width: 40px; height: 40px; margin: -20px; border-radius: 50%; border: 4px solid #ffd23f;
+  opacity: 0; animation: isWave 1.6s ease-out 0.7s forwards; }
+.is-wave.w2 { border-color: #b07cff; animation-delay: 0.95s; }
+@keyframes isWave { 0% { transform: scale(0.5); opacity: 1; } 100% { transform: scale(14); opacity: 0; } }
+.is-shard { position: absolute; left: 50%; top: 50%; font-size: 20px; color: #ffd23f; opacity: 0; animation: isShard 1s ease-out 0.75s forwards; }
+.is-shard.s1 { --x: -140px; --y: -40px; } .is-shard.s2 { --x: 130px; --y: -30px; } .is-shard.s3 { --x: 10px; --y: 50px; }
+@keyframes isShard { 0% { opacity: 1; transform: translate(-50%, -50%); } 100% { opacity: 0.9; transform: translate(calc(-50% + var(--x)), calc(-50% + var(--y))) rotate(200deg); } }
+/* Animals turn hostile: a red glow pulses in one after another */
+.is-beast { animation: isCorrupt 0.6s ease-out var(--d) both; }
+@keyframes isCorrupt { 0% { transform: scale(0.6); filter: none; opacity: 0; } 60% { transform: scale(1.2) rotate(-5deg); opacity: 1; }
+  100% { transform: scale(1); filter: drop-shadow(0 0 10px #ff2b2b) drop-shadow(0 0 4px #ff2b2b); opacity: 1; } }
+/* Frogs and turtles hide underground while the wave passes overhead */
+.is-underground { flex-direction: column; justify-content: flex-start; align-items: stretch; }
+.is-sky { position: relative; height: 55%; overflow: hidden; } /* the wave passes overhead; the ground protects them */
+.is-wave.flat { width: 30px; height: 30px; margin: -15px; animation: isWave 2s ease-out 0.2s infinite; }
+.is-ground { height: 45%; display: flex; justify-content: center; align-items: center; gap: 24px; font-size: 38px;
+  background: linear-gradient(#6a4a2a, #3a2410); border-top: 4px solid #4a8a2a; }
+.is-hide { animation: isPeek 2s ease-in-out infinite alternate; }
+.is-hide.t { animation-delay: 0.5s; }
+@keyframes isPeek { from { transform: translateY(4px); } to { transform: translateY(-4px); } }
+/* You, your rival and Shelly: peaceful, gently bobbing */
+.is-pal { position: relative; animation: isPeek 1.2s ease-in-out infinite alternate; }
+.is-pal.rival { filter: hue-rotate(160deg); animation-delay: 0.3s; }
+.is-pal:last-child { animation-delay: 0.6s; }
+.is-hat { position: absolute; left: 50%; top: -24px; font-size: 26px; transform: translateX(-50%); }
+/* The three crown pieces light up across the world */
+.is-piece { opacity: 0; animation: isGlow 0.8s ease-out var(--d) forwards; }
+@keyframes isGlow { 0% { opacity: 0; transform: scale(0.3); } 70% { opacity: 1; transform: scale(1.25); filter: drop-shadow(0 0 16px #ffd23f); }
+  100% { opacity: 1; transform: scale(1); filter: drop-shadow(0 0 10px #ffd23f); } }
+/* Two frogs race toward the flag */
+.is-track { position: relative; width: 90%; height: 100%; }
+.is-racer { position: absolute; left: 0; top: 18%; animation: isRace 2.2s ease-in-out infinite alternate; transform: scaleX(-1); }
+.is-racer.rival { top: 52%; filter: hue-rotate(160deg); animation-delay: 0.35s; }
+.is-flag { position: absolute; right: 0; top: 30%; }
+@keyframes isRace { from { left: 0; } to { left: calc(100% - 120px); } }
+/* The route: Swamp, Ice Lake, Volcano, each with a crown */
+.is-map { gap: 8px; }
+.is-stop { position: relative; display: flex; flex-direction: column; align-items: center; opacity: 0; animation: isGlow 0.6s ease-out var(--d) forwards; filter: none !important; }
+.is-stop small { font: bold 12px sans-serif; color: #f3d9a4; margin-top: 4px; }
+.is-mini { position: absolute; top: -8px; right: -12px; font-size: 22px; filter: drop-shadow(0 0 6px #ffd23f); }
+.is-arrow { font-size: 26px; color: #f3d9a4aa; }
+@media (max-width: 480px) {
+  .intro-scene { height: 110px; font-size: 40px; }
+  .intro-text { font-size: 15px; }
+  .is-ground { font-size: 30px; }
+}

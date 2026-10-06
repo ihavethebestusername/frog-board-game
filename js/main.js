@@ -111,8 +111,8 @@ function startGame(solo) {
   sfx('button_click');
   startRainSound(); // ambience can start now that the player has tapped
   render();
-  busy = true; // no rolling until everyone has a pet
-  choosePets().then(async () => { busy = false; render(); await offerTour(); }); // then Shelly offers the tour
+  busy = true; // no rolling until the story intro is over and everyone has a pet
+  playIntro().then(choosePets).then(async () => { busy = false; render(); await offerTour(); }); // story (skippable), pets, then Shelly offers the tour
 }
 document.getElementById('menuSolo').onclick = () => startGame(true);
 document.getElementById('menuDuo').onclick = () => startGame(false);

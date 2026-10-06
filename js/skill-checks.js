@@ -61,24 +61,34 @@ function solveEquation(title, text, answer) {
   });
 }
 
-// --- Math quiz: multiple-choice +, − and × questions. The answer is hidden in tiny text in the corner. ---
+// --- Math quiz: multiple-choice +, − and × questions and "find x" equations. The answer is hidden in tiny text in the corner. ---
 
-// Make a 7th-grade question: negative numbers, order of operations and 2-step problems using
-// only +, − and ×. `level` 0..1 picks harder forms for bigger rewards.
+// Make a 7th-grade question: negative numbers, order of operations, 2-step problems using only +, − and ×,
+// and equations to solve for x (one step, two steps, x on both sides). `level` 0..1 picks harder forms for bigger rewards.
 const QUIZ_COLORS = ['#d42020', '#2a6ad1', '#1e9e3a', '#e0b000']; // red, blue, green, yellow
 
 function makeQuestion(level) {
   const rnd = (lo, hi) => lo + Math.floor(Math.random() * (hi - lo + 1));
   const neg = n => (Math.random() < 0.5 ? -n : n);            // randomly flip the sign
   const show = n => (n < 0 ? `(${n})` : `${n}`);              // wrap negatives in brackets
-  // Each form returns [question text, answer, a tempting wrong answer from a classic mistake]
+  // For "find x" equations: 3x, -x, x and "+ 5" / "− 5"
+  const xTerm = a => (a === 1 ? 'x' : a === -1 ? '-x' : `${a}x`);
+  const plusTerm = b => (b < 0 ? ` − ${-b}` : ` + ${b}`);
+  // Each form returns [question text, answer, a tempting wrong answer from a classic mistake, extra seconds];
+  // "find x" forms return the whole question (Find x: ...), the others get " = ?" added
   const forms = [
     // Integer addition/subtraction with negatives: -14 + 9, 7 - (-12)
     () => { const a = neg(rnd(5, 30)), b = neg(rnd(5, 30)), plus = Math.random() < 0.5;
             return plus ? [`${a} + ${show(b)}`, a + b, a - b] : [`${a} − ${show(b)}`, a - b, a + b]; },
+    // Find x, one step: x + 7 = -3, x − 12 = 5  (mistake: doing the same operation instead of undoing it)
+    () => { const x = neg(rnd(2, 20)), b = neg(rnd(2, 20));
+            return [`Find x: x${plusTerm(b)} = ${x + b}`, x, x + 2 * b, 1]; },
     // Multiplying integers: -8 × 7, (-6) × (-9)
     () => { const a = neg(rnd(3, 12)), b = neg(rnd(3, 12));
             return [`${show(a)} × ${show(b)}`, a * b, -a * b]; },
+    // Find x, multiplying: -4x = 28  (mistake: losing the sign)
+    () => { const x = neg(rnd(2, 12)), a = neg(rnd(2, 9));
+            return [`Find x: ${xTerm(a)} = ${a * x}`, x, -x, 1]; },
     // Order of operations: 5 + 3 × (-4)  (mistake: working left to right)
     () => { const a = neg(rnd(2, 20)), b = rnd(2, 9), c = neg(rnd(2, 9));
             return [`${a} + ${b} × ${show(c)}`, a + b * c, (a + b) * c]; },
@@ -88,18 +98,27 @@ function makeQuestion(level) {
     // Two-digit × one-digit with a step: 23 × 4 − 57
     () => { const a = rnd(12, 35), b = rnd(3, 9), c = rnd(10, 90);
             return [`${a} × ${b} − ${c}`, a * b - c, a * (b - c)]; },
+    // Find x, two steps: 3x − 5 = 16  (mistake: undoing the − 5 the wrong way first)
+    () => { const x = neg(rnd(1, 10)), a = neg(rnd(2, 9)), b = neg(rnd(2, 20));
+            const wrong = (a * x + 2 * b) / a;
+            return [`Find x: ${xTerm(a)}${plusTerm(b)} = ${a * x + b}`, x, Number.isInteger(wrong) ? wrong : -x, 3]; },
     // Three terms with negatives: -6 × 4 − (-3) × 5
     () => { const a = neg(rnd(2, 9)), b = rnd(2, 9), c = neg(rnd(2, 9)), d = rnd(2, 9);
             return [`${show(a)} × ${b} − ${show(c)} × ${d}`, a * b - c * d, a * b + c * d]; },
+    // Find x on both sides: 5x + 3 = 2x − 9  (mistake: adding the x terms instead of subtracting)
+    () => { const x = neg(rnd(1, 9)), a = rnd(2, 9), c = (() => { let c; do c = neg(rnd(1, 8)); while (c === a); return c; })(), b = neg(rnd(1, 15));
+            const d = a * x + b - c * x, wrong = (d - b) / (a + c);
+            return [`Find x: ${xTerm(a)}${plusTerm(b)} = ${xTerm(c)}${d ? plusTerm(d) : ''}`, x, a + c && Number.isInteger(wrong) ? wrong : -x, 5]; },
   ];
   // Easier squares use the first forms; harder squares unlock the multi-step ones
   const unlocked = 2 + Math.round(level * (forms.length - 2));
-  const [text, answer, trap] = forms[Math.floor(Math.random() * unlocked)]();
+  const [text, answer, trap, extra = 0] = forms[Math.floor(Math.random() * unlocked)]();
   const choices = new Set([answer]);
   if (trap !== answer) choices.add(trap);
   choices.add(-answer || answer + 1);                          // sign slip
   while (choices.size < 4) choices.add(answer + neg(rnd(1, Math.max(3, Math.round(Math.abs(answer) * 0.25)))));
-  return { text: `${text} = ?`, answer, choices: [...choices].slice(0, 4).sort(() => Math.random() - 0.5) };
+  return { text: text.startsWith('Find x') ? text : `${text} = ?`, answer, extraMs: extra * 1000, // equations get a little more time
+           choices: [...choices].slice(0, 4).sort(() => Math.random() - 0.5) };
 }
 
 // Show one question in the #check panel. Resolves with { correct, timeLeft (0..1) }.
@@ -114,7 +133,7 @@ function askQuestion(q, timeLimit, player = players[turn]) {
   cheat.textContent = '';
   cheat.style.background = QUIZ_COLORS[q.choices.indexOf(q.answer)];
   return new Promise(resolve => {
-    timeLimit += 2000 * perkCount(player, 'fast'); // Fast Fingers perk
+    timeLimit += 2000 * perkCount(player, 'fast') + (q.extraMs || 0); // Fast Fingers perk, extra time for "find x"
     const start = performance.now();
     let finished = false;
     const finish = (correct, btn) => {
