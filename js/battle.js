@@ -8,6 +8,7 @@ function cardFace(c, n, attack = BASE_DAMAGE) {
   return `<div class="card-face${c.gimmick || c.extra ? ' gimmick' : ''}${c.extra ? ' fused' : ''}${c.name.startsWith('Golden ') ? ' golden' : ''} r-${c.rarity || 'common'}" data-card="${slug}" data-style="${CARD_STYLE[slug] || 'Basic'}" data-mark="${mark}"${c.region ? ` data-region="${c.region}"` : ''}>` +
     (c.extra ? `<div class="fuse-badge">${c.extraArt}</div>` : '') +
     (c.quiz ? '<div class="quiz-badge" title="Skill check">🧠</div>' : '') +
+    (c.durable ? `<div class="durable-badge" title="Durable: ${c.durable} battle${c.durable === 1 ? '' : 's'} left">🛡️${c.durable}</div>` : '') +
     (c.rarity && c.rarity !== 'common' ? `<div class="rarity-tag">${c.rarity.toUpperCase()}</div>` : '') +
     (c.ultimate ? '<div class="ultimate-tag">ULTIMATE</div>' : '') +
     (c.superMove ? '<div class="ultimate-tag super-tag">SUPER MOVE</div>' : '') + // Ice Lake / Volcano signature attacks
@@ -20,6 +21,10 @@ function cardFace(c, n, attack = BASE_DAMAGE) {
 // Then they take turns: a spinner rolls through the attacker's loadout and lands on a card,
 // which deals base damage × its multiplier. First frog to 0 HP loses.
 // Pass an enemy (from makeEnemy) to fight the computer instead of the other player.
+// Battle speed (the ⏩ button in the battle box): 2× halves spins and pauses, and in fights against the computer
+// the "Next turn" / "Continue" buttons go on by themselves. Never in boss fights. Remembered on this device.
+let battleFast = false;
+try { battleFast = localStorage.getItem('battleFast') === '1'; } catch (e) {}
 async function battleEvent(enemy = null) {
   const attacker = players[turn], defender = enemy || players[1 - turn];
   // Face whoever is acting; the computer never needs the screen, so keep facing the human then
@@ -30,7 +35,25 @@ async function battleEvent(enemy = null) {
   const body = document.getElementById('battleBody');
   const go = document.getElementById('battleGo');
   el.hidden = false;
-  const waitGo = label => new Promise(r => { go.textContent = label; go.disabled = false; go.onclick = r; });
+  const isBoss = !!(enemy && enemy.boss);
+  const fast = () => battleFast && !isBoss;
+  const pace = ms => (fast() ? Math.round(ms / 2) : ms);
+  const bsleep = ms => sleep(pace(ms));
+  // `auto`: at 2× against the computer, the button presses itself after a moment (PvP always waits: the device is passed)
+  const waitGo = (label, auto = false) => new Promise(r => {
+    go.textContent = label; go.disabled = false; go.onclick = r;
+    if (auto && enemy && fast()) setTimeout(() => { if (go.onclick === r) r(); }, 700);
+  });
+  // The ⏩ button (top right of the battle box), hidden in boss fights
+  const speedBtn = el.querySelector('.battle-speed') || el.querySelector('.battle-panel').appendChild(Object.assign(document.createElement('button'), { className: 'battle-speed' }));
+  const drawSpeed = () => { speedBtn.textContent = battleFast ? '⏩ 2×' : '⏩ 1×'; speedBtn.classList.toggle('on', battleFast); };
+  speedBtn.hidden = isBoss;
+  drawSpeed();
+  speedBtn.onclick = () => {
+    battleFast = !battleFast;
+    try { localStorage.setItem('battleFast', battleFast ? '1' : '0'); } catch (e) {}
+    drawSpeed();
+  };
 
   async function chooseLoadout(p) {
     if (p.enemy) return p.loadout; // the computer's loadout is fixed by its difficulty
@@ -309,7 +332,7 @@ async function battleEvent(enemy = null) {
     const from = w.angle;
     const to = from + 360 * Math.max(1, 3 - spinsThisTurn) + (((k * step - from) % 360) + 360) % 360;
     // Each spin in a turn is quicker than the last
-    const duration = Math.max(220, 1800 * 0.55 ** spinsThisTurn++ * 0.7 ** sawsThisTurn), start = performance.now();
+    const duration = pace(Math.max(220, 1800 * 0.55 ** spinsThisTurn++ * 0.7 ** sawsThisTurn)), start = performance.now(); // ⏩ 2× halves it
     const creep = duration > 600 && Math.random() < 0.35 ? step * 0.65 : 0; // near miss: overshoot then rock back
     let lastFace = Math.floor(from / step + 0.5), lastTick = 0;
     const tickPitch = 1 + spinsThisTurn * 0.1; // spinsThisTurn was already bumped for this spin
@@ -440,7 +463,7 @@ async function battleEvent(enemy = null) {
       f.eggHp = f.hp;
       updateHp();
       if (f.hp <= 0) break;
-      await waitGo('Continue');
+      await waitGo('Continue', true);
     }
     if (f.stunned && Math.random() < stunShrug(f)) { // Hand Warmer / Smoke Goggles charms
       f.stunned--;
@@ -450,13 +473,13 @@ async function battleEvent(enemy = null) {
       msg.textContent = `${stunIcon(f)} ${f.p.name} is ${ELEMENTS[f.stunKind]?.stunned || 'stunned'} and skips this turn!` + (f.stunned ? ` (${f.stunned} more)` : '');
       body.innerHTML = hpRow() + reel(f);
       battleFx('stunSkip', fxCtx(1 - cur)); // the stunned fighter is the target
-      await waitGo(`Next: ${foe.p.name}'s turn`);
+      await waitGo(`Next: ${foe.p.name}'s turn`, true);
       cur = 1 - cur;
       continue;
     }
     msg.textContent = f.p.enemy ? `${f.p.name} is spinning...` : 'Spin to see which cards attack! Match cards on the wheels for combos!';
     body.innerHTML = hpRow() + reel(f) + '<div class="dmg-counter"></div>';
-    if (f.p.enemy) { go.disabled = true; go.textContent = 'Enemy turn'; await sleep(700); } // the computer spins by itself
+    if (f.p.enemy) { go.disabled = true; go.textContent = 'Enemy turn'; await bsleep(700); } // the computer spins by itself
     else {
       // Battle items (items.js): use items from your bag before you spin
       const tray = itemTray(f, (k, lines) => {
@@ -491,7 +514,7 @@ async function battleEvent(enemy = null) {
         statusFx(fi, `🪰 Golden Fly ${it.goldfly}/3`, 'buff', 'buff', ['#ffd23f', '#fff']);
         if (it.goldfly >= 3 && foe.hp > 0) {
           it.goldfly = -1;
-          await sleep(300);
+          await bsleep(300);
           const extra = hit(foe, f.p.attack * 8);
           banner('🪰 THE GOLDEN FLY STRIKES!', 'legendary');
           if (extra) { hurtFx(foeI, `🪰 -${extra}`, 60); turnTotal += extra; }
@@ -508,7 +531,7 @@ async function battleEvent(enemy = null) {
       physicalCount++;
       let total = 0;
       for (let h = 0; h < hits && foe.hp > 0 && f.hp > 0; h++) {
-        if (h > 0) await sleep(Math.max(180, 380 - h * 60)); // quick follow-up strikes
+        if (h > 0) await bsleep(Math.max(180, 380 - h * 60)); // quick follow-up strikes
         blocked = 0; dodged = 0;
         // Crit chance: your stat + Heron Feather + Adrenaline (first 3 turns); Eagle Eye makes matched cards always crit
         let critChance = f.p.critChance + artifactCount(f.p, 'hard') * 0.1 + (f.turns <= 3 ? charmCount(f.p, 'adren') * 0.25 : 0) + (f.focus || 0);
@@ -545,7 +568,7 @@ async function battleEvent(enemy = null) {
         if (blocked) battleFx('block', sctx);
         if (crit && d > 0) { battleFx('crit', sctx); questEvent(f.p, 'crit'); }
         // Hit-stop: a crit or huge hit freezes for a split second before it lands
-        if (d > 0 && (crit || d >= f.p.attack * 5)) { panel.classList.add('hitstop'); await sleep(crit ? 110 : 70); panel.classList.remove('hitstop'); }
+        if (d > 0 && (crit || d >= f.p.attack * 5)) { panel.classList.add('hitstop'); await bsleep(crit ? 110 : 70); panel.classList.remove('hitstop'); }
         total += d;
         turnTotal += d;
         const mods = [...parts];
@@ -814,7 +837,7 @@ async function battleEvent(enemy = null) {
           showDamage(before - foe.hp, `🛰️ ORBITAL LASER · ${f.p.attack} ⚔️ × ${ORBITAL_MULT}${matchMult > 1 ? ` × ${matchMult}` : ''}`, 'ignores shields');
           hurtFx(foeI, `-${before - foe.hp}`, 72);
           updateHp();
-          await sleep(700);
+          await bsleep(700);
         }
       }
       if (card.mult > 0 && card.quiz && !f.p.enemy) {
@@ -850,12 +873,12 @@ async function battleEvent(enemy = null) {
         bonus++;
         respinFx(wi);
         comboSfx(++respinsThisTurn); // each re-spin this turn sings a note higher
-        await sleep(500);
+        await bsleep(500);
         wi--;
         continue;
       }
       bonus = 0; // next wheel gets its own spin count
-      await sleep(450);
+      await bsleep(450);
       if (overcharged) break; // Overcharge: the other wheels sit this turn out
     }
     // Three's Company item: all 3 wheels on different cards = a bonus hit
@@ -863,7 +886,7 @@ async function battleEvent(enemy = null) {
       const extra = hit(foe, f.p.attack * 4);
       statusFx(fi, "🃏 Three's Company!", 'buff', 'buff', ['#ffd23f', '#fff']);
       if (extra) { hurtFx(foeI, `🃏 -${extra}`); turnTotal += extra; }
-      updateHp(); await sleep(400);
+      updateHp(); await bsleep(400);
     }
     // Dragonfly pet: a quick strike of its own after your wheels
     if (f.p.pet === 'dragonfly' && foe.hp > 0) {
@@ -874,7 +897,7 @@ async function battleEvent(enemy = null) {
       if (dealt) { hurtFx(foeI, `${petIcon(f.p)} -${dealt}${crit ? ' CRIT' : ''}`); sfx('hit', 1.4); turnTotal += dealt; }
       else floatFx(foeI, 'BLOCKED', 'shield');
       updateHp();
-      await sleep(300);
+      await bsleep(300);
     }
     questEvent(f.p, 'bigturn', turnTotal);
     curMatch = 1; // Leech's drains and re-spins aren't part of a match
@@ -902,7 +925,7 @@ async function battleEvent(enemy = null) {
         updateHp();
       } else {
         showDamage(0, '🩸 No attacks this turn — Leech spins for damage!', '');
-        await sleep(600);
+        await bsleep(600);
         // Re-spin the Leech's own wheel; guaranteed to land on a damaging card if the loadout has one
         respinFx(wi);
         comboSfx(++respinsThisTurn);
@@ -916,10 +939,10 @@ async function battleEvent(enemy = null) {
           showDamage(0, `🩸 Leech rolled ${rolled.name} — no damage`, '');
         }
       }
-      await sleep(450);
+      await bsleep(450);
     }
-    body.innerHTML = hpRow() + reel(f, true) + body.querySelector('.dmg-counter').outerHTML;
-    if (foe.hp > 0) await waitGo(`Next: ${foe.p.name}'s turn`);
+    body.innerHTML = hpRow() + reel(f, true) + (body.querySelector('.dmg-counter')?.outerHTML || '<div class="dmg-counter"></div>'); // (never let a missing counter stop the battle)
+    if (foe.hp > 0) await waitGo(`Next: ${foe.p.name}'s turn`, true);
     cur = 1 - cur;
   }
 
@@ -947,7 +970,7 @@ async function battleEvent(enemy = null) {
       body.innerHTML = hpRow();
     } else {
       // Reward question, as hard as the enemy was
-      el.hidden = true;
+      el.hidden = true; speedBtn.hidden = true;
       const mult = await quizPanel(coinIcon([0, tier.reward]), `Victory! ${tier.reward} coins`,
         'Answer fast to multiply your reward! Wrong answer halves it.', async result => {
           const { correct, timeLeft } = await askQuestion(makeQuestion(tier.quiz), 9000 + tier.quiz * 6000);
@@ -981,15 +1004,22 @@ async function battleEvent(enemy = null) {
     }
     render();
     await waitGo('Done');
-    el.hidden = true;
+    el.hidden = true; speedBtn.hidden = true;
   }
 
   // Result
   // Growing cards keep their progress: they go back to their owner's hand instead of being used up
   fighters.forEach(fg => fg.p.hand.push(...new Set(fg.loadout.filter(c => c.gimmick === 'grow'))));
+  // Durable cards (hand.js) come back too, until they've lasted DURABLE_BATTLES battles
+  fighters.forEach(fg => {
+    if (fg.p.enemy) return;
+    const worn = [];
+    new Set(fg.loadout.filter(c => c.durable)).forEach(c => { if (--c.durable > 0) fg.p.hand.push(c); else worn.push(c); });
+    if (worn.length) setTimeout(() => banner(`🛡️ ${worn.map(c => c.name).join(', ')} wore out`, 'lose'), 1200);
+  });
   // (if both somehow fell at once, the one whose turn it was loses)
   const winF = fighters.find(f => f.hp > 0) || fighters[1 - cur], loseF = fighters.find(f => f !== winF);
-  if (winF && loseF) { battleFx('ko', fxCtx(fighters.indexOf(winF))); sfx('heavy_slam', 0.8, 1); await sleep(900); } // finishing blow
+  if (winF && loseF) { battleFx('ko', fxCtx(fighters.indexOf(winF))); sfx('heavy_slam', 0.8, 1); await bsleep(900); } // finishing blow
   if (enemy) return enemyResult(winF.p === attacker);
   const bounty = hasBounty(loseF.p), bountyPay = bounty ? bountyCoins(loseF.p) : 0; // the leader lost a duel
   stat(winF.p, 'wins'); stat(loseF.p, 'losses');
@@ -1014,6 +1044,7 @@ async function battleEvent(enemy = null) {
   render();
   await waitGo('Done');
   el.hidden = true;
+  speedBtn.hidden = true;
 }
 
 // ---------- Orbital Laser (global so the card animation viewer can play it too) ----------

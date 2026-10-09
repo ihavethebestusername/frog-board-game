@@ -26,7 +26,7 @@
   <button class="hand-btn" id="handBtn"></button>
   <div class="wallet" id="wallet"></div>
   <div class="world" id="world"></div>
-  <div class="hud"><button id="roll">Roll</button><div class="die" id="die">–</div>
+  <div class="hud"><button id="roll">Roll</button><div class="die-wrap"><div class="die" id="die">–</div><button id="dieChoice" class="die-choice" hidden></button></div>
     <button class="shop-btn" id="shopBtn"><svg class="coin" viewBox="0 0 24 24"><circle cx="12" cy="12" r="11" fill="#e0a800"/><circle cx="12" cy="12" r="8" fill="#ffd23f" stroke="#b07f00" stroke-width="1.5"/><text x="12" y="16.5" text-anchor="middle" font-size="11" font-weight="bold" font-family="sans-serif" fill="#b07f00">$</text></svg> Shop</button></div>
 </div>
 <div id="events" hidden>
@@ -101,7 +101,7 @@
 </div>
 <!-- Loaded in order (they share one global scope), each with the same fresh ?v= stamp -->
 <script>
-['config', 'charms', 'board', 'effects', 'juice', 'progression', 'awards', 'regions', 'card-fx', 'card-sounds', 'fx/basic', 'fx/power', 'fx/toxic', 'fx/nature', 'fx/saw', 'fx/boss', 'fx/playstyle', 'fx/evolved', 'fx/region-kit', 'fx/leviathan', 'fx/swamp-evolved-1', 'fx/swamp-evolved-2', 'turn', 'skill-checks', 'shop', 'battle', 'hand', 'fusion', 'forge', 'items', 'cups', 'flies', 'pets', 'traps', 'mystery', 'memory', 'lilyhop', 'tutorial', 'intro', 'enemies', 'fireflies', 'rain', 'balloon', 'fps', 'main', 'polish/world', 'polish/ui', 'polish/rewards', 'polish/battle', 'polish/minigames', 'viewer']
+['config', 'charms', 'board', 'effects', 'juice', 'progression', 'awards', 'regions', 'card-fx', 'card-sounds', 'fx/basic', 'fx/power', 'fx/toxic', 'fx/nature', 'fx/saw', 'fx/boss', 'fx/playstyle', 'fx/evolved', 'fx/region-kit', 'fx/leviathan', 'fx/swamp-evolved-1', 'fx/swamp-evolved-2', 'turn', 'dice', 'skill-checks', 'shop', 'battle', 'hand', 'fusion', 'forge', 'items', 'packs', 'cups', 'flies', 'pets', 'traps', 'mystery', 'memory', 'lilyhop', 'tutorial', 'intro', 'enemies', 'fireflies', 'rain', 'balloon', 'fps', 'main', 'polish/world', 'polish/ui', 'polish/rewards', 'polish/battle', 'polish/minigames', 'viewer']
   .forEach(f => document.write('<script src="js/' + f + '.js?v=' + V + '"><\/script>'));
 </script>
 </body>

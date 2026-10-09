@@ -37,6 +37,7 @@ const EVENTS = [
   { name: 'Get a grand crown', desc: 'Testing: +1 grand crown', run: async () => gainCrowns(players[turn], 1, 'Testing!') },
   { name: 'Boss hunts me', desc: 'Your next landing becomes a boss fight', run: async () => { players[turn].bossHunting = true; renderProgress(); } },
   { name: 'New boss tile', desc: 'Turn a coin or card square into a boss square now', run: async () => addBossTile() },
+  { name: 'Get dice', desc: 'Testing: +3 rolls of every special die', run: async () => { const p = players[turn]; p.dice = p.dice || {}; DICE.forEach(d => p.dice[d.key] = (p.dice[d.key] || 0) + DIE_ROLLS); render(); } },
   { name: 'Get traps', desc: 'Testing: +1 of every trap', run: async () => { const p = players[turn]; p.traps = p.traps || {}; TRAP_TYPES.forEach(t => p.traps[t.key] = (p.traps[t.key] || 0) + 1); renderTrapButton(); } },
   { name: 'Rarity Forge', desc: "Upgrade a card's rarity (legendary → MYTHICAL)", run: forgeEvent },
   { name: 'Fusion', desc: 'Move a gimmick from one card onto another', run: fuseEvent },

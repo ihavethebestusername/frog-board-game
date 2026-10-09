@@ -8,6 +8,7 @@ const SHOP_TABS = [
   { key: 'items',    icon: '🎒', name: 'Items' },
   { key: 'traps',    icon: '🪤', name: 'Traps' },
   { key: 'gear',     icon: '🧪', name: 'Battle Items' },
+  { key: 'dice',     icon: '🎲', name: 'Dice' },
   { key: 'sell',     icon: '💰', name: 'Sell' },
 ];
 const KEEPER_LINES = {
@@ -16,6 +17,7 @@ const KEEPER_LINES = {
   charms:   ['Charms! Pick a style and go all in, dear.', 'Crits, poison, saws... a charm for every kind of frog.'],
   items:    ['Handy little gadgets. Very handy.', 'Tools of the trade! Some are sneaky...'],
   gear:     ['One-use battle tricks! Use them wisely, dear.', 'Gimmicks galore. Each one breaks after a single fight.'],
+  dice:     ['Tired of leaving it all to chance? Pick your own luck!', 'Short hops, big leaps... a die for every plan.'],
   traps:    ['Heh heh... planning something nasty?', 'Snares, mud, curses... all perfectly legal. Mostly.'],
   sell:     ["Selling? Let's see what you've got.", "I'll give you a fair price. Mostly fair."],
   bought:   ['Pleasure doing business!', 'Ooh, excellent choice!', "You won't regret that one.", 'Ka-ching! Thank you kindly.'],
@@ -45,7 +47,8 @@ function shopRow({ name, desc, button, disabled = false, cls = '', color = '' },
 // in the info card under the shelves, and buy it from there.
 //   opts.id      remembers which item is being looked at, per tab
 //   opts.shelves [{ label (html), items: [{ icon, name, desc, price, color, chip, owned, out, gone, glow, buy, colors }] }]
-//                out: why it can't be bought (e.g. 'MAX'); gone: sold, shows a SOLD sign; glow: extra aura class
+//                out: why it can't be bought (e.g. 'MAX'); gone: sold, shows a SOLD sign; glow: extra aura class;
+//                ownedText: how the info card describes `owned` (default "x2 owned")
 //   opts.bag     optional bottom shelf: { label, items: [{ icon, n, color, title }] }
 //   opts.drop    items drop onto the shelf (right after a restock)
 const shelfPicks = {};
@@ -78,7 +81,7 @@ function shelfStore(page, p, buy, { id, sign, sub = '', shelves, bag, drop = fal
   if (it && !it.gone) {
     info.style.setProperty('--rc', it.color);
     info.innerHTML = `<div class="info-icon">${it.icon}</div><div class="info-text">
-        <div class="info-name">${it.name}${it.chip ? ` <span class="item-rarity" style="background:${it.color}">${it.chip}</span>` : ''}${it.owned ? ` <span class="lvl">x${it.owned} owned</span>` : ''}</div>
+        <div class="info-name">${it.name}${it.chip ? ` <span class="item-rarity" style="background:${it.color}">${it.chip}</span>` : ''}${it.owned ? ` <span class="lvl">${it.ownedText || `x${it.owned} owned`}</span>` : ''}</div>
         <div class="info-desc">${it.desc}</div></div>
       <button class="info-buy" ${it.out || p.coins < it.price ? 'disabled' : ''}>${it.out || `${COIN} ${it.price}`}</button>`;
     info.querySelector('.info-buy').onclick = () =>
@@ -176,6 +179,7 @@ function renderShop() {
 
   if (shopTab === 'traps') renderTrapShop(page, p, buy);
   if (shopTab === 'gear') renderItemShop(page, p, buy); // items.js
+  if (shopTab === 'dice') renderDiceShop(page, p, buy); // dice.js
 
   if (shopTab === 'sell') {
     // Sell cards from your hand for coins

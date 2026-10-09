@@ -24,8 +24,11 @@ async function coinEvent(range) {
 // Draw-cards event: streak skill check, then cards fly from the deck to the player
 async function cardEvent(maxCards = CARDS_PER_SQUARE) {
   const p = players[turn];
-  const got = Math.min(await drawCheck(maxCards), deck.length);
-  const picks = got ? await pickCards(p, got) : []; // each card earned is a choice of 3 (progression.js)
+  const right = await drawCheck(maxCards);
+  // All 4 right: you may buy a card pack to draw from (packs.js); otherwise the cards come from the deck
+  const pack = right === maxCards && maxCards >= CARDS_PER_SQUARE ? await choosePack(p) : null;
+  const got = pack ? right : Math.min(right, deck.length);
+  const picks = got ? await pickCards(p, got, pack) : []; // each card earned is a choice of 3 (progression.js)
   const [px, py] = center(p);
   for (let i = 0; i < picks.length; i++) {
     const fc = document.createElement('div');
@@ -205,7 +208,8 @@ function skillCheck(range) {
 
 // Cards: a streak of questions. Each right answer draws a card; one wrong answer (or running out of time) ends it.
 function drawCheck(maxCards) {
-  return quizPanel('', 'Draw cards', `Each right answer draws a card. A wrong answer ends it and costs ${WRONG_CARD_PENALTY} coins!`, async result => {
+  return quizPanel('', 'Draw cards', `Each right answer draws a card. A wrong answer ends it and costs ${WRONG_CARD_PENALTY} coins!` +
+    (maxCards >= CARDS_PER_SQUARE ? ` Get all ${maxCards} right to choose a card pack!` : ''), async result => {
     const pips = document.getElementById('quizPips');
     pips.innerHTML = '<span></span>'.repeat(maxCards);
     let got = 0, lost = 0;

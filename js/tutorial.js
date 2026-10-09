@@ -189,6 +189,7 @@ const SQUARE_TUTORIALS = {
   cards: { title: '🃏 Card squares', steps: [
     { text: 'Card squares ask you questions too. Every right answer earns you a card, but one wrong answer ends the streak.' },
     { text: 'For each card you earn, you <b>pick 1 of 3</b>. Try it:', demo: 'cards' },
+    { text: 'Get <b>all 4 right</b> and you can buy a <b>card pack</b>: draw your cards from one playstyle, like Crit or Poison, instead of the deck. I offer 3 packs at a time, and you can <b>re-roll</b> them for coins. Better packs cost more, and <b>monster packs</b> (like the Swamp Serpent pack) are rare, and only show up once you\'ve unlocked their monster cards!' },
     { text: 'Your hand holds up to 12 cards, so choose ones that fit your playstyle!' }] },
   battle: { title: '⚔️ Battles', steps: [
     { text: 'Time to fight! First you pick 3–6 cards for your <b>loadout</b>. Each turn, 3 wheels spin through them.' },
@@ -226,7 +227,8 @@ const SQUARE_TUTORIALS = {
     { text: 'Open it:', demo: 'chest' }] },
   shop: { title: '🛒 My shop!', steps: [
     { text: 'Welcome to my shop! Upgrades live on the <b>Upgrade Tree</b>, charms build playstyles, and the Traps tab is for sneaky frogs.' },
-    { text: 'Buying upgrades ends with a quick quiz when you leave. Answer fast to make them stronger!' }] },
+    { text: 'Buying upgrades ends with a quick quiz when you leave. Answer fast to make them stronger!' },
+    { text: 'The <b>Dice</b> tab has special dice: a Short Die to land exactly on a square, a High Die to zoom ahead, and more. Each one lasts 3 rolls. Choose which die to roll with the little button above the die!' }] },
 };
 async function squareTutorial(key) {
   const tut = SQUARE_TUTORIALS[key];

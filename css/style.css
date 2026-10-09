@@ -1491,3 +1491,74 @@ body.region-volcano .vignette { background: radial-gradient(ellipse at center, t
   .intro-text { font-size: 15px; }
   .is-ground { font-size: 30px; }
 }
+
+/* Card packs (packs.js): offered after a perfect card square */
+.pack-offer { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-top: 8px; }
+.pack-box { position: relative; flex: 1 1 150px; max-width: 190px; display: flex; flex-direction: column; align-items: center; gap: 5px; padding: 14px 10px 12px;
+  border-radius: 12px; border: 3px solid var(--rc); cursor: pointer; color: #3a2410; text-shadow: none;
+  background: linear-gradient(160deg, #fff6dc, #f3dfb0); box-shadow: 0 0 14px color-mix(in srgb, var(--rc) 55%, transparent), 0 6px 0 #0006;
+  transition: transform 0.15s; }
+.pack-box:not(:disabled):hover { transform: translateY(-6px) rotate(-1deg); }
+.pack-box:disabled { opacity: 0.45; cursor: not-allowed; }
+.pack-box.r-legendary { box-shadow: 0 0 24px var(--rc), 0 6px 0 #0006; }
+.pack-box.drop { animation: packDrop 0.45s cubic-bezier(.3, 1.6, .5, 1) backwards; animation-delay: var(--d); }
+@keyframes packDrop { from { transform: translateY(-40px) scale(0.8); opacity: 0; } to { transform: none; opacity: 1; } }
+.pack-icon { font-size: 44px; line-height: 1; filter: drop-shadow(0 4px 2px #0006); }
+.pack-box b { font: bold 15px sans-serif; text-align: center; }
+.pack-arts { font-size: 18px; letter-spacing: 2px; min-height: 22px; text-align: center; }
+.pack-box small { font-size: 11px; opacity: 0.8; }
+.pack-price { display: flex; align-items: center; gap: 4px; margin-top: 4px; padding: 5px 12px; border-radius: 8px; font: bold 15px sans-serif;
+  background: #ffd23f; color: #7a5700; box-shadow: 0 3px 0 #b07f00; }
+.pack-actions { display: flex; gap: 10px; justify-content: center; align-items: center; flex-wrap: wrap; margin-top: 14px; }
+.pack-actions .battle-go { width: auto; margin-top: 0; padding: 10px 18px; }
+/* Label row inside a stacked button (icon, text and coin price on one line) */
+.btn-row { display: flex; align-items: center; justify-content: center; gap: 4px; white-space: nowrap; }
+@media (max-width: 480px) { /* phones: all 3 packs in one row, so the buttons stay on screen */
+  .pack-offer { gap: 6px; flex-wrap: nowrap; }
+  .pack-box { flex: 1 1 0; min-width: 0; padding: 10px 4px 8px; gap: 3px; }
+  .pack-icon { font-size: 32px; }
+  .pack-box b { font-size: 12px; }
+  .pack-box .item-rarity { font-size: 7px; letter-spacing: 0.5px; padding: 2px 3px; }
+  .pack-arts { font-size: 13px; letter-spacing: 0; }
+  .pack-price { font-size: 13px; padding: 4px 8px; }
+}
+
+/* Durable cards (hand.js): badge with the battles left */
+.durable-badge { position: absolute; bottom: -8px; left: -8px; z-index: 2; padding: 1px 5px; border-radius: 10px; font: bold 11px/18px sans-serif;
+  background: #6aa8ff; color: #fff; box-shadow: 0 0 8px #6aa8ff; text-shadow: 0 1px 0 #0006; }
+/* Card info pop-up (tap a card in the Cards menu) */
+.card-info { z-index: 37; }
+.card-info .prog-panel { max-width: min(560px, 94vw); }
+.card-info-row { display: flex; gap: 16px; align-items: center; margin: 6px 0 12px; }
+.card-info-face { flex: 0 0 auto; position: relative; transform: scale(1.25); transform-origin: left center; margin-right: 30px; }
+.card-info-face .card-face { cursor: default; }
+.card-info-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 6px; font-size: 14px; text-align: left; }
+.card-info-durable { color: #a8cfff; font-weight: bold; }
+.card-info-btns { display: flex; gap: 10px; flex-wrap: wrap; }
+.card-info-btns button { flex: 1 1 200px; display: flex; flex-direction: column; gap: 3px; padding: 10px 12px; border-radius: 10px; cursor: pointer;
+  font: bold 16px sans-serif; color: #fff3d6; background: #0d0004cc; border: 2px solid #ffd23f55; text-align: center; }
+.card-info-btns button small { font: 11px sans-serif; opacity: 0.85; }
+.card-info-btns button.on { background: #1e5a2a; border-color: #5fd13a; box-shadow: 0 0 12px #5fd13a88; }
+.card-info-btns button:disabled { opacity: 0.5; cursor: default; }
+@media (max-width: 480px) { .card-info-row { flex-direction: column; } .card-info-face { transform: none; margin: 0; } .card-info-text { text-align: center; } }
+
+/* Special dice (dice.js): the selector above the die, the dice tray, and the Double Die choice */
+.die-wrap { position: relative; }
+.hud .die-choice { position: absolute; left: 50%; bottom: calc(100% + 8px); transform: translateX(-50%); white-space: nowrap;
+  font: bold 13px sans-serif; padding: 5px 10px; border-radius: 14px; background: #2a1a4a; color: #f3d9a4; border: 2px solid #f3d9a466; }
+.hud .die-choice.special { background: linear-gradient(#ffd23f, #e0a800); color: #3a2a0a; border-color: #fff; box-shadow: 0 0 10px #ffd23f; }
+.hud .die-choice[hidden] { display: none; }
+.die-card { border: 3px solid var(--rc) !important; }
+.die-card.on { box-shadow: 0 0 16px var(--rc); transform: translateY(-4px); }
+.die-left { font-weight: bold; }
+.double-dice { display: flex; gap: 20px; justify-content: center; margin-top: 10px; }
+.double-die { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 12px 18px; border-radius: 12px; cursor: pointer;
+  background: #fff6dc; border: 3px solid #ffd23f; font: bold 20px sans-serif; color: #3a2410; transition: transform 0.15s; }
+.double-die:hover { transform: translateY(-6px) scale(1.05); }
+.double-die img { width: 64px; height: 64px; image-rendering: pixelated; }
+
+/* Battle speed button (battle.js): top right of the battle box, hidden in boss fights */
+.battle-speed { position: absolute; top: 8px; right: 8px; z-index: 5; font: bold 15px sans-serif; padding: 7px 12px; border-radius: 20px; cursor: pointer;
+  background: #0d0004cc; color: #f3d9a4; border: 2px solid #f3d9a466; text-shadow: none; }
+.battle-speed.on { background: linear-gradient(#ffd23f, #e0a800); color: #3a2a0a; border-color: #fff; box-shadow: 0 0 12px #ffd23f; }
+.battle-speed[hidden] { display: none; }

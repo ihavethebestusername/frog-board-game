@@ -255,14 +255,17 @@ async function enforceHandLimit(p) {
 }
 
 // ---------- Card squares: pick 1 of 3 for every card you earn ----------
-async function pickCards(p, count) {
+// With a `pack` (packs.js), the choices are fresh copies of that pack's cards instead of the top of the deck.
+async function pickCards(p, count, pack = null) {
   const picked = [];
-  for (let n = 0; n < count && deck.length; n++) {
-    const shown = deck.splice(-Math.min(deck.length, 3 + perkCount(p, 'picky') + (isUnderdog(p) ? 1 : 0))); // Picky perk, underdog // take the top cards off the deck
+  for (let n = 0; n < count && (pack || deck.length); n++) {
+    const size = 3 + perkCount(p, 'picky') + (isUnderdog(p) ? 1 : 0); // Picky perk, underdog
+    const shown = pack ? [...packCards(pack)].sort(() => Math.random() - 0.5).slice(0, size).map(copyCard)
+      : deck.splice(-Math.min(deck.length, size)); // take the top cards off the deck
     const el = document.createElement('div');
     el.className = 'prog-overlay';
-    el.innerHTML = `<div class="shop-panel prog-panel prog-wide"><h2>🃏 Pick a card (${n + 1}/${count})</h2>
-      <div class="battle-msg">Choose 1. The others go back into the deck.</div>
+    el.innerHTML = `<div class="shop-panel prog-panel prog-wide"><h2>🃏 Pick a card${pack ? ` from the ${pack.icon} ${pack.name}` : ''} (${n + 1}/${count})</h2>
+      <div class="battle-msg">${pack ? 'Choose 1.' : 'Choose 1. The others go back into the deck.'}</div>
       <div class="pick-row">${shown.map(c => `<div class="pick-choice">${cardFace(c, 0, p.attack)}</div>`).join('')}</div></div>`;
     document.body.appendChild(el);
     const best = ['mythical', 'legendary', 'epic', 'rare'].find(r => shown.some(c => (c.rarity || 'common') === r));
@@ -274,8 +277,8 @@ async function pickCards(p, count) {
     el.remove();
     picked.push(shown[i]);
     stat(p, 'cards');
-    // Unpicked cards are shuffled back into the deck
-    shown.forEach((c, k) => { if (k !== i) deck.splice(Math.floor(Math.random() * (deck.length + 1)), 0, c); });
+    // Unpicked cards are shuffled back into the deck (pack cards were fresh copies, so they just go away)
+    if (!pack) shown.forEach((c, k) => { if (k !== i) deck.splice(Math.floor(Math.random() * (deck.length + 1)), 0, c); });
   }
   return picked;
 }

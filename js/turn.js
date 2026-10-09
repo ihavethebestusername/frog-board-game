@@ -86,12 +86,13 @@ async function rollDice() {
   // Dice sound loops for the whole flicking animation, then stops when the die lands
   const rollSound = sfx('dice_roll');
   if (rollSound) rollSound.loop = true;
+  const faces = currentDie(players[turn])?.faces || [1, 2, 3, 4, 5, 6]; // a special die only flickers its own faces (dice.js)
   for (let i = 0; i < 12; i++) {
-    showDieFace(1 + Math.floor(Math.random() * 6));
+    showDieFace(faces[Math.floor(Math.random() * faces.length)]);
     await sleep(50 + i * 8);
   }
   if (rollSound) rollSound.pause();
-  let roll = luckyRoll(players[turn]); // (can grow while hopping: ice slides)
+  let roll = await rollWithDie(players[turn]); // the chosen die, or the normal one (dice.js); can grow while hopping: ice slides
   if (players[turn].jinx) { players[turn].jinx = false; roll = Math.ceil(roll / 2); banner(`🐈‍⬛ Jinxed! Roll halved to ${roll}`, 'lose'); } // Jinx curse
   onRollProgress(); // threat rises every few rolls
   showDieFace(roll);

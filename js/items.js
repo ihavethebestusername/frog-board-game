@@ -80,7 +80,7 @@ function renderItemShop(page, p, buy) {
   const restock = document.createElement('button');
   restock.className = 'restock-btn';
   restock.disabled = p.coins < rerollPrice;
-  restock.innerHTML = `🔔 Restock the shelf · ${COIN} ${rerollPrice}<small>new items, costs more each time this turn</small>`;
+  restock.innerHTML = `<span class="btn-row">🔔 Restock the shelf · ${COIN} ${rerollPrice}</span><small>new items, costs more each time this turn</small>`;
   restock.onclick = () => buy(rerollPrice, () => { p.rerolls = (p.rerolls || 0) + 1; restockItems(p); shelfFresh = true; shelfPicks.gear = 0; },
     restock, ['#ffd23f', '#b07cff', '#fff']);
   wrap.appendChild(restock);

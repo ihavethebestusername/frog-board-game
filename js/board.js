@@ -193,6 +193,7 @@ function updateWallet() {
   })();
 }
 function render() {
+  if (typeof renderDieChoice === 'function') renderDieChoice(); // dice.js: the die selector shows this player's dice
   setFlip(players[turn]);
   players.forEach((p, i) => {
     const [cx, cy] = center(p);
